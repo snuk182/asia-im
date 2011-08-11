@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string-array name="mrim_preference_strings">
+		<item>Email</item>
+		<item>Пароль</item>
+		<item>Хост</item>
+		<item>Порт</item>
+	</string-array>
+	
+	<string-array name="mrim_xstatus_descr">	
+		<item>Хворий</item>
+		<item>Вдома</item>
+		<item>Їжа</item>
+		<item>Де це я?</item>
+		<item>Вбиральня</item>
+		<item>Кухар</item>
+		<item>Друзяки</item>
+		<item>Прибульці</item>
+		<item>Креведко</item>
+		<item>Загубився</item>
+		<item>Кохання</item>
+		<item>Качечка</item>
+		<item>Ігри</item>
+		<item>На роботі</item>
+		<item>На зустрічі</item>
+		<item>Пиво</item>
+		<item>Кава</item>
+		<item>Дуже важка праця</item>
+		<item>Спати</item>
+		<item>Дзвоню</item>
+		<item>Вчуся</item>
+		<item>Школа</item>
+		<item>Помилились номером</item>
+		<item>Білочка</item>
+		<item>Зірка</item>
+		<item>Скелет</item>
+		<item>Ктулху</item>
+		<item>Відриваюсь</item>
+		<item>Нема статусу</item>
+	</string-array> 
+</resources>

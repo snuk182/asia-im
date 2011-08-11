@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+	<ImageView android:id="@android:id/icon" android:src="@drawable/contact_32px"
+		android:layout_width="wrap_content" android:layout_height="wrap_content" 
+		android:scaleType="fitXY"/>
+
+	<TextView android:id="@android:id/title" android:text="noname"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:textSize="14dip" android:textStyle="bold" android:textColor="#ffff"
+		android:padding="1px" android:background="#00ffffff"
+		android:focusable="false" />
+</merge>

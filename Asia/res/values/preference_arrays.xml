@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string-array name="bg_type_values">
+		<item>"4278190080"</item>
+		<item>"4294967295"</item>
+		<item>"wallpaper"</item>
+	</string-array>
+	
+	<string-array name="list_screen_orientation_values">
+		<item>@string/value_screen_orientation_system</item>
+		<item>@string/value_screen_orientation_portrait</item>
+		<item>@string/value_screen_orientation_landscape</item>
+		<item>@string/value_screen_orientation_sensor</item>
+	</string-array>
+	
+	<string-array name="list_screen_orientation_names">
+		<item>@string/label_screen_orientation_system</item>
+		<item>@string/label_screen_orientation_portrait</item>
+		<item>@string/label_screen_orientation_landscape</item>
+		<item>@string/label_screen_orientation_sensor</item>
+	</string-array>
+	
+	<string-array name="list_chat_date_values">
+		<item>@string/value_chat_date_none</item>
+		<item>@string/value_chat_date_time</item>
+		<item>@string/value_chat_date_full</item>
+	</string-array>
+	
+	<string-array name="list_type_values">
+		<item>@string/value_list_type_grid</item>
+		<item>@string/value_list_type_list</item>
+		<item>@string/value_list_type_doublelist</item>
+	</string-array>
+	
+	<string-array name="list_type_names">
+		<item>@string/label_grid</item>
+		<item>@string/label_list</item>
+		<item>@string/label_doublelist</item>
+	</string-array>
+
+	<string-array name="list_sound_type_names">
+		<item>@string/label_sound_type_all_on</item>
+		<item>@string/label_sound_type_off</item>
+		<item>@string/label_sound_type_vibra</item>
+		<item>@string/label_sound_type_sound</item>
+		<item>@string/label_sound_type_profile</item>
+	</string-array>
+	
+	<string-array name="list_text_size_names">
+		<item>@string/label_text_size_smallest</item>
+		<item>@string/label_text_size_small</item>
+		<item>@string/label_text_size_medium</item>
+		<item>@string/label_text_size_big</item>
+	</string-array>
+	
+	<string-array name="list_text_size_values">
+		<item>@string/value_text_size_smallest</item>
+		<item>@string/value_text_size_small</item>
+		<item>@string/value_text_size_medium</item>
+		<item>@string/value_text_size_big</item>
+	</string-array>
+
+	<string-array name="list_statusbar_type_names">
+		<item>@string/label_statusbar_type_messages</item>
+		<item>@string/label_statusbar_type_account_status</item>
+		<item>@string/label_statusbar_type_none</item>
+		<item>@string/label_statusbar_type_icon</item>
+	</string-array>
+	
+	<string-array name="list_sound_type_values">
+		<item>@string/value_sound_type_all_on</item>
+		<item>@string/value_sound_type_off</item>
+		<item>@string/value_sound_type_vibra</item>
+		<item>@string/value_sound_type_sound</item>
+		<item>@string/value_sound_type_profile</item>
+	</string-array>
+
+	<string-array name="list_statusbar_type_values">
+		<item>@string/value_statusbar_type_messages</item>
+		<item>@string/value_statusbar_type_account_status</item>
+		<item>@string/value_statusbar_type_none</item>
+		<item>@string/value_statusbar_type_icon</item>
+	</string-array>
+	
+	
+</resources>

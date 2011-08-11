@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+  xmlns:android="http://schemas.android.com/apk/res/android">
+  	<item android:id="@+id/menuitem_showtabs"
+          android:icon="@drawable/tabs"
+          android:title="@string/label_tabs_list" />
+  	<item android:id="@+id/menuitem_history"
+          android:icon="@drawable/history"
+          android:title="@string/label_history" />
+    <item android:id="@+id/menuitem_send_location"
+          android:icon="@android:drawable/ic_menu_mylocation"
+          android:title="@string/label_send_my_location" />
+    <item android:id="@+id/menuitem_send_file"
+          android:icon="@android:drawable/ic_menu_save"
+    	  android:title="@string/label_send_file"></item>
+    <item android:id="@+id/menuitem_askxstatus"
+          android:icon="@drawable/xstatus_none"
+          android:title="@string/label_ask_xstatus" />
+    <item android:id="@+id/menuitem_close"
+          android:icon="@android:drawable/ic_menu_close_clear_cancel"
+          android:title="@string/label_close_chat" />
+</menu>

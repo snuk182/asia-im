@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:persistent="false">
+  <PreferenceCategory android:title="@string/label_common_prefs" android:key="@string/key_pref_common" android:persistent="false">
+  	<ListPreference android:persistent="false" android:title="@string/label_bg_type" android:entries="@array/bg_type_names" android:entryValues="@array/bg_type_values" android:key="@string/key_bg_type" android:defaultValue="wallpaper" />
+  	<CheckBoxPreference android:persistent="false" android:title="@string/label_blink_led" android:key="@string/key_blink_led" android:defaultValue="false"/>
+  	<ListPreference android:persistent="false" android:title="@string/label_sound_type" android:key="@string/key_sound_type" android:entries="@array/list_sound_type_names" android:entryValues="@array/list_sound_type_values" android:defaultValue="@string/value_sound_type_profile"/>
+  	<CheckBoxPreference android:persistent="false" android:title="@string/label_message_sound_only" android:key="@string/key_message_sound_only" android:defaultValue="false"/>
+  	<ListPreference android:persistent="false" android:title="@string/label_statusbar_type" android:key="@string/key_statusbar_type" android:entries="@array/list_statusbar_type_names" android:entryValues="@array/list_statusbar_type_values" android:defaultValue="@string/value_statusbar_type_messages"/>
+  	<ListPreference android:persistent="false" android:title="@string/label_chat_date" android:key="@string/key_chat_date" android:entries="@array/list_chat_date_names" android:entryValues="@array/list_chat_date_values" android:defaultValue="@string/value_chat_date_full"/>
+  	<ListPreference android:persistent="false" android:title="@string/label_text_size" android:key="@string/key_text_size" android:entries="@array/list_text_size_names" android:entryValues="@array/list_text_size_values" android:defaultValue="@string/value_text_size_medium"/>
+  	<CheckBoxPreference android:persistent="false" android:title="@string/label_log_to_file" android:key="@string/key_log_to_file" android:defaultValue="false" />
+  	<CheckBoxPreference android:persistent="false" android:title="@string/label_hide_tabs" android:key="@string/key_hide_tabs" android:defaultValue="false"/>
+  	<CheckBoxPreference android:persistent="false" android:title="@string/label_send_by_enter" android:key="@string/key_send_by_enter" android:defaultValue="true"/>
+  	<CheckBoxPreference android:persistent="false" android:title="@string/label_sort_lists" android:key="@string/key_sort_lists" android:defaultValue="true"/>
+  	<CheckBoxPreference android:persistent="false" android:title="@string/label_autoconnect" android:key="@string/key_autoconnect" android:defaultValue="false"/>
+  	<ListPreference android:persistent="false" android:title="@string/label_screen_orientation" android:key="@string/key_screen_orientation" android:entries="@array/list_screen_orientation_names" android:entryValues="@array/list_screen_orientation_values" android:defaultValue="@string/value_screen_orientation_system"/>
+  	<CheckBoxPreference android:persistent="false" android:title="@string/label_fullscreen_landscape_kb" android:key="@string/key_fullscreen_landscape_kb" android:defaultValue="true"/>
+  </PreferenceCategory>
+</PreferenceScreen>

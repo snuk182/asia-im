@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_height="fill_parent" android:layout_width="fill_parent">
+	<LinearLayout android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:layout_alignParentBottom="true"
+		android:orientation="horizontal" android:id="@+id/conversationBottomLayout">
+		<ImageButton android:id="@+id/convsmileybtn"
+			android:scaleType="center" android:layout_weight="85"
+			android:layout_height="fill_parent" android:layout_width="fill_parent"
+			android:src="@drawable/smile_18" />
+		<EditText android:id="@+id/convtext" android:layout_height="wrap_content"
+			android:layout_width="fill_parent" android:layout_weight="30"
+			android:gravity="left|top" android:inputType="textCapSentences|textMultiLine" />
+		<ImageButton android:id="@+id/convsendbtn"
+			android:scaleType="center" android:layout_weight="85"
+			android:layout_height="fill_parent" android:layout_width="fill_parent"
+			android:src="@drawable/send" />
+	</LinearLayout>
+	<FrameLayout android:layout_width="fill_parent"
+			android:layout_height="wrap_content" 
+			android:id="@+id/convframepanel" android:layout_above="@id/conversationBottomLayout"
+			android:padding="1dip">
+		<LinearLayout android:layout_width="fill_parent" android:visibility="visible"
+			android:layout_height="wrap_content" android:orientation="horizontal"
+			android:id="@+id/convstatuspanel" 
+			android:padding="1dip">
+			<ImageView android:id="@+id/statusicon"
+				android:layout_width="wrap_content" android:layout_height="wrap_content"
+				android:src="@drawable/icq_offline_tiny" />
+			<ImageView android:id="@+id/xstatusicon"
+				android:layout_width="wrap_content" android:layout_height="wrap_content" />
+			<ua.snuk182.asia.view.more.StatusTextView android:id="@+id/statustext" android:textSize="11dip"
+				android:layout_width="fill_parent" android:layout_height="17dip"
+				android:text="@string/label_offline" android:gravity="top|right"/>
+		</LinearLayout>
+		<RelativeLayout android:layout_width="fill_parent" android:visibility="gone"
+			android:layout_height="wrap_content" android:id="@+id/convtypingpanel">
+			<ImageView android:layout_centerHorizontal="true" android:layout_alignParentTop="true" android:layout_width="wrap_content" android:layout_height="wrap_content"
+				android:src="@drawable/typing" />
+		</RelativeLayout>
+	</FrameLayout>
+	<LinearLayout android:layout_width="fill_parent"
+		android:layout_height="fill_parent" android:orientation="horizontal"
+		android:padding="3dip" android:layout_above="@id/convframepanel"
+		android:id="@+id/conversationTopLayout">
+		<ScrollView android:layout_height="fill_parent"
+			android:layout_width="fill_parent" android:id="@+id/scroller">
+			<LinearLayout android:id="@+id/historyScrollView"
+				android:gravity="bottom" android:layout_height="wrap_content"
+				android:layout_width="fill_parent" android:orientation="vertical" />
+		</ScrollView>
+		<ListView android:id="@+id/buddiesScrollView"
+			android:layout_height="fill_parent" android:layout_width="fill_parent"
+			android:layout_weight="80" android:scrollingCache="true" />
+	</LinearLayout>
+</merge>

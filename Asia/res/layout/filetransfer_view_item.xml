@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="fill_parent"
+  android:layout_height="wrap_content"
+  android:padding="3dip">
+  <FrameLayout android:id="@+id/buddy_icon_right"
+			android:layout_width="75dip" 
+			android:layout_height="75dip" 
+			android:layout_alignParentRight="true"
+			android:layout_alignParentTop="true"
+			android:layout_alignParentBottom="true"
+			/>
+  	<ImageView android:id="@+id/direction_img_right"
+			android:layout_width="32dip" 
+			android:layout_height="32dip" 
+			android:layout_toLeftOf="@id/buddy_icon_right"
+			android:layout_alignParentTop="true"
+			android:scaleType="fitXY"
+			android:src="@drawable/forward"
+			/>
+	<FrameLayout android:id="@+id/buddy_icon_left"
+			android:layout_width="75dip" 
+			android:layout_height="75dip" 
+			android:layout_alignParentLeft="true"
+			android:layout_alignParentTop="true"
+			android:layout_alignParentBottom="true"
+			/>
+  	<ImageView android:id="@+id/direction_img_left"
+			android:layout_width="32dip" 
+			android:layout_height="32dip" 
+			android:layout_toRightOf="@id/buddy_icon_left"
+			android:layout_alignParentTop="true"
+			android:scaleType="fitXY"
+			android:src="@drawable/forward"
+			/>
+	<TextView android:id="@+id/title" 
+  		android:layout_width="fill_parent" 
+  		android:layout_height="48dip" 
+  		android:text="File"
+  		android:layout_toRightOf="@id/direction_img_left"
+  		android:layout_toLeftOf="@id/direction_img_right"
+		android:layout_alignParentTop="true"
+		android:gravity="center"
+		/>
+	<ProgressBar android:id="@+id/progressbar"
+			android:layout_width="fill_parent" 
+			android:layout_height="20dip"
+			android:indeterminateOnly="false" 
+			android:progressDrawable="@android:drawable/progress_horizontal"
+			android:indeterminateDrawable="@android:drawable/progress_indeterminate_horizontal" 
+			android:visibility="visible" 
+			android:layout_toLeftOf="@id/buddy_icon_right"
+			android:layout_toRightOf="@id/buddy_icon_left"
+			android:layout_below="@id/title"
+			/>
+	
+</RelativeLayout>
