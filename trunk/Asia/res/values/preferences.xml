@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="description">TextDescr</string>
+	
+	<string name="value_chat_date_none">dateNone</string>
+ 	<string name="value_chat_date_time">dateTime</string>
+ 	<string name="value_chat_date_full">dateFull</string>
+	<string name="key_chat_date">PrefChatDate</string>
+	
+	<string name="key_autoconnect">PrefAutoconnect</string>
+	<string name="key_message_sound_only">PrefMessageSoundOnly</string>
+	<string name="key_sound_type">PrefSoundType</string>
+	<string name="key_statusbar_type">PrefStatusBarType</string>
+	<string name="key_log_to_file">PrefLogToFile</string>
+	<string name="key_hide_tabs">PrefHideTabs</string>
+	<string name="key_send_by_enter">PrefSendByEnter</string>
+	<string name="key_screen_orientation">PrefScreenOrientation</string>
+	<string name="key_fullscreen_landscape_kb">PrefFullscreenLandscapeKb</string>
+	<string name="key_blink_led">PrefBlinkLed</string>
+	
+	<string name="value_screen_orientation_system">PrefScreenSystem</string>
+	<string name="value_screen_orientation_portrait">PrefScreenPortrait</string>
+	<string name="value_screen_orientation_landscape">PrefScreenLandscape</string>
+	<string name="value_screen_orientation_sensor">PrefScreenSensor</string>
+
+	<string name="value_list_type_list">list</string>
+	<string name="value_list_type_doublelist">doublelist</string>
+	<string name="value_list_type_grid">grid</string>
+	
+	<string name="key_send_typing">PrefSendTyping</string>
+	
+	<string name="key_secure_login">PrefSecureLogin</string>
+	<string name="key_poweramp_playing_to_status">PrefPowerampToStatus</string>
+
+	<string name="value_sound_type_all_on">allOn</string>
+	<string name="value_sound_type_vibra">vibra</string>
+	<string name="value_sound_type_off">allOff</string>
+	<string name="value_sound_type_profile">profile</string>
+	<string name="value_sound_type_sound">sound</string>
+	
+	<string name="value_statusbar_type_messages">messages</string>
+	<string name="value_statusbar_type_account_status">accountStatus</string>
+	<string name="value_statusbar_type_none">none</string>
+	<string name="value_statusbar_type_icon">icon</string>
+	
+	<string name="value_text_size_big">big</string>
+	<string name="value_text_size_medium">medium</string>
+	<string name="value_text_size_small">small</string>
+	<string name="value_text_size_smallest">smallest</string>
+	
+	<string name="key_text_size">PrefChatTextSize</string>
+	
+	<string name="key_show_groups">PrefShowGroups</string>
+	<string name="key_show_offline">PrefShowOffline</string>
+	<string name="key_list_type">PrefListType</string>
+	<string name="key_load_icons">PrefLoadIcons</string>
+	<string name="key_show_icons">PrefShowIcons</string>
+	<string name="key_notinlist_save">PrefNotInListSave</string>
+	<string name="key_deny_messages_not_from_list">PrefDenyAllMessagesNotFromList</string>
+	<string name="key_bg_type">PrefBgTypeList</string>
+	<string name="key_sort_lists">PrefSortLists</string>
+	
+	<string name="key_pref_account">PrefAccount</string>
+	<string name="key_pref_common">PrefCommon</string>
+</resources>
