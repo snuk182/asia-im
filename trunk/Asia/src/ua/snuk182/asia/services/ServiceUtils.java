@@ -210,6 +210,18 @@ public final class ServiceUtils {
 		}
 		return 0;
 	}*/
+	public static int getStatusResIdByBuddyBigger(Context context, Buddy buddy) {
+		if (buddy.serviceName.equals(context.getResources().getString(R.string.icq_service_name))){
+			return ICQService.getStatusResIdByStatusIdBigger(buddy.status);
+		}
+		if (buddy.serviceName.equals(context.getResources().getString(R.string.xmpp_service_name))){
+			return XMPPService.getStatusResIdByStatusIdBigger(buddy.status);
+		}
+		if (buddy.serviceName.equals(context.getResources().getString(R.string.mrim_service_name))){
+			return MrimService.getStatusResIdByStatusIdBigger(buddy.status);
+		}
+		return 0;
+	}
 	
 	public static int getStatusResIdByBuddyBig(Context context, Buddy buddy){
 		if (buddy.serviceName.equals(context.getResources().getString(R.string.icq_service_name))){

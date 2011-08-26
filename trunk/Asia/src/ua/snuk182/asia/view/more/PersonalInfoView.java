@@ -98,7 +98,7 @@ public class PersonalInfoView extends ScrollView implements ITabContent{
 	public boolean onKeyDown(int i, KeyEvent event) {
 
 		if (i == KeyEvent.KEYCODE_BACK) {
-			getEntryPoint().getTabHost().setCurrentTabByTag(ContactList.class.getSimpleName() + " " + buddy.serviceId);
+			getEntryPoint().mainScreen.checkAndSetCurrentTabByTag(ContactList.class.getSimpleName() + " " + buddy.serviceId);
 			return true;
 		}
 
@@ -119,7 +119,7 @@ public class PersonalInfoView extends ScrollView implements ITabContent{
 	}
 	
 	private void close() {
-		getEntryPoint().removeTabByTag(PersonalInfoView.class.getSimpleName()+" "+buddy.serviceId+" "+buddy.protocolUid);		
+		getEntryPoint().mainScreen.removeTabByTag(PersonalInfoView.class.getSimpleName()+" "+buddy.serviceId+" "+buddy.protocolUid);		
 	}
 
 	public void updateInfo(PersonalInfo info){
@@ -224,4 +224,6 @@ public class PersonalInfoView extends ScrollView implements ITabContent{
 	@Override
 	public void onResume() {}
 
+	@Override
+	public void configChanged() {}
 }

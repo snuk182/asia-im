@@ -44,13 +44,13 @@ public class AccountManagerView extends ListView implements ITabContent {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.menuitem_close:
-			getEntryPoint().removeTabByTag(AccountManagerView.class.getSimpleName());
+			getEntryPoint().mainScreen.removeTabByTag(AccountManagerView.class.getSimpleName());
 			break;
 		case R.id.menuitem_add:
 			try {
 				if (getEntryPoint().runtimeService.getProtocolServices().size() < 126){
 					getEntryPoint().addAccountEditorTab(null);
-					getEntryPoint().removeTabByTag(AccountManagerView.class.getSimpleName());
+					getEntryPoint().mainScreen.removeTabByTag(AccountManagerView.class.getSimpleName());
 				} else {
 					Toast.makeText(getEntryPoint(), R.string.label_too_many_accounts, Toast.LENGTH_LONG);
 				}
@@ -68,10 +68,10 @@ public class AccountManagerView extends ListView implements ITabContent {
 	public boolean onKeyDown(int i, KeyEvent event) {
 
 		if (i == KeyEvent.KEYCODE_BACK) {
-			if (getEntryPoint().getTabs().size()<2){
+			if (getEntryPoint().mainScreen.getTabs().size()<2){
 				getEntryPoint().exit();
 			}else {
-				getEntryPoint().removeTabByTag(AccountManagerView.class.getSimpleName());
+				getEntryPoint().mainScreen.removeTabByTag(AccountManagerView.class.getSimpleName());
 			}
 			
 			return true;
@@ -135,4 +135,8 @@ public class AccountManagerView extends ListView implements ITabContent {
 	@Override
 	public void onResume() {
 	}
+
+
+	@Override
+	public void configChanged() {}
 }

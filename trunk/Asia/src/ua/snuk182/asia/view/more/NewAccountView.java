@@ -172,7 +172,7 @@ public class NewAccountView extends ScrollView implements ITabContent {
 	}
 	
 	private void removeMe(){
-		getEntryPoint().removeTabByTag(tag);
+		getEntryPoint().mainScreen.removeTabByTag(tag);
 	}
 	
 	@Override 
@@ -218,6 +218,7 @@ public class NewAccountView extends ScrollView implements ITabContent {
 							localAccount = new AccountView(et.getText().toString(), (String)protocolChooser.getSelectedItem());
 							try {
 								localAccount.serviceId = getEntryPoint().runtimeService.createAccount(localAccount);
+								account = localAccount;
 							} catch (NullPointerException npe) {	
 								ServiceUtils.log(npe);
 							} catch (RemoteException e) {
@@ -312,4 +313,7 @@ public class NewAccountView extends ScrollView implements ITabContent {
 	public void onResume() {
 		visualStyleUpdated();
 	}
+
+	@Override
+	public void configChanged() {}
 }

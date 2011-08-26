@@ -22,7 +22,7 @@ import ua.snuk182.asia.view.more.PreferencesView;
 import ua.snuk182.asia.view.more.SearchUsersView;
 import android.content.Intent;
 import android.os.RemoteException;
-import android.view.View;
+import android.widget.TabHost;
 
 public final class TabInfoFactory {
 
@@ -32,7 +32,7 @@ public final class TabInfoFactory {
 		}
 		ContactList cl = new ContactList(entryPoint, account);
 		String tag = ContactList.class.getSimpleName() + " " + account.serviceId;
-		TabInfo tab = new TabInfo(tag, cl, entryPoint);
+		TabInfo tab = new TabInfo(tag, cl, entryPoint.mainScreen.getAccountsTabHost());
 
 		return tab;
 	}
@@ -42,22 +42,22 @@ public final class TabInfoFactory {
 			throw new AsiaCoreException("Buddies array is invalid");
 		}
 		ConversationsView view = new ConversationsView(entryPoint, buddies, account);
-		TabInfo tab = new TabInfo(view.chatId, view, entryPoint);
+		TabInfo tab = new TabInfo(view.chatId, view, entryPoint.mainScreen.getChatsTabHost());
 		return tab;
 	}
 
-	public static final TabInfo createSplashscreenTab(EntryPoint entryPoint) {
+	public static final TabInfo createSplashscreenTab(EntryPoint entryPoint, TabHost host) {
 		Splashscreen splash = new Splashscreen(entryPoint);
 		String tag = Splashscreen.class.getSimpleName();
-		TabInfo tab = new TabInfo(tag, splash, entryPoint);
-		entryPoint.getTabWidget().setVisibility(View.GONE);
+		TabInfo tab = new TabInfo(tag, splash, host);
+		//entryPoint.getTabWidget().setVisibility(View.GONE);
 
 		return tab;
 	}
 
 	public static final TabInfo createAccountEditTab(EntryPoint entryPoint, AccountView account) {
 		NewAccountView view = new NewAccountView(entryPoint, account);
-		TabInfo tab = new TabInfo(view.tag, view, entryPoint);
+		TabInfo tab = new TabInfo(view.tag, view, entryPoint.mainScreen.getAccountsTabHost());
 
 		return tab;
 	}
@@ -65,7 +65,7 @@ public final class TabInfoFactory {
 	public static final TabInfo createAccountManager(EntryPoint entryPoint) {
 		AccountManagerView view = new AccountManagerView(entryPoint);
 		String tag = AccountManagerView.class.getSimpleName();
-		TabInfo tab = new TabInfo(tag, view, entryPoint);
+		TabInfo tab = new TabInfo(tag, view, entryPoint.mainScreen.getAccountsTabHost());
 
 		return tab;
 	}
@@ -96,7 +96,7 @@ public final class TabInfoFactory {
 	public static final TabInfo createHistoryTab(EntryPoint entryPoint, Buddy buddy) {
 		String tag = HistoryView.class.getSimpleName() + " " + buddy.serviceId + " " + buddy.protocolUid;
 		HistoryView view = new HistoryView(entryPoint, buddy, tag);
-		TabInfo tab = new TabInfo(tag, view, entryPoint);
+		TabInfo tab = new TabInfo(tag, view, entryPoint.mainScreen.getChatsTabHost());
 
 		return tab;
 	}
@@ -105,6 +105,8 @@ public final class TabInfoFactory {
 		if (tab == null) {
 			throw new AsiaCoreException("Tab is null");
 		}
+		
+		TabHost host = null;
 
 		if (tab.tag.indexOf(ContactList.class.getSimpleName()) > -1) {
 			try {
@@ -116,6 +118,7 @@ public final class TabInfoFactory {
 			} catch (RemoteException e) {
 				throw new AsiaCoreException(e.getMessage());
 			}
+			host = entryPoint.mainScreen.getAccountsTabHost();
 		}
 
 		if (tab.tag.indexOf(ConversationsView.class.getSimpleName()) > -1) {
@@ -131,6 +134,8 @@ public final class TabInfoFactory {
 			} catch (RemoteException e) {
 				throw new AsiaCoreException(e.getMessage());
 			}
+			
+			host = entryPoint.mainScreen.getChatsTabHost();
 		}
 
 		if (tab.tag.indexOf(PreferencesView.class.getSimpleName()) > -1) {
@@ -148,15 +153,36 @@ public final class TabInfoFactory {
 			} catch (RemoteException e) {
 				throw new AsiaCoreException(e.getMessage());
 			}
+			
+			host = entryPoint.mainScreen.getChatsTabHost();
 		}
-		tab.construct(entryPoint.getTabHost());
+		
+		if (tab.tag.indexOf(HistoryView.class.getSimpleName()) > -1) {
+			String[] params = tab.tag.split(" ");
+			try {
+				Buddy bu = entryPoint.runtimeService.getBuddy(Byte.parseByte(params[1]), params[2]);
+				tab.content = new HistoryView(entryPoint, bu, tab.tag);
+			} catch (NullPointerException npe) {
+				throw new AsiaCoreException(npe.getMessage());
+			} catch (NumberFormatException e) {
+				throw new AsiaCoreException(e.getMessage());
+			} catch (RemoteException e) {
+				throw new AsiaCoreException(e.getMessage());
+			}
+			
+			host = entryPoint.mainScreen.getChatsTabHost();
+		}
+		
+		if (host != null){
+			tab.construct(host);
+		}
 		return tab;
 	}
 
 	public static final TabInfo createSearchTab(EntryPoint entryPoint, AccountView account) {
 		SearchUsersView view = new SearchUsersView(entryPoint, account);
 		String tag = SearchUsersView.class.getSimpleName() + " " + account.serviceId;
-		TabInfo tab = new TabInfo(tag, view, entryPoint);
+		TabInfo tab = new TabInfo(tag, view, entryPoint.mainScreen.getChatsTabHost());
 
 		return tab;
 	}
@@ -164,7 +190,7 @@ public final class TabInfoFactory {
 	public static final TabInfo createPersonalInfoTab(EntryPoint entryPoint, Buddy buddy, PersonalInfo info) {
 		PersonalInfoView infoView = new PersonalInfoView(entryPoint, buddy, info);
 		String tag = PersonalInfoView.class.getSimpleName() + " " + buddy.serviceId + " " + buddy.protocolUid;
-		TabInfo tab = new TabInfo(tag, infoView, entryPoint);
+		TabInfo tab = new TabInfo(tag, infoView, entryPoint.mainScreen.getChatsTabHost());
 
 		return tab;
 	}
@@ -182,7 +208,7 @@ public final class TabInfoFactory {
 
 		FileTransferView ftView = new FileTransferView(entryPoint, account);
 		String tag = FileTransferView.class.getSimpleName() + " " + serviceId;
-		TabInfo tab = new TabInfo(tag, ftView, entryPoint);
+		TabInfo tab = new TabInfo(tag, ftView, entryPoint.mainScreen.getChatsTabHost());
 
 		return tab;
 	}

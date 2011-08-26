@@ -398,9 +398,21 @@ public class SSIProcessor {
 		}
 		switch (plainData[1]) {
 		case 0xe:
-			tmpBuddy.visibility = ICQConstants.VIS_NOT_AUTHORIZED;
-			tmpGroup.buddies.add(tmpBuddy.itemId);
-			addBuddyToContactList(tmpBuddy, tmpGroup, true);
+			switch(currentAction){
+			case ACTION_MOVE_BUDDY:
+				tmpBuddy.visibility = ICQConstants.VIS_NOT_AUTHORIZED;
+				//moveBuddy(tmpBuddy);
+				break;
+			case ACTION_RENAME_BUDDY:
+				tmpBuddy.visibility = ICQConstants.VIS_NOT_AUTHORIZED;
+				modifyBuddy(tmpBuddy);
+				break;
+			case ACTION_ADD_BUDDY:
+				tmpBuddy.visibility = ICQConstants.VIS_NOT_AUTHORIZED;
+				tmpGroup.buddies.add(tmpBuddy.itemId);
+				addBuddyToContactList(tmpBuddy, tmpGroup, true);
+				break;
+			}
 		case 0x0:
 			switch (currentAction) {
 			case ACTION_RENAME_GROUP:

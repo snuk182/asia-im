@@ -23,4 +23,6 @@ public interface ITabContent{
 	void visualStyleUpdated();
 
 	public void onResume();
+
+	public void configChanged();
 }

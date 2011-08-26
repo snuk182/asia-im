@@ -13,6 +13,7 @@ import ua.snuk182.asia.core.dataentity.Buddy;
 import ua.snuk182.asia.core.dataentity.BuddyGroup;
 import ua.snuk182.asia.core.dataentity.FileMessage;
 import ua.snuk182.asia.core.dataentity.ServiceMessage;
+import ua.snuk182.asia.core.dataentity.TabInfo;
 import ua.snuk182.asia.services.ServiceUtils;
 import ua.snuk182.asia.services.api.AccountService;
 import ua.snuk182.asia.services.icq.ICQService;
@@ -705,11 +706,12 @@ public final class ViewUtils {
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(entryPoint);
 		builder.setTitle(R.string.label_tabs_list);
-		builder.setAdapter(getTabsAdapter(entryPoint), new OnClickListener() {
+		final TabsAdapter adapter = getTabsAdapter(entryPoint);
+		builder.setAdapter(adapter, new OnClickListener() {
 
 			@Override
 			public void onClick(DialogInterface dialog, int position) {
-				entryPoint.getTabHost().setCurrentTab(position);
+				entryPoint.mainScreen.checkAndSetCurrentTabByTag(((TabInfo)adapter.getItem(position)).tag);
 				dialog.dismiss();
 			}
 		});

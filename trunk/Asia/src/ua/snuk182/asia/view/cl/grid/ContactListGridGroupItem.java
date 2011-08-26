@@ -26,7 +26,6 @@ public class ContactListGridGroupItem extends LinearLayout implements OnClickLis
 	private TextView subGroupNameText;
 	private TextView subGroupCountText;
 	private int columnCount;
-	private int itemSize;
 	public int groupId = -1;
 	public byte serviceId = -1;
 	private List<ContactListGridItem> buddyList = new ArrayList<ContactListGridItem>();
@@ -74,7 +73,7 @@ public class ContactListGridGroupItem extends LinearLayout implements OnClickLis
 
 	void refresh() {
 		if (refreshContents) {
-			refresh(0, 0, sort);
+			refresh(0, sort);
 			refreshContents = false;
 		} else {
 			ownerLayout.removeView(this);
@@ -88,7 +87,7 @@ public class ContactListGridGroupItem extends LinearLayout implements OnClickLis
 		setCollapsedInternal(false);
 	}
 
-	void refresh(int column_count, int item_size, boolean sort) {
+	void refresh(int column_count, boolean sort) {
 		this.sort  = sort;
 		
 		if (sort){
@@ -105,9 +104,9 @@ public class ContactListGridGroupItem extends LinearLayout implements OnClickLis
 			columnCount = column_count;
 		}
 
-		if (item_size > 0) {
+		/*if (item_size > 0) {
 			itemSize = item_size;
-		}
+		}*/
 
 		if (buddyList == null || columnCount < 1) {
 			return;
@@ -131,12 +130,12 @@ public class ContactListGridGroupItem extends LinearLayout implements OnClickLis
 				buddyRows.add(row);
 				row.setOrientation(LinearLayout.HORIZONTAL);
 				
-				row.setGravity(Gravity.CENTER_HORIZONTAL);
 				row.setPadding(8, 8, 8, 8);
 
 				row.setFocusable(false);
 				
 				row.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+				row.setGravity(Gravity.CENTER_HORIZONTAL);
 			}
 			
 			if (row.getParent() == null){
@@ -156,7 +155,7 @@ public class ContactListGridGroupItem extends LinearLayout implements OnClickLis
 			
 			if (!iterator.hasNext()){
 				for (;currentColumn < columnCount; currentColumn++){
-					row.addView(newDummy(), new LinearLayout.LayoutParams(itemSize, itemSize, 1));
+					row.addView(newDummy(), new LinearLayout.LayoutParams(ContactListGridItem.itemSize, ContactListGridItem.itemSize, 1));
 					row.addView(newDivider());
 				}
 			}
@@ -173,6 +172,9 @@ public class ContactListGridGroupItem extends LinearLayout implements OnClickLis
 			}
 		}
 		
+		/*for (LinearLayout row : buddyRows) {
+			row.requestLayout();
+		}*/
 	}
 
 	@Override
@@ -235,6 +237,26 @@ public class ContactListGridGroupItem extends LinearLayout implements OnClickLis
 				ServiceUtils.log(e);
 			}
 		}
+	}
+	
+	public void resize(int size){
+		float textSize;
+		switch(size){
+		case 75:
+			textSize = 24 * getEntryPoint().metrics.density;
+			break;
+		case 96:
+			textSize = 31 * getEntryPoint().metrics.density;
+			break;
+		case 62:
+			textSize = 18 * getEntryPoint().metrics.density;
+			break;
+		default:
+			textSize = 13 * getEntryPoint().metrics.density;
+			break;
+		}
+		subGroupNameText.setTextSize(textSize);
+		subGroupCountText.setTextSize(textSize);
 	}
 
 	public boolean isCollapsed() {

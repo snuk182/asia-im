@@ -356,6 +356,32 @@ public class MrimService extends AccountService {
 			return getStatusResIdByStatusId80(statusId);
 		}
 	}*/
+	
+	public static int getStatusResIdByStatusIdBigger(int statusId) {
+		int statusResId;
+		
+		switch(statusId){
+		case Buddy.ST_ONLINE:
+			statusResId = R.drawable.mrim_online_bigger;
+			break;
+		case Buddy.ST_AWAY:
+			statusResId = R.drawable.mrim_away_bigger;
+			break;
+		case Buddy.ST_OTHER:
+			statusResId = R.drawable.mrim_undetermined_bigger;
+			break;
+		case Buddy.ST_INVISIBLE:
+			statusResId = R.drawable.mrim_invisible_bigger;
+			break;
+		default:
+			statusResId = R.drawable.mrim_offline_bigger;
+			break;
+		case Buddy.ST_FREE4CHAT:
+			statusResId = R.drawable.mrim_free4chat_bigger;
+			break;
+		}
+		return statusResId;
+	}
 
 	public static int getStatusResIdByStatusIdBig(int statusId) {
 		int statusResId;

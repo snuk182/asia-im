@@ -41,7 +41,7 @@ public final class ServiceStoredPreferences {
 		this.context = context;
 	}
 	
-	public void saveMap(final Map<String, String> map, final String storageName){
+	public synchronized void saveMap(final Map<String, String> map, final String storageName){
 		
 		new Thread("Preference saver "+storageName){
 			@Override
@@ -57,11 +57,16 @@ public final class ServiceStoredPreferences {
 		}.start();
 	}
 	
-	public Bundle getApplicationOptions(){
-		return getOptions(null);
+	public static String getOption(Context context, String key){
+		SharedPreferences soptions = context.getSharedPreferences(SAVEDPARAMS_TOTAL, 0);
+		return soptions.getString(key, "false");
 	}
 	
-	public Map<String,String> getMap(Set<String> keys, String storageName){
+	public Bundle getApplicationOptions(){
+		return getOptions(null, context);
+	}
+		
+	public synchronized Map<String,String> getMap(Set<String> keys, String storageName){
 		if (keys==null){
 			return null;
 		}
@@ -299,12 +304,12 @@ public final class ServiceStoredPreferences {
 			account.getBuddyGroupList().add(buddyGroup);
 		}		
 		
-		account.options = getOptions(account);
+		account.options = getOptions(account, context);
 		
 		return account;
 	}
 	
-	private Bundle getOptions(AccountView account) {
+	private Bundle getOptions(AccountView account, Context context) {
 		String file;
 		if (account != null){
 			file = account.getAccountId();
@@ -333,22 +338,24 @@ public final class ServiceStoredPreferences {
 		return BitmapFactory.decodeStream(fis);
 	}
 	
-	public void saveBinaryFile(String filename, byte[] contents){
-		new FileAsyncSaver(filename, contents).start();		
+	public void saveBinaryFile(String filename, byte[] contents, Runnable runOnFinish){
+		new FileAsyncSaver(filename, contents, runOnFinish).start();		
 	}
 	
-	public void saveIcon(String filename, byte[] contents){
-		saveBinaryFile(filename+Buddy.BUDDYICON_FILEEXT, contents);
+	public void saveIcon(String filename, byte[] contents, Runnable runOnFinish){
+		saveBinaryFile(filename+Buddy.BUDDYICON_FILEEXT, contents, runOnFinish);
 	}
 	
 	class FileAsyncSaver extends Thread {
 		
 		String fileName;
 		byte[] contents;
+		Runnable runOnFinish;
 		
-		public FileAsyncSaver(String fileName, byte[] contents){
+		public FileAsyncSaver(String fileName, byte[] contents, Runnable runOnFinish){
 			this.fileName = fileName;
 			this.contents = contents;
+			this.runOnFinish = runOnFinish;
 			setName("Preferences saver "+fileName);
 		}
 		
@@ -359,6 +366,7 @@ public final class ServiceStoredPreferences {
 				fos = context.openFileOutput(fileName, Context.MODE_PRIVATE);
 				fos.write(contents);
 				fos.close();
+				runOnFinish.run();
 			} catch (FileNotFoundException e) {
 				ServiceUtils.log(e);
 			} catch (IOException e) {

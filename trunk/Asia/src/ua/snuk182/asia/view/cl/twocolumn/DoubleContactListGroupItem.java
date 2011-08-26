@@ -25,6 +25,8 @@ import android.widget.TextView;
 public class DoubleContactListGroupItem extends LinearLayout implements OnClickListener, OnFocusChangeListener{
 	
 	private static final String SPACE = "  ";
+	public static int itemSize = 120;
+	
 	private TextView subGroupNameText;
 	private TextView subGroupCountText;
 	private int groupId = -1;
@@ -34,7 +36,6 @@ public class DoubleContactListGroupItem extends LinearLayout implements OnClickL
 	private ViewGroup ownerLayout;
 	private boolean refreshContents = false;
 	private final int columnCount = 2;
-	private int itemWidth = 120;
 	private boolean sort = true;
 	private boolean collapsed = false;
 	
@@ -75,9 +76,21 @@ public class DoubleContactListGroupItem extends LinearLayout implements OnClickL
 		}
 	}
 
-	public void refresh(String bgType){
+	public void refresh(boolean refreshLayout){
+		if (refreshLayout){
+			/*for (ContactListListItem item: buddyList){
+				item.setLayoutParams(new LinearLayout.LayoutParams(DoubleContactListGroupItem.itemSize, LayoutParams.WRAP_CONTENT, 1));
+			}*/
+			for (LinearLayout item : buddyRows) {
+				for (int i=0; i<item.getChildCount(); i++){
+					if (!item.getChildAt(i).getTag().equals("")){
+						item.getChildAt(i).setLayoutParams(new LinearLayout.LayoutParams(DoubleContactListGroupItem.itemSize, item.getHeight(), 1f));
+					}
+				}
+			}
+		}
 		if (refreshContents){
-			forceRefresh(bgType, itemWidth, sort);
+			forceRefresh(sort);
 			refreshContents = false;
 		} else {
 			ownerLayout.removeView(this);
@@ -91,7 +104,7 @@ public class DoubleContactListGroupItem extends LinearLayout implements OnClickL
 		setCollapsedInternal(false);
 	}
 	
-	public void forceRefresh(String bgType, int itemWidth, boolean sort){
+	public void forceRefresh(boolean sort){
 		
 		this.sort = sort;
 		
@@ -110,10 +123,6 @@ public class DoubleContactListGroupItem extends LinearLayout implements OnClickL
 			return;
 		}
 		
-		if (itemWidth > 0){
-			this.itemWidth = itemWidth;
-		}
-
 		subGroupCountText.setText(buddyList.size() + SPACE);
 		
 		int rowNum = buddyList.size() / columnCount + ((buddyList.size() % columnCount) > 0 ? 1 : 0);
@@ -156,7 +165,7 @@ public class DoubleContactListGroupItem extends LinearLayout implements OnClickL
 			
 			if (!iterator.hasNext()){
 				for (;currentColumn < columnCount; currentColumn++){
-					row.addView(newDummy(), new LinearLayout.LayoutParams(this.itemWidth, LayoutParams.WRAP_CONTENT, 1));
+					row.addView(newDummy(), new LinearLayout.LayoutParams(itemSize, LayoutParams.WRAP_CONTENT, 1));
 					row.addView(newDivider());
 				}
 			}
@@ -264,4 +273,23 @@ public class DoubleContactListGroupItem extends LinearLayout implements OnClickL
 		return buddyList;
 	}
 
+	public void resize(int size){
+		float textSize;
+		switch(size){
+		case 64:
+			textSize = 31 * getEntryPoint().metrics.density;
+			break;
+		case 48:
+			textSize = 24 * getEntryPoint().metrics.density;
+			break;
+		case 32:
+			textSize = 18 * getEntryPoint().metrics.density;
+			break;
+		default:
+			textSize = 13 * getEntryPoint().metrics.density;
+			break;
+		}
+		subGroupNameText.setTextSize(textSize);
+		subGroupCountText.setTextSize(textSize);
+	}
 }

@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+	<string name="label_view_type">Вид программы (нужен перезапуск)</string>
+	<string name="label_view_type_plain">Обычный</string>
+	<string name="label_view_type_notabs">Без вкладок</string>
+	<string name="label_view_type_tablet">Планшетный</string>
+
 	<string name="label_copy_all">Копировать всё</string>
 	<string name="label_personal_info">Персональные данные</string>
 	<string name="label_male">Мужской</string>
@@ -18,7 +23,7 @@
 	<string name="label_export">Экспорт на карту памяти"</string>
 	
 	<string name="label_blink_led">Мигать индикатором при новом сообщении</string>
-
+	
 	<string-array name="bg_type_names">
 		<item>"Черный"</item>
 		<item>"Белый"</item>
@@ -113,7 +118,6 @@
     <string name="label_set_xstatus">"Установить х-статус"</string>
     <string name="label_xstatus">"Х-статус"</string>
     <string name="label_tabs_list">"Список вкладок"</string>
-    <string name="label_hide_tabs">"Спрятать вкладки"</string>
     <string name="xstatus_text_title">"Заголовок"</string>
     <string name="xstatus_text_value">"Текст"</string>
     <string name="label_load_icons">"Загружать иконки контактов"</string>
@@ -182,6 +186,7 @@
 	<string name="label_text_size_smallest">Очень маленький</string>
 	
 	<string name="label_text_size">Размер шрифта в чате</string>
+	<string name="label_cl_item_size">Размер контакта в списке</string>
 	
 	<string name="label_sort_lists">"Сортировать по алфавиту"</string>
 	

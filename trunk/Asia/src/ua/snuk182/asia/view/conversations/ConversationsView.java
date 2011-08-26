@@ -198,7 +198,7 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 		updated(account);
 
 		kbManager = (InputMethodManager) getEntryPoint().getSystemService(Context.INPUT_METHOD_SERVICE);
-		entryPoint.addOnTabChangeListener(tabChangeListener);
+		entryPoint.mainScreen.addOnTabChangeListener(tabChangeListener);
 
 		LayoutInflater inflate = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		inflate.inflate(R.layout.conversation, this);
@@ -427,9 +427,9 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 		MenuItem showTabsItem = menu.findItem(R.id.menuitem_showtabs);
 		String hideTabsStr;
 		try {
-			hideTabsStr = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_hide_tabs));
+			hideTabsStr = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_view_type));
 			if (hideTabsStr != null) {
-				boolean hideTabs = Boolean.parseBoolean(hideTabsStr);
+				boolean hideTabs = hideTabsStr.equals(getResources().getString(R.string.value_view_type_notabs));
 				showTabsItem.setVisible(hideTabs);
 			} else {
 				showTabsItem.setVisible(false);
@@ -464,7 +464,7 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 		case R.id.menuitem_close:
 			// kbManager.hideSoftInputFromWindow(textEditor.getWindowToken(),
 			// 0);
-			getEntryPoint().removeTabByTag(chatId);
+			getEntryPoint().mainScreen.removeTabByTag(chatId);
 			returnToBuddyList();
 			break;
 		case R.id.menuitem_send_file:
@@ -505,7 +505,7 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 
 	private void returnToBuddyList() {
 		kbManager.hideSoftInputFromWindow(textEditor.getWindowToken(), 0);
-		getEntryPoint().getTabHost().setCurrentTabByTag(ContactList.class.getSimpleName() + " " + account.serviceId);
+		getEntryPoint().mainScreen.checkAndSetCurrentTabByTag(ContactList.class.getSimpleName() + " " + account.serviceId);
 	}
 
 	@Override
@@ -591,7 +591,7 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 			new Thread("Chat icon request"){
 				@Override
 				public void run(){
-					icon = buddies.get(0).getIcon(getEntryPoint(), (int) (32*getEntryPoint().metrics.density));
+					icon = buddies.get(0).getIcon(getEntryPoint());
 					handler.post(bitmapGot);									
 				}
 			}.start();
@@ -726,11 +726,11 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 			}
 		}
 
-		if (textSize == null || textSize.equals(getResources().getString(R.string.value_text_size_medium))) {
+		if (textSize == null || textSize.equals(getResources().getString(R.string.value_size_medium))) {
 			this.textSize = 16 * getEntryPoint().metrics.density;
-		} else if (textSize.equals(getResources().getString(R.string.value_text_size_big))) {
+		} else if (textSize.equals(getResources().getString(R.string.value_size_big))) {
 			this.textSize = 20 * getEntryPoint().metrics.density;
-		} else if (textSize.equals(getResources().getString(R.string.value_text_size_small))) {
+		} else if (textSize.equals(getResources().getString(R.string.value_size_small))) {
 			this.textSize = 12 * getEntryPoint().metrics.density;
 		} else {
 			this.textSize = 8 * getEntryPoint().metrics.density;
@@ -864,4 +864,7 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 		}
 		return super.onCreateInputConnection(outAttrs);
 	}
+
+	@Override
+	public void configChanged() {}
 }

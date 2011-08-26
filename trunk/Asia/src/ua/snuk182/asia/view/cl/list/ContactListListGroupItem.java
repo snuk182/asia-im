@@ -177,6 +177,26 @@ public class ContactListListGroupItem extends LinearLayout implements OnClickLis
 			}
 		}
 	}
+	
+	public void resize(int size){
+		float textSize;
+		switch(size){
+		case 64:
+			textSize = 31 * getEntryPoint().metrics.density;
+			break;
+		case 48:
+			textSize = 24 * getEntryPoint().metrics.density;
+			break;
+		case 32:
+			textSize = 18 * getEntryPoint().metrics.density;
+			break;
+		default:
+			textSize = 13 * getEntryPoint().metrics.density;
+			break;
+		}
+		subGroupNameText.setTextSize(textSize);
+		subGroupCountText.setTextSize(textSize);
+	}
 
 	public boolean isCollapsed() {
 		return collapsed;

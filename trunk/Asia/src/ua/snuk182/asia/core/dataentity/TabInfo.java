@@ -19,16 +19,16 @@ public class TabInfo implements TabContentFactory, Parcelable{
 	public ITabContent content;
 	public TabWidgetLayout tabWidgetLayout;
 	
-	public TabInfo(String tag, final ITabContent content, final EntryPoint entryPoint){
+	public TabInfo(String tag, final ITabContent content, final TabHost tabHost){
 		this.tag = tag;
 		this.content = content;
 		
-		construct(entryPoint.getTabHost());
+		construct(tabHost);
 		content.getTabWidgetLayout().setOnFocusChangeListener(new OnFocusChangeListener(){
 
 			@Override
 			public void onFocusChange(View v, boolean hasFocus) {
-				entryPoint.getTabScroller().scrollTo(content.getTabWidgetLayout().getRight(), content.getTabWidgetLayout().getTop());				
+				tabHost.scrollTo(content.getTabWidgetLayout().getRight(), content.getTabWidgetLayout().getTop());				
 			}
 			
 		});
@@ -36,7 +36,7 @@ public class TabInfo implements TabContentFactory, Parcelable{
 	
 	public TabInfo(String tag, String title, Intent intent, EntryPoint entryPoint, int iconId){
 		this.tag = tag;
-		tabSpec = entryPoint.getTabHost().newTabSpec(tag).setContent(intent);		
+		tabSpec = entryPoint.mainScreen.getChatsTabHost().newTabSpec(tag).setContent(intent);		
 		
 		TabWidgetLayout indicator = new TabWidgetLayout(entryPoint);
 		indicator.getTabName().setText(title);

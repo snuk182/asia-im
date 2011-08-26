@@ -7,12 +7,17 @@
  	<string name="value_chat_date_full">dateFull</string>
 	<string name="key_chat_date">PrefChatDate</string>
 	
+	<string name="key_view_type">PrefViewType</string>
+	
+	<string name="value_view_type_plain">plain</string>
+	<string name="value_view_type_notabs">notabs</string>
+	<string name="value_view_type_tablet">tablet</string>
+	
 	<string name="key_autoconnect">PrefAutoconnect</string>
 	<string name="key_message_sound_only">PrefMessageSoundOnly</string>
 	<string name="key_sound_type">PrefSoundType</string>
 	<string name="key_statusbar_type">PrefStatusBarType</string>
 	<string name="key_log_to_file">PrefLogToFile</string>
-	<string name="key_hide_tabs">PrefHideTabs</string>
 	<string name="key_send_by_enter">PrefSendByEnter</string>
 	<string name="key_screen_orientation">PrefScreenOrientation</string>
 	<string name="key_fullscreen_landscape_kb">PrefFullscreenLandscapeKb</string>
@@ -43,12 +48,13 @@
 	<string name="value_statusbar_type_none">none</string>
 	<string name="value_statusbar_type_icon">icon</string>
 	
-	<string name="value_text_size_big">big</string>
-	<string name="value_text_size_medium">medium</string>
-	<string name="value_text_size_small">small</string>
-	<string name="value_text_size_smallest">smallest</string>
+	<string name="value_size_big">big</string>
+	<string name="value_size_medium">medium</string>
+	<string name="value_size_small">small</string>
+	<string name="value_size_smallest">smallest</string>
 	
 	<string name="key_text_size">PrefChatTextSize</string>
+	<string name="key_cl_item_size">PrefCLItemSize</string>
 	
 	<string name="key_show_groups">PrefShowGroups</string>
 	<string name="key_show_offline">PrefShowOffline</string>

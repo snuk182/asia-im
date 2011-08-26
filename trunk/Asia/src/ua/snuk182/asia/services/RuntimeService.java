@@ -283,7 +283,18 @@ public class RuntimeService extends Service {
 
 				String filename = account.getAccountId() + " " + args[1];
 				log("icon for " + filename);
-				storage.saveIcon(filename, iconData);
+				storage.saveIcon(filename, iconData, new Runnable(){
+
+					@Override
+					public void run() {
+						try {
+							uiCallback.icon(serviceId, (String) args[1]);
+						} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e2) {
+							ServiceUtils.log(e2);
+						}
+					}
+					
+				});
 				
 				// account.editBuddy(buddy, true);
 
@@ -291,11 +302,7 @@ public class RuntimeService extends Service {
 					final Buddy buddy = account.getBuddyByProtocolUid((String) args[1]);
 					buddy.iconHash = (String) args[2];					
 				}
-				try {
-					uiCallback.icon(serviceId, (String) args[1]);
-				} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e2) {
-					ServiceUtils.log(e2);
-				}
+				
 				
 				//storage.saveAccount(account);		
 				

@@ -452,6 +452,36 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 			return getStatusResIdByStatusIdBig(statusId);
 		}
 	}*/
+	
+	public static int getStatusResIdByStatusIdBigger(int statusId) {
+		int statusResId;
+
+		switch (statusId) {
+		case Buddy.ST_ONLINE:
+			statusResId = R.drawable.xmpp_online_bigger;
+			break;
+		case Buddy.ST_FREE4CHAT:
+			statusResId = R.drawable.xmpp_free4chat_bigger;
+			break;
+		case Buddy.ST_AWAY:
+			statusResId = R.drawable.xmpp_away_bigger;
+			break;
+		case Buddy.ST_DND:
+			statusResId = R.drawable.xmpp_dnd_bigger;
+			break;
+		case Buddy.ST_INVISIBLE:
+			statusResId = R.drawable.xmpp_invisible_bigger;
+			break;
+		case Buddy.ST_NA:
+			statusResId = R.drawable.xmpp_na_bigger;
+			break;
+		default:
+			statusResId = R.drawable.xmpp_offline_bigger;
+			break;
+		}
+
+		return statusResId;
+	}
 
 	public static int getStatusResIdByStatusIdBig(int statusId) {
 		int statusResId;

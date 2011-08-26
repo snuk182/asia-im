@@ -102,7 +102,7 @@ public class SearchUsersView extends LinearLayout implements ITabContent, IHasAc
 				progressDialog = null;
 				return true;
 			}
-			entryPoint.removeTabByTag(SearchUsersView.class.getSimpleName()+ " " + account.serviceId);
+			entryPoint.mainScreen.removeTabByTag(SearchUsersView.class.getSimpleName()+ " " + account.serviceId);
 			return true;
 		}
 
@@ -198,8 +198,8 @@ public class SearchUsersView extends LinearLayout implements ITabContent, IHasAc
 	}
 
 	@Override
-	public void onResume() {
-		// TODO Auto-generated method stub
-		
-	}
+	public void onResume() {}
+	
+	@Override
+	public void configChanged() {}
 }
