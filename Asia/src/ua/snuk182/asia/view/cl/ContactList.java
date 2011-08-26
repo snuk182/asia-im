@@ -151,10 +151,9 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 		MenuItem showTabsItem = menu.findItem(R.id.menuitem_showtabs);
 		String hideTabsStr;
 		try {
-			hideTabsStr = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_hide_tabs));
+			hideTabsStr = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_view_type));
 			if (hideTabsStr!=null){
-				boolean hideTabs = Boolean.parseBoolean(hideTabsStr);
-				showTabsItem.setVisible(hideTabs);
+				showTabsItem.setVisible(hideTabsStr.equals(getResources().getString(R.string.value_view_type_notabs)));
 			} else {
 				showTabsItem.setVisible(false);
 			}
@@ -259,12 +258,12 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 			}
 			
 	    	if ((clType == null || clType.equals(getResources().getString(R.string.value_list_type_grid)))){
-	    		contactList = new ContactListGridDrawer(getEntryPoint(), account);
+	    		contactList = new ContactListGridDrawer(getEntryPoint(), account, this);
 	    	} else if (clType.equals(getResources().getString(R.string.value_list_type_list))){
 	    		//contactList = new ContactListListDrawer(getEntryPoint(), account);
-	    		contactList = new ContactListListDrawer(getEntryPoint(), account);
+	    		contactList = new ContactListListDrawer(getEntryPoint(), account, this);
 	    	} else {
-	    		contactList = new DoubleContactListListDrawer(getEntryPoint(), account);
+	    		contactList = new DoubleContactListListDrawer(getEntryPoint(), account, this);
 	    	}
 	    	
 	    	addView((View)contactList, 0);
@@ -272,10 +271,9 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 		
 		String hideTabsStr;
 		try {
-			hideTabsStr = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_hide_tabs));
+			hideTabsStr = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_view_type));
 			if (hideTabsStr!=null){
-				boolean hideTabs = Boolean.parseBoolean(hideTabsStr);
-				if (hideTabs){
+				if (hideTabsStr.equals(getResources().getString(R.string.value_view_type_notabs))){
 					statusIcon.setVisibility(View.VISIBLE);
 					statusIcon.setImageDrawable(getResources().getDrawable(ServiceUtils.getStatusResIdByAccountMedium(getContext(), account, false)));
 				} else {
@@ -311,7 +309,7 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 		
 		tabWidgetLayout.getTabName().setText(account.ownName == null ? account.protocolUid : account.ownName);
 		
-		contactList.updateView(this);
+		contactList.updateView();
 	}
 
 	private void requestIcon() {
@@ -333,7 +331,7 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 	public void messageReceived(TextMessage message, boolean activeTab){
 		if (message==null || message.from==null) return;
 		
-		if (activeTab || (!getEntryPoint().getTabHost().getCurrentTabTag().equals(ConversationsView.class.getSimpleName() + " " + getServiceId() + " " + message.from))){
+		if (activeTab || (!getEntryPoint().mainScreen.getCurrentChatsTabTag().equals(ConversationsView.class.getSimpleName() + " " + getServiceId() + " " + message.from))){
 			tabWidgetLayout.getTabIcon().setImageResource(R.drawable.message_medium);
 			contactList.messageReceived(message);
 		}
@@ -438,7 +436,7 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 			}
 		}		
 	}
-
+	
 	@Override
 	public void connectionState(int state) {
 		statusPanel.setVisibility(View.GONE);
@@ -461,4 +459,9 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 			contactList.bitmap(uid);
 		}
 	}
+
+	@Override
+	public void configChanged() {
+		contactList.configChanged();
+	}	
 }

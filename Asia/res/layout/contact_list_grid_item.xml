@@ -34,7 +34,7 @@
   	android:layout_alignParentLeft="true" 
   	android:layout_alignParentRight="true" 
   	android:src="@drawable/contact_64px"
-  	android:background="@drawable/logo_48px"
+  	android:background="@drawable/dummy_48"
   	android:scaleType="fitXY"
   	android:focusable="false"
   />

@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+	<string name="label_view_type">Вигляд програми (потрібен перезапуск)</string>
+	<string name="label_view_type_plain">Звичайний</string>
+	<string name="label_view_type_notabs">Без вкладок</string>
+	<string name="label_view_type_tablet">Планшетний</string>
+	
 	<string name="label_copy_all">Копіювати все</string>
 	<string name="label_personal_info">Персональне інфо</string>
 	<string name="label_male">Чоловік</string>
@@ -113,7 +118,6 @@
     <string name="label_set_xstatus">"Встановити х-статус"</string>
     <string name="label_xstatus">"Х-статус"</string>
     <string name="label_tabs_list">"Список вкладок"</string>
-    <string name="label_hide_tabs">"Сховати вкладки"</string>
     <string name="xstatus_text_title">"Заголовок"</string>
     <string name="xstatus_text_value">"Текст"</string>
     <string name="label_load_icons">"Витягати іконки контактів"</string>
@@ -182,6 +186,7 @@
 	<string name="label_text_size_smallest">Найменший</string>
 	
 	<string name="label_text_size">Розмір шрифту в чаті</string>
+	<string name="label_cl_item_size">Розмір контакта в списку</string>
 	
 	<string name="label_sort_lists">"Сортувати за алфавітом"</string>
 	

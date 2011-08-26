@@ -4,20 +4,18 @@ import ua.snuk182.asia.EntryPoint;
 import ua.snuk182.asia.R;
 import ua.snuk182.asia.core.dataentity.Buddy;
 import ua.snuk182.asia.services.ServiceUtils;
+import ua.snuk182.asia.view.ViewUtils;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
-import android.util.DisplayMetrics;
-import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -34,6 +32,12 @@ public class ContactListListItem extends RelativeLayout implements Comparable<Co
 	public TextView xStatusText;
 	public ImageView authIcon;
 	
+	public static int itemHeight = 48;
+	
+	private static int defaultImageResource = R.drawable.contact_48px;
+	private static float nameTextSize = 14;
+	private static float statusTextSize = 10;
+	
 	private Bitmap icon;
 	
 	private final Handler handler = new Handler();
@@ -43,12 +47,10 @@ public class ContactListListItem extends RelativeLayout implements Comparable<Co
 		@Override
 		public void run() {
 			if (icon != null){
-				BitmapDrawable bicon = new BitmapDrawable(icon);
+				BitmapDrawable bicon = new BitmapDrawable(ViewUtils.scaleBitmap(icon, (int) (itemHeight*getEntryPoint().metrics.density), false));
 				bicon.setGravity(Gravity.CENTER);
 				picLayout.setImageDrawable(bicon);
-			} else {
-				picLayout.setImageResource(R.drawable.contact_32px);
-			}
+			} 
 		}		
 	};
 	
@@ -69,7 +71,7 @@ public class ContactListListItem extends RelativeLayout implements Comparable<Co
 		picLayout = (ImageView)findViewById(R.id.iconlayout);
 		authIcon = (ImageView) findViewById(R.id.authimage);
 		xStatusText = (TextView) findViewById(R.id.xstatuslabel);  
-		picLayout.setImageResource(R.drawable.contact_32px);
+		picLayout.setImageResource(defaultImageResource);
 		
 		setPadding(2,2,2,2);	
 		
@@ -92,25 +94,31 @@ public class ContactListListItem extends RelativeLayout implements Comparable<Co
 			} catch (NumberFormatException e) {
 				ServiceUtils.log(e);
 			}
-		}	
-		       
+		}
+		
 		name.setText(buddy.getName());
+		name.setTextSize(nameTextSize);
+		xStatusText.setTextSize(statusTextSize);
+	       
 		setTag(buddy.protocolUid);
 		        
 		setFocusable(true);
 		//setFocusableInTouchMode(true);
 		
-		Display display = ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-		DisplayMetrics metrics = new DisplayMetrics();
-		display.getMetrics(metrics);
-				
-		/*if (buddy.icon!=null){
-			BitmapDrawable icon = new BitmapDrawable(buddy.icon);
-			icon.setGravity(Gravity.CENTER);
-					
-			picLayout.setImageDrawable(icon);			
-		}*/
-		mainStatusIcon.setImageResource(ServiceUtils.getStatusResIdByBuddyBig(getContext(), buddy));
+		switch(itemHeight){
+		case 24:
+			mainStatusIcon.setImageResource(ServiceUtils.getStatusResIdByBuddySmall(getContext(), buddy));
+			break;
+		case 32:
+			mainStatusIcon.setImageResource(ServiceUtils.getStatusResIdByBuddyMedium(getContext(), buddy));
+			break;
+		case 48:
+			mainStatusIcon.setImageResource(ServiceUtils.getStatusResIdByBuddyBigger(getContext(), buddy));
+			break;
+		default:
+			mainStatusIcon.setImageResource(ServiceUtils.getStatusResIdByBuddyBig(getContext(), buddy));
+			break;
+		}
 		switch(buddy.status){
 		case Buddy.ST_ONLINE:
 			xStatusText.setText(R.string.label_st_online);
@@ -169,7 +177,17 @@ public class ContactListListItem extends RelativeLayout implements Comparable<Co
 		}
 		        
 		if (buddy.unread>0){
-			mainStatusIcon.setImageResource(R.drawable.message_big);
+			switch(itemHeight){
+			case 24:
+				mainStatusIcon.setImageResource(R.drawable.message_tiny);
+				break;
+			case 32:
+				mainStatusIcon.setImageResource(R.drawable.message_medium);
+				break;
+			default:
+				mainStatusIcon.setImageResource(R.drawable.message_big);
+				break;
+			}
 		} 
 		
 		/*if (buddy.visibility == Buddy.VIS_NOT_AUTHORIZED){
@@ -238,16 +256,45 @@ public class ContactListListItem extends RelativeLayout implements Comparable<Co
 			new Thread("CL list item icon request"){
 				@Override
 				public void run(){
-					Bitmap b = buddy.getIcon(getEntryPoint(), (int) (32*getEntryPoint().metrics.density));
+					Bitmap b = buddy.getIcon(getEntryPoint());
 						if (b != null){
 							icon = b;
 							handler.post(iconGot);
+						} else {
+							picLayout.setImageResource(defaultImageResource);
 						}
 					
 				}
 			}.start();
 		} else {
-			picLayout.setImageResource(R.drawable.contact_32px);
+			picLayout.setImageResource(defaultImageResource);
+		}
+	}
+	
+	public static void resize(int itemHeight){
+		ContactListListItem.itemHeight = itemHeight;
+		//picLayout.setLayoutParams(new RelativeLayout.LayoutParams(size, size));		
+		switch(itemHeight){
+		case 24:
+			defaultImageResource = R.drawable.contact_24px;
+			nameTextSize = 8;
+			statusTextSize = 5;
+			break;
+		case 32:
+			defaultImageResource = R.drawable.contact_32px;
+			nameTextSize = 12;
+			statusTextSize = 7;
+			break;
+		case 48:
+			defaultImageResource = R.drawable.contact_48px;
+			nameTextSize = 18;
+			statusTextSize = 10;
+			break;
+		default:
+			defaultImageResource = R.drawable.contact_64px;
+			nameTextSize = 25;
+			statusTextSize = 13;
+			break;
 		}
 	}
 	

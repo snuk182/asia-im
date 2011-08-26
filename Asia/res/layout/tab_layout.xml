@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<TabHost xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- TabHost -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
 	android:id="@android:id/tabhost" android:layout_width="fill_parent"
 	android:layout_height="fill_parent" android:background="#00000000"
 	android:fadingEdge="none" android:fadingEdgeLength="0px">
@@ -13,7 +13,7 @@
 			android:layout_height="wrap_content" android:background="#00000000"
 			android:gravity="center_vertical" >
 			
-			<HorizontalScrollView android:id="@+id/tabContainer"
+			<HorizontalScrollView android:id="@+id/tabContainer" android:fillViewport="true"
 				android:layout_width="fill_parent" android:layout_height="wrap_content"
 				android:scrollbars="none" android:background="#00000000"
 				android:paddingTop="0px" android:paddingLeft="0px"
@@ -23,7 +23,7 @@
 
 				<TabWidget android:id="@android:id/tabs"
 					android:layout_width="wrap_content" android:layout_height="wrap_content"
-					android:background="#00000000" />
+					android:background="#00000000" android:gravity="left"/>
 			</HorizontalScrollView>
 			
 		</LinearLayout>
@@ -33,5 +33,5 @@
 			android:layout_weight="1" android:fadingEdge="none" android:background="#0000"
 			android:fadingEdgeLength="0px" />
 	</LinearLayout>
-</TabHost>
+</merge>
 

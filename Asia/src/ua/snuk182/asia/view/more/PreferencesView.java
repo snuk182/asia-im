@@ -104,8 +104,7 @@ public class PreferencesView extends PreferenceActivity implements ITabContent {
 		if (i == KeyEvent.KEYCODE_BACK) {
 			String tag = account!=null ? PreferencesView.class.getSimpleName()+" "+account.serviceId : PreferencesView.class.getSimpleName();
 			
-			getEntryPoint().checkShowTabs();
-			getEntryPoint().removeTabByTag(tag);
+			getEntryPoint().mainScreen.removeTabByTag(tag);
 			return true;
 		}
 
@@ -173,4 +172,7 @@ public class PreferencesView extends PreferenceActivity implements ITabContent {
 	public void onResume(){
 		super.onResume();
 	}
+	
+	@Override
+	public void configChanged() {}
 }

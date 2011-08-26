@@ -3,6 +3,7 @@
  */
 package ua.snuk182.asia;
 
+import ua.snuk182.asia.services.ServiceUtils;
 import ua.snuk182.asia.view.ITabContent;
 import ua.snuk182.asia.view.more.TabWidgetLayout;
 import android.content.Context;
@@ -50,7 +51,8 @@ public class Splashscreen extends RelativeLayout implements ITabContent{
 
 	@Override
 	public int getMainMenuId() {
-		return R.menu.splashscreen_menu;
+		//return R.menu.splashscreen_menu;
+		return 0;
 	}
 
 	@Override
@@ -68,7 +70,22 @@ public class Splashscreen extends RelativeLayout implements ITabContent{
 
 	@Override
 	public void visualStyleUpdated() {
-				
+		String bgType;
+		
+		try {
+			bgType = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_bg_type));
+		} catch (NullPointerException npe) {
+			bgType = null;
+			ServiceUtils.log(npe);
+		} if (bgType == null || bgType.equals("wallpaper")){
+			setBackgroundColor(0x60000000);
+		}else {
+			try {
+				setBackgroundColor(0);
+			} catch (NumberFormatException e) {				
+				ServiceUtils.log(e);
+			}
+		}		
 	}
 
 	@Override
@@ -79,4 +96,7 @@ public class Splashscreen extends RelativeLayout implements ITabContent{
 	@Override
 	public void onResume() {		
 	}
+
+	@Override
+	public void configChanged() {}
 }

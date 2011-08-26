@@ -3,9 +3,13 @@
 	android:clickable="true" android:longClickable="true"
 	android:layout_width="fill_parent" android:layout_height="50px">
 	<ImageView android:id="@+id/statusimage"
-		android:layout_width="40dip" android:layout_height="40dip"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
 		android:layout_alignParentTop="true" android:layout_alignParentLeft="true"
 		android:layout_alignParentBottom="true" android:src="@drawable/icq_offline_medium" />
+	<ImageView android:id="@+id/iconlayout" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:layout_alignParentTop="true"
+		android:layout_alignParentRight="true"
+		android:layout_alignParentBottom="true" android:src="@drawable/contact_32px" />
 	<TextView android:id="@+id/usernamelabel"
 		android:layout_width="fill_parent" android:textSize="14dip"
 		android:textColor="#ffff" android:textStyle="bold" android:padding="1px"
@@ -18,20 +22,19 @@
 		android:text="Username" android:layout_height="wrap_content" />
 	<ImageView android:id="@+id/authimage" android:src="@drawable/not_authorized"
 		android:layout_width="wrap_content" android:layout_height="wrap_content" 
-		android:layout_below="@id/usernamelabel" android:layout_toRightOf="@id/statusimage"
-		android:layout_alignParentBottom="true" android:padding="1px"/>
+		android:layout_below="@id/usernamelabel" 
+		android:layout_alignParentBottom="true" android:layout_toRightOf="@id/statusimage"
+		android:padding="1px"/>
 	<ImageView android:id="@+id/xstatusimage"
 		android:layout_width="wrap_content" android:layout_height="wrap_content"
-		android:layout_below="@id/usernamelabel" android:layout_toRightOf="@id/authimage"
-		android:layout_alignParentBottom="true" android:padding="1px"
+		android:layout_below="@id/usernamelabel" 
+		android:layout_alignParentBottom="true" android:layout_toRightOf="@id/authimage"
+		android:padding="1px"
 		android:src="@drawable/message_tiny" />
-	<ImageView android:id="@+id/iconlayout" android:layout_width="40dip"
-		android:layout_height="40dip" android:layout_alignParentTop="true"
-		android:layout_alignParentRight="true"
-		android:layout_alignParentBottom="true" android:src="@drawable/contact_32px" />
 	<TextView android:id="@+id/xstatuslabel" android:textSize="11dip"
 		android:text="Offline" android:layout_alignParentBottom="true"
-		android:layout_toRightOf="@id/xstatusimage" android:layout_toLeftOf="@id/iconlayout" 
+		android:layout_toRightOf="@id/xstatusimage"
+		android:layout_toLeftOf="@id/iconlayout" 
 		android:layout_below="@id/usernamelabel"
 		android:layout_height="12dip" android:layout_width="wrap_content" />
 	

@@ -70,7 +70,7 @@ public class HistoryView extends ListView implements ITabContent, IHasMessages {
 			closeHistory();
 			break;
 		case R.id.menuitem_return:
-			getEntryPoint().getTabHost().setCurrentTabByTag(ContactList.class.getSimpleName() + " " + buddy.getOwnerAccountId());
+			getEntryPoint().mainScreen.checkAndSetCurrentTabByTag(ContactList.class.getSimpleName() + " " + buddy.getOwnerAccountId());
 			break;
 		case R.id.menuitem_delete:
 			messages.clear();
@@ -106,7 +106,7 @@ public class HistoryView extends ListView implements ITabContent, IHasMessages {
 	}
 
 	private void closeHistory() {
-		getEntryPoint().removeTabByTag(historyId);
+		getEntryPoint().mainScreen.removeTabByTag(historyId);
 	}
 
 	@Override
@@ -169,11 +169,11 @@ public class HistoryView extends ListView implements ITabContent, IHasMessages {
 		DisplayMetrics metrics = new DisplayMetrics();
 		display.getMetrics(metrics);
 
-		if (textSize == null || textSize.equals(getResources().getString(R.string.value_text_size_medium))) {
+		if (textSize == null || textSize.equals(getResources().getString(R.string.value_size_medium))) {
 			historyAdapter.setTextSize(16 * metrics.density);
-		} else if (textSize.equals(getResources().getString(R.string.value_text_size_big))) {
+		} else if (textSize.equals(getResources().getString(R.string.value_size_big))) {
 			historyAdapter.setTextSize(20 * metrics.density);
-		} else if (textSize.equals(getResources().getString(R.string.value_text_size_small))) {
+		} else if (textSize.equals(getResources().getString(R.string.value_size_small))) {
 			historyAdapter.setTextSize(12 * metrics.density);
 		} else {
 			historyAdapter.setTextSize(8 * metrics.density);
@@ -186,4 +186,7 @@ public class HistoryView extends ListView implements ITabContent, IHasMessages {
 
 	@Override
 	public void onResume() {}
+
+	@Override
+	public void configChanged() {}
 }

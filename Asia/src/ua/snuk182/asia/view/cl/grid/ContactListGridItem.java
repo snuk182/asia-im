@@ -38,6 +38,10 @@ public class ContactListGridItem extends RelativeLayout implements Comparable<Co
 	
 	private Bitmap icon;
 	
+	public static int itemSize;
+	//private static int defaultImageResource = R.drawable.contact_48px;
+	private static float textSize = 12;
+	
 	private final Handler handler = new Handler();
 	
 	private final Runnable iconGot = new Runnable(){
@@ -45,7 +49,7 @@ public class ContactListGridItem extends RelativeLayout implements Comparable<Co
 		@Override
 		public void run() {
 			if (icon != null){
-				BitmapDrawable bd = new BitmapDrawable(ViewUtils.scaleBitmap(icon, (int) (60 * getEntryPoint().metrics.density), false));
+				BitmapDrawable bd = new BitmapDrawable(ViewUtils.scaleBitmap(icon, (int) ((itemSize-15) * getEntryPoint().metrics.density), false));
 				bd.setGravity(Gravity.CENTER);
 				buddyImage.setBuddyImage(bd);
 			} else {
@@ -71,28 +75,60 @@ public class ContactListGridItem extends RelativeLayout implements Comparable<Co
 		unreadMsgIcon = (ImageView) findViewById(R.id.unreadimage);
 		//picLayout.setImageResource(R.drawable.contact_64px);
 		buddyImage = (BuddyImage) findViewById(R.id.buddyimage);
-		buddyImage.setBuddyImage(R.drawable.dummy_48);
 		
 		setTag(tag);
 		//setBackgroundResource(R.drawable.cl_item);
 		setOnFocusChangeListener(this);
 	}
 	
+	@Override
+	public void onFocusChange(View v, boolean hasFocus) {
+		if (hasFocus){
+			buddyImage.setTopImage(R.drawable.contact_sel_64px);			
+		} else {
+			buddyImage.setTopImage(R.drawable.contact_64px);
+		}
+	}	
+	
 	public void populate(Buddy buddy){
-		populate(buddy, -1, showIcon);
+		populate(buddy, showIcon);
 	}
 	
-	public void populate(Buddy buddy, int itemSize, boolean showIcons){
+	public static void resize(int itemSize, EntryPoint entryPoint){
+		ContactListGridItem.itemSize = (int) (itemSize * entryPoint.metrics.density);
+
+		//picLayout.setLayoutParams(new RelativeLayout.LayoutParams(size, size));		
+		switch(itemSize){
+		case 75:
+			//defaultImageResource = R.drawable.contact_64px;
+			textSize = 15;
+			break;
+		case 96:
+			//defaultImageResource = R.drawable.contact_64px;
+			textSize = 20;
+			break;
+		case 62:
+			//defaultImageResource = R.drawable.contact_64px;
+			textSize = 11;
+			break;
+		default:
+			//defaultImageResource = R.drawable.contact_48px;
+			textSize = 7;
+			break;
+		}
+	}
+	
+	public void populate(Buddy buddy, boolean showIcons){
 		if (!buddy.protocolUid.equals(getTag())){
 			return;
 		}
-		if (itemSize > 0){
-			setLayoutParams(new LayoutParams(itemSize, itemSize));
-		}
+		setLayoutParams(new LayoutParams(itemSize, itemSize));
+		
 		//setGravity(Gravity.CENTER);					
 		setPadding(2,2,2,2);
 		       
 		name.setText(buddy.getName());
+		name.setTextSize(textSize);
 		        
 		setFocusable(true);
 		//setFocusableInTouchMode(true);
@@ -149,16 +185,6 @@ public class ContactListGridItem extends RelativeLayout implements Comparable<Co
 		
 	}
 
-	@Override
-	public void onFocusChange(View v, boolean hasFocus) {
-		if (hasFocus){
-			buddyImage.setTopImage(R.drawable.contact_sel_64px);
-			
-		} else {
-			buddyImage.setTopImage(R.drawable.contact_64px);
-		}
-	}
-	
 	public void removeFromParent(){
 		ViewGroup parent = (ViewGroup) getParent();
 		if (parent != null){
@@ -177,10 +203,12 @@ public class ContactListGridItem extends RelativeLayout implements Comparable<Co
 			new Thread("CL grid item icon request"){
 				@Override
 				public void run(){
-					Bitmap b = buddy.getIcon(getEntryPoint(), getLayoutParams().height);
+					Bitmap b = buddy.getIcon(getEntryPoint());
 						if (b != null){
 							icon = b;
 							handler.post(iconGot);
+						} else {
+							buddyImage.setBuddyImage(R.drawable.dummy_48);
 						}
 				}
 			}.start();

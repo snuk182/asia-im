@@ -10,8 +10,10 @@ public interface IContactListDrawer {
 	public void removeAllViews();
 
 	public ViewParent getParent();
-
-	public void updateView(ContactList parent);
+	
+	public void updateView();
+	
+	public void configChanged();
 
 	public void messageReceived(TextMessage message);
 

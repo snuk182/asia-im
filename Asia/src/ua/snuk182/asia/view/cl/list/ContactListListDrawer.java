@@ -33,6 +33,7 @@ public class ContactListListDrawer extends ScrollView implements IContactListDra
 
 	private String bgType;
 	private LinearLayout contactList;
+	protected ContactList parent;
 	
 	private final AccountView account;
 
@@ -40,10 +41,11 @@ public class ContactListListDrawer extends ScrollView implements IContactListDra
 	boolean showOffline = false;
 	private boolean showIcons = true;
 	
-	public ContactListListDrawer(EntryPoint entryPoint, AccountView account) {
+	public ContactListListDrawer(EntryPoint entryPoint, AccountView account, ContactList parent) {
 		super(entryPoint);
 		
 		this.account = account;
+		this.parent = parent;
 		
 		LayoutInflater inflate = (LayoutInflater)entryPoint.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		inflate.inflate(R.layout.contact_list_grid_drawer, this);		
@@ -65,7 +67,7 @@ public class ContactListListDrawer extends ScrollView implements IContactListDra
 	}
 
 	@Override
-	public synchronized void updateView(final ContactList parent) {
+	public synchronized void updateView() {
 		String showGroupsStr = parent.getAccount().options.getString(getResources().getString(R.string.key_show_groups));
 		showGroups = showGroupsStr!=null?Boolean.parseBoolean(showGroupsStr):false;
 		
@@ -74,6 +76,19 @@ public class ContactListListDrawer extends ScrollView implements IContactListDra
 		
 		String showIconsStr = account.options.getString(getResources().getString(R.string.key_show_icons));
 		showIcons   = showIconsStr != null ? Boolean.parseBoolean(showIconsStr) : true;
+		
+		String itemSizeStr = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_cl_item_size));
+		int size;
+		if (itemSizeStr == null || itemSizeStr.equals(getResources().getString(R.string.value_size_medium))){
+			size = 48;
+		} else if (itemSizeStr.equals(getResources().getString(R.string.value_size_big))){
+			size = 64;
+		} else if (itemSizeStr.equals(getResources().getString(R.string.value_size_small))){
+			size = 32;
+		} else {
+			size = 24;
+		}
+		ContactListListItem.resize(size);
 		
 		groups.clear();
 		
@@ -116,9 +131,8 @@ public class ContactListListDrawer extends ScrollView implements IContactListDra
 		}
 		
 		for (Buddy buddy : account.getBuddyList()){
-				ContactListListItem item = getItem(buddy, bgType, getEntryPoint(), showIcons);
-				// items.add(item);
-
+				ContactListListItem item = getItem(buddy, getEntryPoint(), showIcons);
+				
 				if (showGroups && account.getBuddyGroupList().size() > 0) {
 					if (buddy.unread > 0) {
 						unreadGroup.getBuddyList().add(item);
@@ -168,6 +182,7 @@ public class ContactListListDrawer extends ScrollView implements IContactListDra
 		contactList.removeAllViews();
 		
 		for (ContactListListGroupItem group:groups){
+			group.resize(size);
 			group.forceRefresh(bgType, parent.sort);
 		}		
 	}
@@ -201,7 +216,7 @@ public class ContactListListDrawer extends ScrollView implements IContactListDra
 			item.refresh(bgType);
 		}
 		
-		if (getEntryPoint().getTabHost().getCurrentTabTag().equals(ContactList.class.getSimpleName()+" "+account.serviceId)){
+		if (getEntryPoint().mainScreen.getCurrentAccountsTabTag().equals(ContactList.class.getSimpleName()+" "+account.serviceId)){
 			try {
 				Buddy budddy = getEntryPoint().runtimeService.getBuddy(account.serviceId, message.from);
 				budddy.unread++;
@@ -291,23 +306,30 @@ public class ContactListListDrawer extends ScrollView implements IContactListDra
 		return (ContactListListItem) this.findViewWithTag(buddyUid);
 	}
 
-	private ContactListListItem getItem(final Buddy buddy, String bgType, final EntryPoint entryPoint, boolean showIcons) {
+	private ContactListListItem getItem(final Buddy buddy, final EntryPoint entryPoint, boolean showIcons) {
 		ContactListListItem item;
+		int height = (int) (ContactListListItem.itemHeight * getEntryPoint().metrics.density);
 		if ((item = findExistingItem(buddy.protocolUid)) == null){			
 			final ContactListListItem cli = new ContactListListItem(getEntryPoint(), buddy.protocolUid);
-			cli.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, (int) (44 * getEntryPoint().metrics.density)));
-			
 			cli.setOnClickListener(new OnClickListener() {
 
 				@Override
 				public void onClick(View v) {
-					try {
-						entryPoint.getConversationTab(getEntryPoint().runtimeService.getBuddy(buddy.serviceId, buddy.protocolUid));
-					} catch (NullPointerException npe) {	
-						ServiceUtils.log(npe);
-					} catch (RemoteException e) {
-						getEntryPoint().onRemoteCallFailed(e);
-					}
+					cli.setBackgroundColor(0xddff7f00);
+					getEntryPoint().threadMsgHandler.post(new Runnable() {
+						
+						@Override
+						public void run() {
+							try {
+								entryPoint.getConversationTab(getEntryPoint().runtimeService.getBuddy(buddy.serviceId, buddy.protocolUid));
+								cli.setBackgroundColor(0x00ffffff);
+							} catch (NullPointerException npe) {	
+								ServiceUtils.log(npe);
+							} catch (RemoteException e) {
+								getEntryPoint().onRemoteCallFailed(e);
+							}
+						}
+					});
 				}
 			});
 			cli.setOnLongClickListener(new OnLongClickListener() {
@@ -328,13 +350,14 @@ public class ContactListListDrawer extends ScrollView implements IContactListDra
 
 			});
 			
-			cli.requestIcon(buddy);
-			
 			item = cli;
-		}
-
+		} 
+		item.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, height));
+		
 		item.removeFromParent();
 		item.populate(buddy, bgType, showIcons);
+		item.requestIcon(buddy);
+		
 		return item;
 	}
 
@@ -357,4 +380,7 @@ public class ContactListListDrawer extends ScrollView implements IContactListDra
 	public boolean hasUnreadMessages() {
 		return unreadGroup.getVisibility() == View.VISIBLE;
 	}
+
+	@Override
+	public void configChanged() {}
 }

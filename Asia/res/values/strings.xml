@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string name="version">0.5.4b</string>
+	<string name="version">0.5.5b</string>
+	
+	<string name="label_view_type">App view type (needs restart)</string>
+	<string name="label_view_type_plain">Plain</string>
+	<string name="label_view_type_notabs">No tabs</string>
+	<string name="label_view_type_tablet">Tablet</string>
 
 	<string name="label_copy_all">Copy all</string>
 	<string name="label_personal_info">Personal info</string>
@@ -12,7 +17,7 @@
 	<string name="label_manage_visibility">Visibility</string>
 
 	<string name="label_blink_led">Blink LED on new message</string>
-
+	
 	<string name="label_secure_login">Secure login</string>
 	<string name="label_poweramp_playing_to_status">Send "Now playing" from PowerAMP</string>
 
@@ -35,10 +40,10 @@
 	<string name="label_inempty_group">"This group is not empty. What to do with buddies
 		from it?"</string>
 
-	<string name="label_text_size_big">Big</string>
-	<string name="label_text_size_medium">Medium</string>
-	<string name="label_text_size_small">Small</string>
-	<string name="label_text_size_smallest">Smallest</string>
+	<string name="label_size_big">Big</string>
+	<string name="label_size_medium">Medium</string>
+	<string name="label_size_small">Small</string>
+	<string name="label_size_smallest">Smallest</string>
 
 	<string name="label_screen_orientation">Screen orientation</string>
 
@@ -48,6 +53,7 @@
 	<string name="label_screen_orientation_sensor">Sensor</string>
 
 	<string name="label_text_size">Chat font size</string>
+	<string name="label_cl_item_size">Contact list item size</string>
 	<string name="label_file_from">"File from "</string>
 	<string name="label_files">" files"</string>
 
@@ -178,7 +184,6 @@
 	<string name="label_ask_xstatus">"Ask for x-status"</string>
 	<string name="label_set_xstatus">"Set x-status"</string>
 	<string name="label_xstatus">"X-status"</string>
-	<string name="label_hide_tabs">"Hide tabs"</string>
 	<string name="label_tabs_list">"Tabs list"</string>
 	<string name="xstatus_text_title">"Title"</string>
 	<string name="xstatus_text_value">"Text"</string>

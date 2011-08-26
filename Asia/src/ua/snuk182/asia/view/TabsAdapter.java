@@ -49,12 +49,12 @@ public class TabsAdapter extends BaseAdapter {
 
 	@Override
 	public int getCount() {
-		return getEntryPoint().tabs.size();
+		return getEntryPoint().mainScreen.getTabs().size();
 	}
 
 	@Override
 	public Object getItem(int position) {
-		return getEntryPoint().tabs.get(position);
+		return getEntryPoint().mainScreen.getTabs().get(position);
 	}
 
 	@Override

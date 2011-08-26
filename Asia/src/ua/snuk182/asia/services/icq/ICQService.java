@@ -428,6 +428,53 @@ public class ICQService extends AccountService {
 		}
 		return statusResId;
 	}
+	
+	public static int getStatusResIdByStatusIdBigger(int statusId) {
+		int statusResId;
+		
+		switch(statusId){
+		case Buddy.ST_ONLINE:
+			statusResId = R.drawable.icq_online_bigger;
+			break;
+		case Buddy.ST_FREE4CHAT:
+			statusResId = R.drawable.icq_free4chat_bigger;
+			break;
+		case Buddy.ST_AWAY:
+			statusResId = R.drawable.icq_away_bigger;
+			break;
+		case Buddy.ST_BUSY:
+			statusResId = R.drawable.icq_busy_bigger;
+			break;
+		case Buddy.ST_DND:
+			statusResId = R.drawable.icq_dnd_bigger;
+			break;
+		case Buddy.ST_INVISIBLE:
+			statusResId = R.drawable.icq_invisible_bigger;
+			break;
+		case Buddy.ST_NA:
+			statusResId = R.drawable.icq_na_bigger;
+			break;
+		case Buddy.ST_ANGRY:
+			statusResId = R.drawable.icq_angry_bigger;
+			break;
+		case Buddy.ST_DEPRESS:
+			statusResId = R.drawable.icq_depress_bigger;
+			break;
+		case Buddy.ST_DINNER:
+			statusResId = R.drawable.icq_dinner_bigger;
+			break;
+		case Buddy.ST_HOME:
+			statusResId = R.drawable.icq_home_bigger;
+			break;
+		case Buddy.ST_WORK:
+			statusResId = R.drawable.icq_work_bigger;
+			break;
+		default:
+			statusResId = R.drawable.icq_offline_bigger;
+			break;
+		}
+		return statusResId;
+	}
 
 	/*private static int getStatusResIdByStatusId64(int statusId) {
 		int statusResId;

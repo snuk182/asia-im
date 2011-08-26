@@ -5,11 +5,8 @@ import ua.snuk182.asia.R;
 import ua.snuk182.asia.view.ViewUtils;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.util.DisplayMetrics;
-import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -57,11 +54,11 @@ public class TabWidgetLayout extends LinearLayout {
 			return;
 		}
 		
-		Display display = ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-		DisplayMetrics metrics = new DisplayMetrics();
-		display.getMetrics(metrics);
-		
-		tabIcon.setImageBitmap(ViewUtils.scaleBitmap(bmp, (int) (32 * metrics.density), true));
+		tabIcon.setImageBitmap(ViewUtils.scaleBitmap(bmp, (int) (32 * getEntryPoint().metrics.density), true));
+	}
+
+	private EntryPoint getEntryPoint() {
+		return (EntryPoint) getContext();
 	}
 
 	public void color(int bgColor) {

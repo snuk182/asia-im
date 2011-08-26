@@ -80,9 +80,9 @@ public class FileTransferView extends ScrollView implements ITabContent, IHasFil
 		MenuItem showTabsItem = menu.findItem(R.id.menuitem_showtabs);
 		String hideTabsStr;
 		try {
-			hideTabsStr = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_hide_tabs));
+			hideTabsStr = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_view_type));
 			if (hideTabsStr != null) {
-				boolean hideTabs = Boolean.parseBoolean(hideTabsStr);
+				boolean hideTabs = hideTabsStr.equals(getResources().getString(R.string.value_view_type_notabs));
 				showTabsItem.setVisible(hideTabs);
 			} else {
 				showTabsItem.setVisible(false);
@@ -111,7 +111,7 @@ public class FileTransferView extends ScrollView implements ITabContent, IHasFil
 	}
 
 	private void closeMe() {
-		getEntryPoint().removeTabByTag(FileTransferView.class.getSimpleName()+" "+serviceId);
+		getEntryPoint().mainScreen.removeTabByTag(FileTransferView.class.getSimpleName()+" "+serviceId);
 	}
 
 	@Override
@@ -126,7 +126,7 @@ public class FileTransferView extends ScrollView implements ITabContent, IHasFil
 	}
 
 	private void returnToBuddyList() {
-		getEntryPoint().getTabHost().setCurrentTabByTag(ContactList.class.getSimpleName() + " " + serviceId);
+		getEntryPoint().mainScreen.checkAndSetCurrentTabByTag(ContactList.class.getSimpleName() + " " + serviceId);
 	}
 
 	@Override
@@ -197,4 +197,7 @@ public class FileTransferView extends ScrollView implements ITabContent, IHasFil
 			closeMe();
 		}
 	}
+
+	@Override
+	public void configChanged() {}
 }

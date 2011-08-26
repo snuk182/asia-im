@@ -26,6 +26,18 @@
 		<item>@string/value_chat_date_full</item>
 	</string-array>
 	
+	<string-array name="view_type_values">
+		<item>@string/value_view_type_plain</item>
+		<item>@string/value_view_type_notabs</item>
+		<item>@string/value_view_type_tablet</item>
+	</string-array>
+	
+	<string-array name="view_type_names">
+		<item>@string/label_view_type_plain</item>
+		<item>@string/label_view_type_notabs</item>
+		<item>@string/label_view_type_tablet</item>
+	</string-array>
+	
 	<string-array name="list_type_values">
 		<item>@string/value_list_type_grid</item>
 		<item>@string/value_list_type_list</item>
@@ -46,18 +58,18 @@
 		<item>@string/label_sound_type_profile</item>
 	</string-array>
 	
-	<string-array name="list_text_size_names">
-		<item>@string/label_text_size_smallest</item>
-		<item>@string/label_text_size_small</item>
-		<item>@string/label_text_size_medium</item>
-		<item>@string/label_text_size_big</item>
+	<string-array name="list_size_names">
+		<item>@string/label_size_smallest</item>
+		<item>@string/label_size_small</item>
+		<item>@string/label_size_medium</item>
+		<item>@string/label_size_big</item>
 	</string-array>
 	
-	<string-array name="list_text_size_values">
-		<item>@string/value_text_size_smallest</item>
-		<item>@string/value_text_size_small</item>
-		<item>@string/value_text_size_medium</item>
-		<item>@string/value_text_size_big</item>
+	<string-array name="list_size_values">
+		<item>@string/value_size_smallest</item>
+		<item>@string/value_size_small</item>
+		<item>@string/value_size_medium</item>
+		<item>@string/value_size_big</item>
 	</string-array>
 
 	<string-array name="list_statusbar_type_names">

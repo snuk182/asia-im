@@ -13,22 +13,22 @@ import ua.snuk182.asia.core.dataentity.TabInfo;
 import ua.snuk182.asia.core.dataentity.TextMessage;
 import ua.snuk182.asia.services.IRuntimeService;
 import ua.snuk182.asia.services.IRuntimeServiceCallback;
+import ua.snuk182.asia.services.ServiceStoredPreferences;
 import ua.snuk182.asia.services.ServiceUtils;
 import ua.snuk182.asia.services.TabInfoFactory;
-import ua.snuk182.asia.view.IHasAccount;
-import ua.snuk182.asia.view.IHasBuddy;
-import ua.snuk182.asia.view.IHasFileTransfer;
-import ua.snuk182.asia.view.IHasMessages;
+import ua.snuk182.asia.view.IMainScreen;
 import ua.snuk182.asia.view.ViewUtils;
 import ua.snuk182.asia.view.cl.ContactList;
 import ua.snuk182.asia.view.conversations.ConversationsView;
+import ua.snuk182.asia.view.mainscreen.SmartphoneScreen;
+import ua.snuk182.asia.view.mainscreen.TabletScreen;
 import ua.snuk182.asia.view.more.AccountManagerView;
 import ua.snuk182.asia.view.more.AsiaCoreException;
 import ua.snuk182.asia.view.more.HistoryView;
-import ua.snuk182.asia.view.more.PersonalInfoView;
 import ua.snuk182.asia.view.more.PreferencesView;
 import ua.snuk182.asia.view.more.SearchUsersView;
-import android.app.TabActivity;
+import android.app.ActivityGroup;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -36,9 +36,7 @@ import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -48,33 +46,30 @@ import android.view.Display;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.HorizontalScrollView;
-import android.widget.TabHost;
-import android.widget.TabHost.OnTabChangeListener;
 import android.widget.Toast;
 
-public class EntryPoint extends TabActivity {
+public class EntryPoint extends ActivityGroup {
 	
+	private static final String SAVEDSTATE_SERVICE_INTENT = "serviceIntent";
+	private static final String SAVEDSTATE_SELECTED_CHAT = "selectedChat";
+	private static final String SAVEDSTATE_SELECTED_ACC = "selectedAcc";
+	private static final String SAVEDSTATE_TABS = "tabs";
+	public static final int BGCOLOR_WALLPAPER = 0xff7f7f80;
 	public IRuntimeService runtimeService = null;
-	public ArrayList<TabInfo> tabs = null;
 	private Intent serviceIntent = null;
+	
+	public IMainScreen mainScreen;
+	public ProgressDialog progressDialog;
 	
 	private Bundle appOptions;
 	
 	public int bgColor = 0xff7f7f80;
 	public DisplayMetrics metrics = new DisplayMetrics();
 	
-	private HorizontalScrollView tabScroller;
-	
-	private final List<OnTabChangeListener> tabChangeListeners = new ArrayList<OnTabChangeListener>();
-	
-	protected ArrayList<TabInfo> savedTabs = null;
-	protected int selectedTab = 0;
+	private Bundle savedState;
 	private ServiceConnection serviceConnection = new ServiceConnection(){
 		
 		@Override
@@ -83,7 +78,7 @@ public class EntryPoint extends TabActivity {
 				runtimeService = IRuntimeService.Stub.asInterface(service);
     			try {
 					runtimeService.registerCallback(serviceCallback);
-					continueCreating(savedTabs, selectedTab);
+					continueCreating();
 				} catch (NullPointerException npe) {	
 					ServiceUtils.log(npe);
 				} catch (RemoteException e) {
@@ -104,13 +99,29 @@ public class EntryPoint extends TabActivity {
 		}
 	};
 	
-	private final OnTabChangeListener tabChangeListener = new OnTabChangeListener() {
+	private final Runnable startRunnable = new Runnable() {
 		
 		@Override
-		public void onTabChanged(String tabId) {
-			for (OnTabChangeListener listener:tabChangeListeners){
-				listener.onTabChanged(tabId);
-			}		
+		public void run() {
+			String view;
+			
+			try {
+				view = ServiceStoredPreferences.getOption(EntryPoint.this, getString(R.string.key_view_type));
+			} catch (NullPointerException npe) {	
+				view = null;
+			} 
+			
+			if (view != null && view.equals(getString(R.string.value_view_type_tablet))){
+				mainScreen = new TabletScreen(EntryPoint.this, null);
+			} else {
+				mainScreen = new SmartphoneScreen(EntryPoint.this, null);
+			}
+			
+			setContentView((View)mainScreen);
+			
+	    	//addTab(TabInfoFactory.createSplashscreenTab(this));  
+	    	
+	        getRuntimeService();	
 		}
 	};
 	
@@ -136,105 +147,62 @@ public class EntryPoint extends TabActivity {
 				setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
 			}					
 			
-			String bgType;
+			updateBackground();	
 			
-			try {
-				bgType = getApplicationOptions().getString(getResources().getString(R.string.key_bg_type));
-			} catch (NullPointerException npe) {	
-				bgType = null;
-				ServiceUtils.log(npe);
-			}
-			if (bgType == null || bgType.equals("wallpaper")){
-				bgColor = 0xff7f7f80;
-				Bitmap original = ((BitmapDrawable)getWallpaper()).getBitmap();	
-				BitmapDrawable wallpaper = new BitmapDrawable(original);
-				//wallpaper.setGravity(Gravity.CENTER);
-				
-				if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
-					wallpaper.setGravity(Gravity.CENTER|Gravity.FILL_VERTICAL);
-				} else {
-					wallpaper.setGravity(Gravity.CENTER|Gravity.FILL_HORIZONTAL);
-				}
-				getTabHost().setBackgroundDrawable(wallpaper);
-				findViewById(R.id.divider).setVisibility(View.GONE);
-			}else {
-				try {
-					bgColor = (int) Long.parseLong(bgType);
-					getTabHost().setBackgroundColor(bgColor);
-					
-					if (checkShowTabs()){
-						findViewById(R.id.divider).setVisibility(View.VISIBLE);
-						//findViewById(R.id.divider).setBackgroundColor((bgColor ^ 0xffffff));
-						findViewById(R.id.divider).setBackgroundColor(0x60202020);
-					} else {
-						findViewById(R.id.divider).setVisibility(View.GONE);
-					}							
-				} catch (NumberFormatException e) {				
-					ServiceUtils.log(e);
-				}
-			}	
-			
-			for (TabInfo tab:tabs){
-				if (tab.content != null){
-					tab.content.visualStyleUpdated();
-					tab.tabWidgetLayout.color(bgColor);
-				}
-			}
-			
-			if (getTabHost().getCurrentView() != null && getTabHost().getCurrentView().getContext() instanceof PreferencesView){
-				((PreferencesView)getTabHost().getCurrentView().getContext()).visualStyleUpdated();
-			}
+			mainScreen.visualStyleUpdated();
 		}
 		
-	};
-	
-	private final OnTabChangeListener scrollToSelectedListener = new OnTabChangeListener() {
-		
-		@Override
-		public void onTabChanged(final String tabId) {
-			tabScroller.post(new Runnable(){
-
-				@Override
-				public void run() {
-					TabInfo desiredTab = getTabByTag(tabId);
-					if (desiredTab == null){
-						return;
-					}
-					View tabWidget = desiredTab.tabWidgetLayout;
-					Rect rect = new Rect();
-					tabScroller.getDrawingRect(rect);
-					if (rect.left > tabWidget.getLeft()){
-						tabScroller.scrollTo(tabWidget.getLeft(),0);	
-						return;
-					}
-					if (rect.right < tabWidget.getRight()){
-						tabScroller.scrollTo(tabWidget.getRight(),0);	
-						return;
-					}
-				}				
-			});			
-		}
 	};
 	
 	@Override
     public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);   
+        super.onConfigurationChanged(newConfig); 
+        mainScreen.configChanged();
+		
         threadMsgHandler.post(new Runnable(){
 
 			@Override
 			public void run() {
-				try {
-					serviceCallback.visualStyleUpdated();
-				} catch (RemoteException e) {
-					ServiceUtils.log(e);
-				}
-				scrollToSelectedListener.onTabChanged(getTabHost().getCurrentTabTag());
+				updateBackground();
 			}
         	
         });
     }
 	
-    public Bundle getApplicationOptions() {
+    private void updateBackground() {
+    	String bgType;
+		
+		try {
+			bgType = getApplicationOptions().getString(getResources().getString(R.string.key_bg_type));
+		} catch (NullPointerException npe) {	
+			bgType = null;
+			ServiceUtils.log(npe);
+		}
+		if (bgType == null || bgType.equals("wallpaper")){
+			bgColor = BGCOLOR_WALLPAPER;
+			Bitmap original = ((BitmapDrawable)getWallpaper()).getBitmap();	
+			BitmapDrawable wallpaper = new BitmapDrawable(original);
+			//wallpaper.setGravity(Gravity.CENTER);
+			
+			if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
+				wallpaper.setGravity(Gravity.CENTER|Gravity.FILL_VERTICAL);
+			} else {
+				wallpaper.setGravity(Gravity.CENTER|Gravity.FILL_HORIZONTAL);
+			}
+			mainScreen.setBackgroundDrawable(wallpaper);
+		}else {
+			try {
+				bgColor = (int) Long.parseLong(bgType);
+				mainScreen.setBackgroundColor(bgColor);
+				
+											
+			} catch (NumberFormatException e) {				
+				ServiceUtils.log(e);
+			}
+		}
+	}
+
+	public Bundle getApplicationOptions() {
 		return appOptions;
 	}
 
@@ -246,34 +214,54 @@ public class EntryPoint extends TabActivity {
     	
     	super.onCreate(savedInstanceState);  
     	
-    	setContentView(R.layout.tab_layout);
+    	//setContentView(R.layout.tab_layout);
     	
-    	tabScroller = (HorizontalScrollView) findViewById(R.id.tabContainer);
-    	
-    	getTabHost().setOnTabChangedListener(tabChangeListener);
-    	
-    	addOnTabChangeListener(scrollToSelectedListener);
-    	
-    	final ArrayList<TabInfo> savedTabs;
-    	final int selectedTab;
-    	if(savedInstanceState!=null){
-    		savedTabs = savedInstanceState.getParcelableArrayList("tabs");        
-        	selectedTab = savedInstanceState.getInt("selected");
-        	serviceIntent = savedInstanceState.getParcelable("serviceIntent");
-    	} else {
-    		savedTabs = null;
-    		selectedTab = 0;
-    	}
-    	tabs =  new ArrayList<TabInfo>();
-        addTab(TabInfoFactory.createSplashscreenTab(this));  
+    	savedState = savedInstanceState;
+    	toggleSplashscreen(true);
         
-        this.savedTabs = savedTabs;
-        this.selectedTab = selectedTab;
-        getRuntimeService();		
+    	threadMsgHandler.post(startRunnable);	
     }
     
-    private void getRuntimeService() {
-    	getTabHost().post(new Runnable(){
+    private void toggleSplashscreen(final boolean show) {
+    	
+    	/*threadMsgHandler.post(new Runnable(){
+
+			@Override
+			public void run() {
+				if (progressDialog!=null){
+					if (show){
+						progressDialog.show();
+					} else {
+						progressDialog.hide();
+					}
+				} else {
+					if (show){
+						progressDialog = ProgressDialog.show(EntryPoint.this, "", getResources().getString(R.string.label_wait), true);
+						progressDialog.setIndeterminateDrawable(getResources().getDrawable(R.drawable.logo_96px));
+						progressDialog.setCancelable(true);
+					}
+				}
+			}
+    		
+    	});*/
+    	
+    	if (progressDialog!=null){
+			if (show){
+				progressDialog.show();
+			} else {
+				progressDialog.hide();
+			}
+		} else {
+			if (show){
+				progressDialog = ProgressDialog.show(EntryPoint.this, "", getResources().getString(R.string.label_wait), true);
+				progressDialog.setIndeterminateDrawable(getResources().getDrawable(R.drawable.logo_96px));
+				progressDialog.setCancelable(true);
+			}
+		}
+	}
+
+	private void getRuntimeService() {
+    	threadMsgHandler.post(new Runnable(){
 
 			@Override
 			public void run() {
@@ -288,20 +276,12 @@ public class EntryPoint extends TabActivity {
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu){
-    	if (getSelectedTab().content != null && getSelectedTab().content.getMainMenuId() > 0){
-    		menu.clear();
-        	
-        	MenuInflater inflater = getMenuInflater();
-    		inflater.inflate(getSelectedTab().content.getMainMenuId(), menu);
-    		
-        	return getSelectedTab().content.onPrepareOptionsMenu(menu);
-    	}
-    	return false;
+    	return mainScreen.onPrepareOptionsMenu(menu);
     }
     
     @Override
 	public boolean onOptionsItemSelected(MenuItem item){
-    	return getSelectedTab().content.onOptionsItemSelected(item);
+    	return mainScreen.onOptionsItemSelected(item);
     }
     
     @Override
@@ -326,23 +306,42 @@ public class EntryPoint extends TabActivity {
     	
     	if (notificationTag.startsWith(ContactList.class.getSimpleName())){
     		try {
-				getTabHost().setCurrentTabByTag(notificationTag);
+				mainScreen.checkAndSetCurrentTabByTag(notificationTag);
 			} catch (Exception e) {
 				ServiceUtils.log(e);
 			}
     	}		    	
     }
     
-    private void continueCreating(ArrayList<TabInfo> savedTabs, int selectedTab) {
+    private void continueCreating() {
     	try {
     		runtimeService.setAppVisible(true);
     		appOptions = runtimeService.getApplicationOptions();
+    		
+    		ArrayList<TabInfo> savedTabs;
+        	int selectedAccTab = 0;
+        	int selectedChatTab = 0;
+        	if(savedState!=null){
+        		savedTabs = savedState.getParcelableArrayList(SAVEDSTATE_TABS);        
+            	/*if (mainScreen instanceof TabletScreen){
+            		selectedAccTab = savedState.getInt(SAVEDSTATE_SELECTED_ACC);
+            		selectedChatTab = savedState.getInt(SAVEDSTATE_SELECTED_CHAT);
+            	} else {
+            		selectedChatTab = savedState.getInt(SAVEDSTATE_SELECTED_CHAT);
+            	}*/
+        		selectedAccTab = savedState.getInt(SAVEDSTATE_SELECTED_ACC);
+        		selectedChatTab = savedState.getInt(SAVEDSTATE_SELECTED_CHAT);
+            	serviceIntent = savedState.getParcelable(SAVEDSTATE_SERVICE_INTENT);
+        	} else {
+        		savedTabs = null;
+        	}
+    		
     		if (savedTabs == null){
     			savedTabs = (ArrayList<TabInfo>) runtimeService.getSavedTabs();
     		}
     		if (savedTabs!=null){
     			for (TabInfo tab:savedTabs){    				
-    				addTab(TabInfoFactory.recreateTabContent(this, tab));    	
+    				mainScreen.addTab(TabInfoFactory.recreateTabContent(this, tab), false);    	
     			}
     		} else {
     			List<AccountView> protocols = runtimeService.getProtocolServices();
@@ -354,63 +353,33 @@ public class EntryPoint extends TabActivity {
     			for (AccountView protocolView:protocols){				
     				addAccountTab(protocolView);
     			}
-    			selectedTab = 0;
     		}
-			if (tabs.get(0).content instanceof Splashscreen){
-				removeTabAt(0);
-			}
+			mainScreen.setCurrentAccountsTab(selectedAccTab);
+			mainScreen.setCurrentChatsTab(selectedChatTab);
 			
-			getTabHost().setCurrentTab(selectedTab);					
+			//checkShowTabs();
 			
-			checkShowTabs();
-			
-			serviceCallback.visualStyleUpdated();
-			
+			serviceCallback.visualStyleUpdated();			
 		} catch (NullPointerException npe) {	
+			npe.printStackTrace();
 			ServiceUtils.log(npe);
 		} catch (RemoteException e) {
 			onRemoteCallFailed(e);
 		} catch (AsiaCoreException e) {
 			ServiceUtils.log(e);
 		} 		
-		
-	}
-    
-    public boolean checkShowTabs() {
-    	if (Build.VERSION.SDK_INT == 11){
-    		getTabWidget().setVisibility(View.GONE);
-    		return false;
-    	}
-    	String hideTabsStr;
-		try {
-			hideTabsStr = getApplicationOptions().getString(getResources().getString(R.string.key_hide_tabs));
-			if (hideTabsStr!=null){
-				boolean hideTabs = Boolean.parseBoolean(hideTabsStr);
-				if (hideTabs){
-					getTabWidget().setVisibility(View.GONE);
-				} else {
-					getTabWidget().setVisibility(View.VISIBLE);
-				}
-				return hideTabs;
-			} else {
-				getTabWidget().setVisibility(View.VISIBLE);				
-			}		
-		} catch (NullPointerException npe) {		
-			getTabWidget().setVisibility(View.VISIBLE);	
-		}
-		return true;
+		toggleSplashscreen(false);
 	}
 
 	public void addAccountEditorTab(AccountView account){
 		TabInfo tab = TabInfoFactory.createAccountEditTab(this, account);
-    	addTab(tab);
-    	getTabHost().setCurrentTab(tabs.size()-1);
+    	mainScreen.addTab(tab, true);    	
     }
     
     public TabInfo addAccountTab(AccountView account) {
     	try {
     		TabInfo info = TabInfoFactory.createContactList(this, account);
-			addTab(info);
+			mainScreen.addTab(info, false);
 			return info;
 		} catch (AsiaCoreException e) {
 			ServiceUtils.log(e);
@@ -419,12 +388,10 @@ public class EntryPoint extends TabActivity {
 	}
     
     public void getConversationTab(Buddy buddy){
-    	for (int i=0; i<tabs.size(); i++){
-    		String tag = ConversationsView.class.getSimpleName()+" "+buddy.serviceId+" "+buddy.protocolUid;
-    		if (tabs.get(i).tag.equals(tag)){
-    			getTabHost().setCurrentTab(i);
-    			return;
-    		}
+    	String tag = ConversationsView.class.getSimpleName()+" "+buddy.serviceId+" "+buddy.protocolUid;
+    	
+    	if (mainScreen.checkAndSetCurrentTabByTag(tag)){
+    		return;
     	}
     	
     	try {
@@ -433,10 +400,8 @@ public class EntryPoint extends TabActivity {
 	    	buddyList.add(buddy);
 	    	TabInfo info;
 			info = TabInfoFactory.createConversation(this, account, buddyList);
-			addTab(info);
-	    	
-	    	getTabHost().setCurrentTabByTag(info.tag);
-		} catch (NullPointerException npe) {	
+			mainScreen.addTab(info, true);
+    	} catch (NullPointerException npe) {	
 			ServiceUtils.log(npe);
 		} catch (AsiaCoreException e) {
 			ServiceUtils.log(e);
@@ -448,116 +413,36 @@ public class EntryPoint extends TabActivity {
     
     public void addHistoryTab(Buddy buddy){
     	String tag = HistoryView.class.getSimpleName()+" "+buddy.serviceId+" "+buddy.protocolUid;    	
-    	String currentTag = getTabHost().getCurrentTabTag();    	
-    	getTabHost().setCurrentTabByTag(tag);
     	
-    	if (!currentTag.equals(getTabHost().getCurrentTabTag())){
+    	if (mainScreen.checkAndSetCurrentTabByTag(tag)){
     		return;
     	}
     	
     	TabInfo info = TabInfoFactory.createHistoryTab(this, buddy);
-    	addTab(info);
-    	
-    	getTabHost().setCurrentTabByTag(info.tag);
+    	mainScreen.addTab(info, true);    	
     }
     
     public void addSearchTab(AccountView account){
     	String tag = SearchUsersView.class.getSimpleName()+" "+account.serviceId;    	
-    	String currentTag = getTabHost().getCurrentTabTag();    	
-    	getTabHost().setCurrentTabByTag(tag);
-    	
-    	if (!currentTag.equals(getTabHost().getCurrentTabTag())){
+    	   
+    	if (mainScreen.checkAndSetCurrentTabByTag(tag)){
     		return;
-    	}    
+    	}
     	
     	TabInfo tab = TabInfoFactory.createSearchTab(this, account);
-    	addTab(tab);
-    	getTabHost().setCurrentTabByTag(tab.tag);
+    	mainScreen.addTab(tab, true);
     }
     
-    public void removeTabByTag(String tag){
-    	String currentTag = getTabHost().getCurrentTabTag();
-    	
-    	if (currentTag.equals(tag)){
-    		getTabHost().setCurrentTab(0);
-    	} 
-    	
-    	for (int i=0; i<tabs.size(); i++){
-    		if (tabs.get(i).tag.equals(tag)){
-    			removeTabAt(i);
-    			break;
-    		}
-    	}   	
-    }
     
-    public void removeTabAt(int pos){
-    	TabHost tabHost = getTabHost();
-    	
-    	try {
-    		tabHost.setCurrentTab(0);
-    		tabHost.getTabWidget().setFocusable(false);
-    		tabHost.clearAllTabs();
-    		tabs.remove(pos);	
-    	} catch (Exception e) {
-			ServiceUtils.log(e);
-		}	
-		
-    	if (tabs.size()<1){
-    		finish();
-    	}
-    	
-    	for (TabInfo info:tabs){
-    		try {
-    			tabHost.addTab(info.tabSpec);
-			} catch (Exception e) {
-				ServiceUtils.log(e);
-			}
-    	}
-		
-    	tabHost.getTabWidget().setFocusable(true);					
-    }
     
     public void removeAccount(AccountView account){
-    	TabHost tabHost = getTabHost();
-    	tabHost.setCurrentTab(0);
-    	
-    	for (int i=tabs.size()-1; i>=0; i--){
-			if (tabs.get(i).tag.indexOf(ConversationsView.class.getSimpleName()+" "+account.serviceId)>-1 ||
-					tabs.get(i).tag.equals(ContactList.class.getSimpleName()+" "+account.serviceId)){
-				tabs.remove(i);
-			}
-		}
-    	
-    	if (tabs.size()<1){
-    		addAccountEditorTab(null);
-    	}
-    	
-    	try {
-    		tabHost.getTabWidget().setFocusable(false);
-    		tabHost.clearAllTabs();
-    	} catch (Exception e) {
-			ServiceUtils.log(e);
-		}	
-		
-    	for (TabInfo info:tabs){
-    		try {
-				tabHost.addTab(info.tabSpec);
-			} catch (Exception e) {
-				ServiceUtils.log(e);
-			}
-    	}
-		
-		tabHost.getTabWidget().setFocusable(true);
+    	mainScreen.removeAccount(account);
     }
 
 	private final IRuntimeServiceCallback serviceCallback = new IRuntimeServiceCallback.Stub() {
 		
 		private void accountStateChanged(AccountView account){
-			for (TabInfo tab: tabs){
-				if ((tab.content instanceof IHasAccount) && ((IHasAccount)tab.content).getServiceId()==account.serviceId){
-					((IHasAccount)tab.content).stateChanged(account);
-				}
-			}
+			mainScreen.accountStateChanged(account);
 			
 			/*if (!(getTabHost().getCurrentView() instanceof IHasAccount) || ((IHasAccount)getTabHost().getCurrentView()).getServiceId()!=account.protocolServiceId){
 				try {
@@ -567,13 +452,6 @@ public class EntryPoint extends TabActivity {
 			}*/
 		}
 		
-		private void accountContactListUpdated(AccountView account){
-			for (TabInfo tab: tabs){
-				if ((tab.content instanceof IHasAccount) && ((IHasAccount)tab.content).getServiceId()==account.serviceId){
-					((IHasAccount)tab.content).updated(account);
-				}
-			}
-		}
 
 		@Override
 		public void accountConnected(final AccountView account) throws RemoteException {
@@ -593,12 +471,7 @@ public class EntryPoint extends TabActivity {
 
 				@Override
 				public void run() {
-					for (TabInfo tab: tabs){
-						if ((tab.content instanceof IHasAccount) && ((IHasAccount)tab.content).getServiceId()==serviceId){
-							ServiceUtils.log(uid);
-							((IHasAccount)tab.content).bitmap(uid);
-						}
-					}					
+					mainScreen.icon(serviceId, uid);					
 				}
 				
 			});
@@ -611,7 +484,7 @@ public class EntryPoint extends TabActivity {
 
 				@Override
 				public void run() {
-					accountContactListUpdated(account);					
+					mainScreen.accountUpdated(account);		
 				}
 				
 			});		
@@ -623,11 +496,7 @@ public class EntryPoint extends TabActivity {
 
 				@Override
 				public void run() {
-					for (TabInfo tab: tabs){
-						if ((tab.content instanceof IHasBuddy) && ((IHasBuddy)tab.content).getServiceId()==buddy.serviceId){
-							((IHasBuddy)tab.content).updateBuddyState(buddy);				
-						}
-					}
+					mainScreen.buddyStateChanged(buddy);
 				}
 				
 			});
@@ -640,11 +509,7 @@ public class EntryPoint extends TabActivity {
 
 				@Override
 				public void run() {
-					for (TabInfo tab: tabs){
-						if ((tab.content instanceof IHasAccount) && ((IHasAccount)tab.content).getServiceId()==serviceId){
-							((IHasAccount)tab.content).connectionState(progress);
-						}
-					}						
+					mainScreen.connecting(serviceId, progress);						
 				}
 				
 			});
@@ -657,7 +522,7 @@ public class EntryPoint extends TabActivity {
 
 				@Override
 				public void run() {
-					accountContactListUpdated(account);					
+					mainScreen.accountUpdated(account);		
 				}
 				
 			});				
@@ -693,11 +558,7 @@ public class EntryPoint extends TabActivity {
 
 				@Override
 				public void run() {
-					for (TabInfo tab: tabs){
-						if ((tab.content instanceof SearchUsersView) && ((SearchUsersView)tab.content).getServiceId()==serviceId){
-							((SearchUsersView)tab.content).searchResult(infos);
-						}
-					}	
+					mainScreen.searchResult(serviceId, infos);	
 					
 				}
 				
@@ -725,11 +586,7 @@ public class EntryPoint extends TabActivity {
 					Toast.makeText(getBaseContext(), getApplicationContext().getResources().getString(R.string.label_buddy) + buddy.name + " (" + buddy.protocolUid + ")" + getApplicationContext().getResources().getString(R.string.label_added),
 							Toast.LENGTH_LONG).show();
 					
-					for (TabInfo tab:tabs){
-						if (tab.content != null){
-							tab.content.visualStyleUpdated();
-						}
-					}
+					mainScreen.visualStyleUpdated();
 				}
 				
 			});
@@ -743,12 +600,7 @@ public class EntryPoint extends TabActivity {
 				public void run() {
 					Toast.makeText(getBaseContext(), getApplicationContext().getResources().getString(R.string.label_buddy) + buddy.name + " (" + buddy.protocolUid + ")" + getApplicationContext().getResources().getString(R.string.label_deleted),
 							Toast.LENGTH_LONG).show();
-					for (TabInfo tab:tabs){
-						if (tab.content != null){
-							tab.content.visualStyleUpdated();
-							tab.tabWidgetLayout.color(bgColor);
-						}
-					}
+					mainScreen.visualStyleUpdated();
 				}
 				
 			});
@@ -763,12 +615,7 @@ public class EntryPoint extends TabActivity {
 				public void run() {
 					Toast.makeText(getBaseContext(), getApplicationContext().getResources().getString(R.string.label_group) + group.name + getApplicationContext().getResources().getString(R.string.label_deleted), Toast.LENGTH_LONG).show();
 					
-					for (TabInfo tab:tabs){
-						if (tab.content != null){
-							tab.content.visualStyleUpdated();
-							tab.tabWidgetLayout.color(bgColor);
-						}
-					}
+					mainScreen.visualStyleUpdated();
 				}
 				
 			});
@@ -796,12 +643,7 @@ public class EntryPoint extends TabActivity {
 				public void run() {
 					Toast.makeText(getBaseContext(), getApplicationContext().getResources().getString(R.string.label_group) + group.name + getApplicationContext().getResources().getString(R.string.label_modified), Toast.LENGTH_LONG).show();
 					
-					for (TabInfo tab:tabs){
-						if (tab.content != null){
-							tab.content.visualStyleUpdated();
-							tab.tabWidgetLayout.color(bgColor);
-						}
-					}
+					mainScreen.visualStyleUpdated();
 				}
 				
 			});
@@ -827,22 +669,7 @@ public class EntryPoint extends TabActivity {
 
 				@Override
 				public void run() {
-					for (int i=0; i<tabs.size(); i++){
-						TabInfo tab = tabs.get(i);
-						if ((tab.content instanceof IHasAccount) && (tab.content instanceof IHasMessages) && ((IHasAccount)tab.content).getServiceId()==message.serviceId){
-							((IHasMessages)tab.content).messageReceived(message, i==getTabHost().getCurrentTab());					
-						}
-					}
-					
-					if (!(getTabHost().getCurrentView() instanceof IHasAccount) || ((IHasAccount)getTabHost().getCurrentView()).getServiceId()!=message.serviceId){
-						try {
-							runtimeService.setUnread(runtimeService.getBuddy(message.serviceId, message.from), message);
-						} catch (NullPointerException npe) {
-							ServiceUtils.log(npe);
-						} catch (RemoteException e) {
-							onRemoteCallFailed(e);
-						}
-					}
+					mainScreen.textMessage(message);
 				}
 				
 			});
@@ -851,18 +678,19 @@ public class EntryPoint extends TabActivity {
 
 		@Override
 		public void accountAdded(final AccountView account) throws RemoteException {
-			threadMsgHandler.post(new Runnable(){
+			TabInfo tab = addAccountTab(account);		
+			tab.content.visualStyleUpdated();
+			tab.tabWidgetLayout.color(bgColor);
+			/*threadMsgHandler.post(new Runnable(){
 
 				@Override
 				public void run() {
-					int current = getTabHost().getCurrentTab();
-					TabInfo tab = addAccountTab(account);		
-					tab.content.visualStyleUpdated();
-					tab.tabWidgetLayout.color(bgColor);
-					removeTabAt(current);
+					//int current = getTabHost().getCurrentTab();
+					
+					//removeTabAt(current);
 				}
 				
-			});			
+			});		*/	
 		}
 
 		@Override
@@ -918,22 +746,7 @@ public class EntryPoint extends TabActivity {
 
 				@Override
 				public void run() {
-					IHasFileTransfer ft = null;
-					
-					for (TabInfo tab: tabs){
-						if (tab.content!= null && tab.content instanceof IHasFileTransfer && ((IHasFileTransfer) tab.content).getServiceId() == buddy.serviceId){
-							ft = (IHasFileTransfer) tab.content;
-						}
-					}	
-					
-					if (ft == null){
-						TabInfo tab = TabInfoFactory.createFileTransferTab(EntryPoint.this, buddy.serviceId);
-						ft = (IHasFileTransfer) tab.content;
-						addTab(tab);
-						getTabHost().setCurrentTabByTag(tab.tag);
-					}
-					
-					ft.notifyFileProgress(messageId, buddy, filename, totalSize, sizeTransferred, isReceive, error);
+					mainScreen.fileProgress(messageId, buddy, filename, totalSize, sizeTransferred, isReceive, error);
 				}
 				
 			});
@@ -945,11 +758,7 @@ public class EntryPoint extends TabActivity {
 
 				@Override
 				public void run() {
-					for (TabInfo tab: tabs){
-						if (tab.tag != null && tab.tag.equals(ConversationsView.class.getSimpleName() + " " + buddy.serviceId + " " + buddy.protocolUid)){
-							((ConversationsView) tab.content).messageAck(messageId, level);
-						}
-					}	
+					mainScreen.messageAck(buddy, messageId, level);	
 				}
 				
 			});		
@@ -962,8 +771,7 @@ public class EntryPoint extends TabActivity {
 				@Override
 				public void run() {
 					TabInfo tab = TabInfoFactory.createPersonalInfoTab(EntryPoint.this, buddy, info);	
-					addTab(tab);
-					getTabHost().setCurrentTabByTag(tab.tag);
+					mainScreen.addTab(tab, true);
 				}
 				
 			});	
@@ -975,13 +783,7 @@ public class EntryPoint extends TabActivity {
 
 				@Override
 				public void run() {
-					for (int i=0; i<tabs.size(); i++){
-						TabInfo tab = tabs.get(i);
-						if (tab.tag != null && tab.tag.equals(ConversationsView.class.getSimpleName() + " " + serviceId + " " + buddyUid)){
-							((ConversationsView) tab.content).typing(getTabHost().getCurrentTab() == i);
-							break;
-						}
-					}	
+					mainScreen.typing(serviceId, buddyUid);	
 				}
 				
 			});	
@@ -994,21 +796,6 @@ public class EntryPoint extends TabActivity {
 			finish();
 			System.gc();
 		}};
-	
-	public void addTab(TabInfo info){
-		if (info==null) return;
-		
-		boolean exists = getTabByTag(info.tag) != null;
-		if (exists){
-			return;
-		}
-		
-		tabs.add(info);
-		if (info.tabWidgetLayout!= null && info.tabWidgetLayout.getParent() != null){
-			((ViewGroup)info.tabWidgetLayout.getParent()).removeView(info.tabWidgetLayout);
-		}
-		getTabHost().addTab(info.tabSpec);
-	}
 
 	public IRuntimeServiceCallback getServiceCallback() {
 		return serviceCallback;
@@ -1025,14 +812,14 @@ public class EntryPoint extends TabActivity {
 			ServiceUtils.log(e);
 		}
 		
-		if (tabs.get(getTabHost().getCurrentTab()).content != null){
-			tabs.get(getTabHost().getCurrentTab()).content.onResume();
+		if (mainScreen != null){
+			mainScreen.onResume();
 		}
 	}
 	
 	@Override
 	public boolean onKeyDown(int i, KeyEvent event){
-		if (getSelectedTab().content.onKeyDown(i, event)){
+		if (mainScreen.onKeyDown(i, event)){
 			return true;
 		} else {
 			return super.onKeyDown(i, event);
@@ -1056,23 +843,19 @@ public class EntryPoint extends TabActivity {
 				runtimeService = null;
 				serviceIntent = null;
 				
-				savedTabs = null;
-		        selectedTab = 0;
-		       
 				getRuntimeService();
 			}
 		} else {
-			savedTabs = null;
-	        selectedTab = 0;
 			getRuntimeService();
 		}
 	}
 	
 	@Override
 	public void onSaveInstanceState(Bundle bundle){
-		bundle.putParcelableArrayList("tabs", tabs);
-		bundle.putInt("selected", getTabHost().getCurrentTab());
-		bundle.putParcelable("serviceIntent", serviceIntent);
+		bundle.putParcelableArrayList(SAVEDSTATE_TABS, mainScreen.getTabs());
+		bundle.putInt(SAVEDSTATE_SELECTED_ACC, mainScreen.getCurrentAccountsTab());
+		bundle.putInt(SAVEDSTATE_SELECTED_CHAT, mainScreen.getCurrentChatsTab());
+		bundle.putParcelable(SAVEDSTATE_SERVICE_INTENT, serviceIntent);
 	}
 	
 	@Override
@@ -1099,19 +882,7 @@ public class EntryPoint extends TabActivity {
 	public void onDestroy(){
 		super.onDestroy();
 		ServiceUtils.log("entry point destroyed");
-		try {
-			for (int i=tabs.size()-1; i>=0; i--){
-				if (tabs.get(i).tag.indexOf(PersonalInfoView.class.getSimpleName())>-1){
-					tabs.remove(i);
-				}
-			}
-			runtimeService.saveTabs(tabs);
-			//unbindService(serviceConnection);
-		} catch (NullPointerException npe) {
-			ServiceUtils.log(npe);
-		} catch (RemoteException e){
-			onRemoteCallFailed(e);
-		}
+		mainScreen.onDestroy();
 	}
 	
 	public void exit() {
@@ -1135,41 +906,34 @@ public class EntryPoint extends TabActivity {
 
 	public void addAccountsManagerTab() {		
 		String tag = AccountManagerView.class.getSimpleName();		
-		String currentTag = getTabHost().getCurrentTabTag();    	
-    	getTabHost().setCurrentTabByTag(tag);
-    	
-    	if (!currentTag.equals(getTabHost().getCurrentTabTag())){
-    		return;
-    	} 
+		if (mainScreen.checkAndSetCurrentTabByTag(tag)){
+			return;
+		} 
 		
-		addTab(TabInfoFactory.createAccountManager(this));
-		getTabHost().setCurrentTabByTag(AccountManagerView.class.getSimpleName());
+		TabInfo tab = TabInfoFactory.createAccountManager(this);
+		mainScreen.addTab(tab, true);
 	}
 	
 	public void addPreferencesTab(AccountView account){
 		String tag = account != null ? PreferencesView.class.getSimpleName()+" "+account.serviceId : PreferencesView.class.getSimpleName();
 		
-		String currentTag = getTabHost().getCurrentTabTag();
-    	
-    	getTabHost().setCurrentTabByTag(tag);
-    	
-    	if (!currentTag.equals(getTabHost().getCurrentTabTag())){
-    		return;
-    	}    	
-    	
+		if (mainScreen.checkAndSetCurrentTabByTag(tag)){
+			return;
+		} 
+		
 		TabInfo info = TabInfoFactory.createPreferencesTab(this, account);		
-		addTab(info);
-		getTabHost().setCurrentTabByTag(tag);
+		mainScreen.addTab(info, true);
 	}
 
 	public void setXStatus(AccountView account) {
 		try {
 			runtimeService.setXStatus(account);
-			for (TabInfo tab: tabs){
+			mainScreen.accountStateChanged(account);
+			/*for (TabInfo tab: tabs){
 				if ((tab.content instanceof IHasAccount) && ((IHasAccount)tab.content).getServiceId()==account.serviceId){
 					((IHasAccount)tab.content).stateChanged(account);
 				}
-			}
+			}*/
 		} catch (NullPointerException npe) {	
 			ServiceUtils.log(npe);
 		} catch (RemoteException e) {
@@ -1177,14 +941,10 @@ public class EntryPoint extends TabActivity {
 		}		
 	}
 
-	public ArrayList<TabInfo> getTabs() {
-		return tabs;
-	}
-
 	public void removeBuddy(Buddy buddy) {
 		try {
 			runtimeService.removeBuddy(buddy);
-			removeTabByTag("conversation "+buddy.serviceId+" "+buddy.protocolUid);
+			mainScreen.removeTabByTag("conversation "+buddy.serviceId+" "+buddy.protocolUid);
 		} catch (NullPointerException npe) {	
 			ServiceUtils.log(npe);
 		} catch (RemoteException e) {
@@ -1192,7 +952,7 @@ public class EntryPoint extends TabActivity {
 		}		
 	}
 	
-	public TabInfo getSelectedTab(){
+	/*public TabInfo getSelectedTab(){
 		return tabs.get(getTabHost().getCurrentTab());
 	}
 	
@@ -1203,23 +963,12 @@ public class EntryPoint extends TabActivity {
 			}
 		}
 		return null;
-	}
-
-	public HorizontalScrollView getTabScroller() {
-		return tabScroller;
-	}
-	
-	public void addOnTabChangeListener(OnTabChangeListener listener){
-		tabChangeListeners.add(listener);
-	}
-	public void removeOnTabChangeListener(OnTabChangeListener listener){
-		tabChangeListeners.remove(listener);
-	}
+	}*/
 	
 	public void onRemoteCallFailed(Throwable e){
 		ServiceUtils.log(e);
 		threadMsgHandler.post(endActivityRunnable );
 	}
 		
-	private final Handler threadMsgHandler = new Handler();
+	public final Handler threadMsgHandler = new Handler();
 }

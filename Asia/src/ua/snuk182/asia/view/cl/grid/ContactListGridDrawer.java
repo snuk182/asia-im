@@ -18,10 +18,8 @@ import ua.snuk182.asia.view.cl.ContactList;
 import ua.snuk182.asia.view.cl.IContactListDrawer;
 import android.content.Context;
 import android.os.RemoteException;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
@@ -43,10 +41,13 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 	boolean showOffline = false;
 	private boolean showIcons = true;
 
-	public ContactListGridDrawer(EntryPoint entryPoint, AccountView account) {
+	protected ContactList parent;
+
+	public ContactListGridDrawer(EntryPoint entryPoint, AccountView account, ContactList parent) {
 		super(entryPoint);
 
 		this.account = account;
+		this.parent = parent;
 
 		LayoutInflater inflate = (LayoutInflater) entryPoint.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		inflate.inflate(R.layout.contact_list_grid_drawer, this);
@@ -68,16 +69,56 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 	}
 
 	@Override
-	public void updateView(ContactList parent) {
+	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+		final int width = getWidth();
+		//System.out.println("exist "+width);
+		//boolean diff = getWidth() != width;
+		super.onLayout(changed, left, top, right, bottom);
+		if (changed) {
+			getEntryPoint().threadMsgHandler.post(new Runnable(){
+
+				@Override
+				public void run() {
+					// int itemSize = (int) (75 * getEntryPoint().metrics.density);
+					COLUMN_COUNT = width / ContactListGridItem.itemSize;
+					//System.out.println(width+" "+ContactListGridItem.itemSize+" "+COLUMN_COUNT);
+					
+					for (ContactListGridGroupItem group : groups) {
+						group.refresh(COLUMN_COUNT, parent.sort);
+					}
+					//configChanged = false;
+				}
+				
+			});
+		}
+	}
+
+	@Override
+	public void updateView() {
 		String showGroupsStr = account.options.getString(getResources().getString(R.string.key_show_groups));
 		showGroups = showGroupsStr != null ? Boolean.parseBoolean(showGroupsStr) : false;
 
 		String showOfflineStr = account.options.getString(getResources().getString(R.string.key_show_offline));
 		showOffline = showOfflineStr != null ? Boolean.parseBoolean(showOfflineStr) : true;
-		
-		String showIconsStr = account.options.getString(getResources().getString(R.string.key_show_icons));
-		showIcons  = showIconsStr != null ? Boolean.parseBoolean(showIconsStr) : true;
 
+		String showIconsStr = account.options.getString(getResources().getString(R.string.key_show_icons));
+		showIcons = showIconsStr != null ? Boolean.parseBoolean(showIconsStr) : true;
+		
+		String itemSizeStr = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_cl_item_size));
+		int size;
+		if (itemSizeStr == null || itemSizeStr.equals(getResources().getString(R.string.value_size_medium))){
+			size = 75;
+		} else if (itemSizeStr.equals(getResources().getString(R.string.value_size_big))){
+			size = 96;
+		} else if (itemSizeStr.equals(getResources().getString(R.string.value_size_small))){
+			size = 62;
+		} else {
+			size = 48;
+		}
+		ContactListGridItem.resize(size, getEntryPoint());
+		
+		COLUMN_COUNT = this.getWidth() / ContactListGridItem.itemSize;
+		
 		groups.clear();
 		// items.clear();
 
@@ -87,12 +128,16 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 		notInListGroup.getBuddyList().clear();
 		groups.add(unreadGroup);
 
-		Display display = ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-		int itemSize = (int) (75 * getEntryPoint().metrics.density);
-		COLUMN_COUNT = display.getWidth() / itemSize;
+		// Display display = ((WindowManager)
+		// getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+
+		/*
+		 * int itemSize = (int) (75 * getEntryPoint().metrics.density);
+		 * COLUMN_COUNT = this.getWidth() / itemSize;
+		 */
 
 		if (showGroups && account.getBuddyGroupList().size() > 0) {
-			if (parent.sort){
+			if (parent.sort) {
 				Collections.sort(account.getBuddyGroupList());
 			}
 			for (final BuddyGroup group : account.getBuddyGroupList()) {
@@ -118,40 +163,39 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 		}
 
 		for (Buddy buddy : account.getBuddyList()) {
-				ContactListGridItem item = getItem(buddy, itemSize, getEntryPoint(), showIcons);
-				// items.add(item);
+			ContactListGridItem item = getItem(buddy, getEntryPoint(), showIcons);
+			// items.add(item);
 
-				if (showGroups && account.getBuddyGroupList().size() > 0) {
-					if (buddy.unread > 0) {
-						unreadGroup.getBuddyList().add(item);
-					} else if (buddy.groupId == AccountService.NOT_IN_LIST_GROUP_ID) {
-						notInListGroup.getBuddyList().add(item);
-					} else if (buddy.status == Buddy.ST_OFFLINE) {
-						if (showOffline) {
-							offlineGroup.getBuddyList().add(item);
-						}
-					} else {
-						for (int i = 1; i < groups.size(); i++) {
-							ContactListGridGroupItem group = groups.get(i);
-							if (group.groupId == buddy.groupId) {
-								group.getBuddyList().add(item);
-							}
-						}
-					}
-
-				} else {
-					if (buddy.unread > 0) {
-						unreadGroup.getBuddyList().add(item);
-					} else if (buddy.groupId == AccountService.NOT_IN_LIST_GROUP_ID) {
-						notInListGroup.getBuddyList().add(item);
-					} else if (buddy.status == Buddy.ST_OFFLINE) {
+			if (showGroups && account.getBuddyGroupList().size() > 0) {
+				if (buddy.unread > 0) {
+					unreadGroup.getBuddyList().add(item);
+				} else if (buddy.groupId == AccountService.NOT_IN_LIST_GROUP_ID) {
+					notInListGroup.getBuddyList().add(item);
+				} else if (buddy.status == Buddy.ST_OFFLINE) {
+					if (showOffline) {
 						offlineGroup.getBuddyList().add(item);
-					} else {
-						onlineGroup.getBuddyList().add(item);
+					}
+				} else {
+					for (int i = 1; i < groups.size(); i++) {
+						ContactListGridGroupItem group = groups.get(i);
+						if (group.groupId == buddy.groupId) {
+							group.getBuddyList().add(item);
+						}
 					}
 				}
+
+			} else {
+				if (buddy.unread > 0) {
+					unreadGroup.getBuddyList().add(item);
+				} else if (buddy.groupId == AccountService.NOT_IN_LIST_GROUP_ID) {
+					notInListGroup.getBuddyList().add(item);
+				} else if (buddy.status == Buddy.ST_OFFLINE) {
+					offlineGroup.getBuddyList().add(item);
+				} else {
+					onlineGroup.getBuddyList().add(item);
+				}
 			}
-		
+		}
 
 		if (unreadGroup.getBuddyList().size() > 0) {
 			unreadGroup.setVisibility(VISIBLE);
@@ -170,7 +214,8 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 		contactList.removeAllViews();
 
 		for (ContactListGridGroupItem group : groups) {
-			group.refresh(COLUMN_COUNT, itemSize, parent.sort);
+			group.resize(size);
+			group.refresh(COLUMN_COUNT, parent.sort);
 		}
 	}
 
@@ -181,9 +226,9 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 			ContactListGridGroupItem groupItem = groups.get(i);
 			ContactListGridItem bu = groupItem.removeItem(message.from);
 			if (bu != null) {
-				//if (buddy == null) {
-					buddy = bu;
-				//}
+				// if (buddy == null) {
+				buddy = bu;
+				// }
 
 				groupItem.setRefreshContents(true);
 
@@ -205,12 +250,12 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 			item.refresh();
 		}
 
-		if (getEntryPoint().getTabHost().getCurrentTabTag().equals(ContactList.class.getSimpleName()+" "+account.serviceId)){
+		if (getEntryPoint().mainScreen.getCurrentAccountsTabTag().equals(ContactList.class.getSimpleName() + " " + account.serviceId)) {
 			try {
 				Buddy budddy = getEntryPoint().runtimeService.getBuddy(account.serviceId, message.from);
 				budddy.unread++;
 				getEntryPoint().runtimeService.setUnread(budddy, message);
-			} catch (NullPointerException npe) {	
+			} catch (NullPointerException npe) {
 				ServiceUtils.log(npe);
 			} catch (RemoteException e) {
 				getEntryPoint().onRemoteCallFailed(e);
@@ -230,18 +275,18 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 				break;
 			}
 		}
-		
-		if (item == null){
-			ServiceUtils.log("no item found - "+buddy.protocolUid);
+
+		if (item == null) {
+			ServiceUtils.log("no item found - " + buddy.protocolUid);
 			return;
 		}
 
 		item.populate(buddy);
-		
+
 		ContactListGridGroupItem groupItem = null;
 		String tag = null;
-		if (buddy.unread < 1){
-			if (buddy.groupId == AccountService.NOT_IN_LIST_GROUP_ID){
+		if (buddy.unread < 1) {
+			if (buddy.groupId == AccountService.NOT_IN_LIST_GROUP_ID) {
 				tag = ServiceConstants.VIEWGROUP_NOT_IN_LIST;
 			} else {
 				if (buddy.status == Buddy.ST_OFFLINE) {
@@ -270,7 +315,7 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 		groupItem.getBuddyList().add(item);
 		groupItem.setRefreshContents(true);
 
-		if (unreadGroup.getBuddyList().size() < 1){
+		if (unreadGroup.getBuddyList().size() < 1) {
 			unreadGroup.setVisibility(View.GONE);
 		} else {
 			unreadGroup.setVisibility(View.VISIBLE);
@@ -286,55 +331,71 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 	public String getType() {
 		return getContext().getResources().getString(R.string.value_list_type_grid);
 	}
-	
-	private ContactListGridItem findExistingItem(String buddyUid){
-		if (buddyUid == null || buddyUid.length() < 1){
+
+	private ContactListGridItem findExistingItem(String buddyUid) {
+		if (buddyUid == null || buddyUid.length() < 1) {
 			return null;
 		}
 		View view = this.findViewWithTag(buddyUid);
 		return (ContactListGridItem) view;
 	}
 
-	private ContactListGridItem getItem(final Buddy buddy, int itemSize, final EntryPoint entryPoint, boolean showIcons) {
+	private ContactListGridItem getItem(final Buddy buddy, final EntryPoint entryPoint, boolean showIcons) {
 		ContactListGridItem item;
-		if ((item = findExistingItem(buddy.protocolUid)) == null){			
+		if ((item = findExistingItem(buddy.protocolUid)) == null) {
 			final ContactListGridItem cli = new ContactListGridItem(getEntryPoint(), buddy.protocolUid);
 			cli.setOnClickListener(new OnClickListener() {
 
 				@Override
 				public void onClick(View v) {
-					try {							
-						entryPoint.getConversationTab(getEntryPoint().runtimeService.getBuddy(buddy.serviceId, buddy.protocolUid));
-					} catch (NullPointerException npe) {	
-						ServiceUtils.log(npe);
-					} catch (RemoteException e) {
-						getEntryPoint().onRemoteCallFailed(e);
-					}
+					cli.buddyImage.setTopImage(R.drawable.contact_sel_64px);
+					getEntryPoint().threadMsgHandler.post(new Runnable() {
+						
+						@Override
+						public void run() {
+							try {
+								entryPoint.getConversationTab(getEntryPoint().runtimeService.getBuddy(buddy.serviceId, buddy.protocolUid));
+								cli.buddyImage.setTopImage(R.drawable.contact_64px);
+							} catch (NullPointerException npe) {
+								ServiceUtils.log(npe);
+							} catch (RemoteException e) {
+								getEntryPoint().onRemoteCallFailed(e);
+							}
+						}
+					});
 				}
 			});
 			cli.setOnLongClickListener(new OnLongClickListener() {
 
 				@Override
 				public boolean onLongClick(View v) {
-					if (account.getConnectionState() == AccountService.STATE_CONNECTED) {
-						try {
-							ViewUtils.contactMenu(entryPoint, account, getEntryPoint().runtimeService.getBuddy(buddy.serviceId, buddy.protocolUid));
-						} catch (NullPointerException npe) {	
-							ServiceUtils.log(npe);
-						} catch (RemoteException e) {
-							getEntryPoint().onRemoteCallFailed(e);
+					getEntryPoint().threadMsgHandler.post(new Runnable() {
+						
+						@Override
+						public void run() {
+							if (account.getConnectionState() == AccountService.STATE_CONNECTED) {
+								try {
+									ViewUtils.contactMenu(entryPoint, account, getEntryPoint().runtimeService.getBuddy(buddy.serviceId, buddy.protocolUid));
+								} catch (NullPointerException npe) {
+									ServiceUtils.log(npe);
+								} catch (RemoteException e) {
+									getEntryPoint().onRemoteCallFailed(e);
+								}
+							}
 						}
-					}
-					return false;
+					});
+					return true;
 				}
 
 			});
-			
+
 			item = cli;
 		}
 
 		item.removeFromParent();
-		item.populate(buddy, itemSize, showIcons);
+		item.populate(buddy, showIcons);
+		item.requestIcon(buddy);
+		
 		return item;
 	}
 
@@ -345,19 +406,24 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 	@Override
 	public void bitmap(String uid) {
 		ContactListGridItem item = findExistingItem(uid);
-		if (item != null){
+		if (item != null) {
 			try {
 				item.requestIcon(getEntryPoint().runtimeService.getBuddy(account.serviceId, uid));
-			} catch (NullPointerException npe) {	
+			} catch (NullPointerException npe) {
 				ServiceUtils.log(npe);
 			} catch (RemoteException e) {
 				getEntryPoint().onRemoteCallFailed(e);
 			}
 		}
 	}
-	
+
 	@Override
 	public boolean hasUnreadMessages() {
 		return unreadGroup.getVisibility() == View.VISIBLE;
+	}
+
+	@Override
+	public void configChanged() {
+		
 	}
 }

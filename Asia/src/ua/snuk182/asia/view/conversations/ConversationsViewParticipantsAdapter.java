@@ -47,7 +47,7 @@ public class ConversationsViewParticipantsAdapter extends ArrayAdapter<Buddy> {
 		
 		final ContactListGridItem cli = (ContactListGridItem) convertView;
 		
-		cli.populate(buddy, 50, showIcons);
+		cli.populate(buddy, showIcons);
         
         return cli;
 	}
