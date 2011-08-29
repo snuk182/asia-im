@@ -253,9 +253,14 @@ public class EntryPoint extends ActivityGroup {
 			}
 		} else {
 			if (show){
-				progressDialog = ProgressDialog.show(EntryPoint.this, "", getResources().getString(R.string.label_wait), true);
-				progressDialog.setIndeterminateDrawable(getResources().getDrawable(R.drawable.logo_96px));
-				progressDialog.setCancelable(true);
+				try {
+					progressDialog = ProgressDialog.show(EntryPoint.this, "", getResources().getString(R.string.label_wait), true);
+					progressDialog.setIndeterminateDrawable(getResources().getDrawable(R.drawable.logo_96px));
+					progressDialog.setCancelable(true);
+				} catch (Exception e) {
+					//TODO may be Window Leaked
+					ServiceUtils.log(e);
+				}
 			}
 		}
 	}
