@@ -36,6 +36,13 @@
 		<item>"Время, дата"</item>
 	</string-array>
 	
+	<string name="label_dont_draw_smileys">Не отрисовывать смайлы</string>
+	
+	<string name="label_size_big">Большой</string>
+	<string name="label_size_medium">Средний</string>
+	<string name="label_size_small">Маленький</string>
+	<string name="label_size_smallest">Еще меньше</string>
+	
 	<string name="label_screen_orientation">Ориентация экрана</string>
 	
 	<string name="label_screen_orientation_system">Системная</string>

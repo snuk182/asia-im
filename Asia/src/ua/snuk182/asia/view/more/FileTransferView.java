@@ -168,7 +168,7 @@ public class FileTransferView extends ScrollView implements ITabContent, IHasFil
 	}
 
 	@Override
-	public void onResume() {
+	public void onStart() {
 				
 	}
 

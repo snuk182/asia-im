@@ -94,7 +94,7 @@ public class Splashscreen extends RelativeLayout implements ITabContent{
 	}
 
 	@Override
-	public void onResume() {		
+	public void onStart() {		
 	}
 
 	@Override

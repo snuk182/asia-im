@@ -222,7 +222,7 @@ public class PersonalInfoView extends ScrollView implements ITabContent{
 	}
 
 	@Override
-	public void onResume() {}
+	public void onStart() {}
 
 	@Override
 	public void configChanged() {}

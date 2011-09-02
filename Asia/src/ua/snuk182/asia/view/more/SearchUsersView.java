@@ -198,7 +198,7 @@ public class SearchUsersView extends LinearLayout implements ITabContent, IHasAc
 	}
 
 	@Override
-	public void onResume() {}
+	public void onStart() {}
 	
 	@Override
 	public void configChanged() {}

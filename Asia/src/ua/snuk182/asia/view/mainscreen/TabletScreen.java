@@ -397,12 +397,12 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
 	}
 
 	@Override
-	public void onResume() {
+	public void onStart() {
 		if (tabsAccount.size() > 0 && tabsAccount.get(tabHostAccount.getCurrentTab()).content != null){
-			tabsAccount.get(tabHostAccount.getCurrentTab()).content.onResume();
+			tabsAccount.get(tabHostAccount.getCurrentTab()).content.onStart();
 		}
 		if (tabsChat.size() > 0 && tabsChat.get(tabHostChat.getCurrentTab()).content != null){
-			tabsChat.get(tabHostChat.getCurrentTab()).content.onResume();
+			tabsChat.get(tabHostChat.getCurrentTab()).content.onStart();
 		}
 	}
 
@@ -570,11 +570,12 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
 			}
 		}
 		
-		if ((!(tabHostChat.getCurrentView() instanceof IHasAccount) || ((IHasAccount)tabHostChat.getCurrentView()).getServiceId()!=message.serviceId) 
-				
+		if ((!(tabHostChat.getCurrentView() instanceof IHasAccount) || ((IHasAccount)tabHostChat.getCurrentView()).getServiceId()!=message.serviceId) 				
 				 && (!(tabHostAccount.getCurrentView() instanceof IHasAccount)|| ((IHasAccount)tabHostAccount.getCurrentView()).getServiceId()!=message.serviceId)){
 			try {
-				getEntryPoint().runtimeService.setUnread(getEntryPoint().runtimeService.getBuddy(message.serviceId, message.from), message);
+				Buddy budddy = getEntryPoint().runtimeService.getBuddy(message.serviceId, message.from);
+				budddy.unread++;
+				getEntryPoint().runtimeService.setUnread(budddy, message);
 			} catch (NullPointerException npe) {
 				ServiceUtils.log(npe);
 			} catch (RemoteException e) {

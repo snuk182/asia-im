@@ -101,19 +101,19 @@ public class ContactListGridItem extends RelativeLayout implements Comparable<Co
 		switch(itemSize){
 		case 75:
 			//defaultImageResource = R.drawable.contact_64px;
-			textSize = 15;
+			textSize = 12;
 			break;
 		case 96:
 			//defaultImageResource = R.drawable.contact_64px;
-			textSize = 20;
+			textSize = 16;
 			break;
 		case 62:
 			//defaultImageResource = R.drawable.contact_64px;
-			textSize = 11;
+			textSize = 8;
 			break;
 		default:
 			//defaultImageResource = R.drawable.contact_48px;
-			textSize = 7;
+			textSize = 4;
 			break;
 		}
 	}

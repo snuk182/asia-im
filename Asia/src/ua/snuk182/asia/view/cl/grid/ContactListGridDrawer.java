@@ -105,7 +105,7 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 		showIcons = showIconsStr != null ? Boolean.parseBoolean(showIconsStr) : true;
 		
 		String itemSizeStr = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_cl_item_size));
-		int size;
+		final int size;
 		if (itemSizeStr == null || itemSizeStr.equals(getResources().getString(R.string.value_size_medium))){
 			size = 75;
 		} else if (itemSizeStr.equals(getResources().getString(R.string.value_size_big))){
@@ -250,7 +250,7 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 			item.refresh();
 		}
 
-		if (getEntryPoint().mainScreen.getCurrentAccountsTabTag().equals(ContactList.class.getSimpleName() + " " + account.serviceId)) {
+		/*if (getEntryPoint().mainScreen.getCurrentAccountsTabTag().equals(ContactList.class.getSimpleName() + " " + account.serviceId)) {
 			try {
 				Buddy budddy = getEntryPoint().runtimeService.getBuddy(account.serviceId, message.from);
 				budddy.unread++;
@@ -260,7 +260,7 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 			} catch (RemoteException e) {
 				getEntryPoint().onRemoteCallFailed(e);
 			}
-		}
+		}*/
 	}
 
 	@Override

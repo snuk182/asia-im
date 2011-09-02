@@ -18,5 +18,6 @@
   	<CheckBoxPreference android:persistent="false" android:title="@string/label_autoconnect" android:key="@string/key_autoconnect" android:defaultValue="false"/>
   	<ListPreference android:persistent="false" android:title="@string/label_screen_orientation" android:key="@string/key_screen_orientation" android:entries="@array/list_screen_orientation_names" android:entryValues="@array/list_screen_orientation_values" android:defaultValue="@string/value_screen_orientation_system"/>
   	<CheckBoxPreference android:persistent="false" android:title="@string/label_fullscreen_landscape_kb" android:key="@string/key_fullscreen_landscape_kb" android:defaultValue="true"/>
+  	<CheckBoxPreference android:persistent="false" android:title="@string/label_dont_draw_smileys" android:key="@string/key_dont_draw_smileys" android:defaultValue="false" />
   </PreferenceCategory>
 </PreferenceScreen>

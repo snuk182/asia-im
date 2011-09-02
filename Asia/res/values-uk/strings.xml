@@ -21,6 +21,13 @@
 	
 	<string name="label_secure_login">Безпечний вхід</string>
 	<string name="label_poweramp_playing_to_status">"Зараз грає..." із PowerAMP</string>
+	
+	<string name="label_dont_draw_smileys">Не малювати смайли</string>
+	
+	<string name="label_size_big">Великий</string>
+	<string name="label_size_medium">Середній</string>
+	<string name="label_size_small">Маленький</string>
+	<string name="label_size_smallest">Найменший</string>
 
 	<string-array name="bg_type_names">
 		<item>"Чорний"</item>

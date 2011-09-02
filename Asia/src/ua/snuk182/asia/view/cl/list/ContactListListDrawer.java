@@ -216,7 +216,7 @@ public class ContactListListDrawer extends ScrollView implements IContactListDra
 			item.refresh(bgType);
 		}
 		
-		if (getEntryPoint().mainScreen.getCurrentAccountsTabTag().equals(ContactList.class.getSimpleName()+" "+account.serviceId)){
+		/*if (getEntryPoint().mainScreen.getCurrentAccountsTabTag().equals(ContactList.class.getSimpleName()+" "+account.serviceId)){
 			try {
 				Buddy budddy = getEntryPoint().runtimeService.getBuddy(account.serviceId, message.from);
 				budddy.unread++;
@@ -226,7 +226,7 @@ public class ContactListListDrawer extends ScrollView implements IContactListDra
 			} catch (RemoteException e) {
 				getEntryPoint().onRemoteCallFailed(e);
 			}
-		}
+		}*/
 	}
 
 	@Override

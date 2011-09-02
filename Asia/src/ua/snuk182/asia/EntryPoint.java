@@ -69,6 +69,8 @@ public class EntryPoint extends ActivityGroup {
 	public int bgColor = 0xff7f7f80;
 	public DisplayMetrics metrics = new DisplayMetrics();
 	
+	public boolean dontDrawSmileys = false;
+	
 	private Bundle savedState;
 	private ServiceConnection serviceConnection = new ServiceConnection(){
 		
@@ -145,7 +147,9 @@ public class EntryPoint extends ActivityGroup {
 				setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);	
 			} else {
 				setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-			}					
+			}
+			
+			dontDrawSmileys = Boolean.parseBoolean(getApplicationOptions().getString(getResources().getString(R.string.key_dont_draw_smileys)));
 			
 			updateBackground();	
 			
@@ -158,7 +162,7 @@ public class EntryPoint extends ActivityGroup {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig); 
         mainScreen.configChanged();
-		
+		getMetrics();
         threadMsgHandler.post(new Runnable(){
 
 			@Override
@@ -214,9 +218,10 @@ public class EntryPoint extends ActivityGroup {
     	
     	super.onCreate(savedInstanceState);  
     	
-    	//setContentView(R.layout.tab_layout);
+    	setContentView(R.layout.dummy);
     	
     	savedState = savedInstanceState;
+    	getMetrics();
     	toggleSplashscreen(true);
         
     	threadMsgHandler.post(startRunnable);	
@@ -724,8 +729,7 @@ public class EntryPoint extends ActivityGroup {
 
 		@Override
 		public void visualStyleUpdated() throws RemoteException {
-			final Display display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-			display.getMetrics(metrics);
+			getMetrics();
 			
 			threadMsgHandler.post(visualStyleUpdatedRunnable);
 		}
@@ -806,22 +810,11 @@ public class EntryPoint extends ActivityGroup {
 		return serviceCallback;
 	}
 	
-	@Override
-	public void onResume(){
-		super.onResume();
-		
-		try {
-			serviceCallback.visualStyleUpdated();
-		} catch (NullPointerException npe) {					
-		} catch (RemoteException e) {
-			ServiceUtils.log(e);
-		}
-		
-		if (mainScreen != null){
-			mainScreen.onResume();
-		}
+	private void getMetrics() {
+		final Display display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+		display.getMetrics(metrics);
 	}
-	
+
 	@Override
 	public boolean onKeyDown(int i, KeyEvent event){
 		if (mainScreen.onKeyDown(i, event)){
@@ -831,15 +824,26 @@ public class EntryPoint extends ActivityGroup {
 		}
 	}
 	
-	@Override
+	/*@Override
 	public void onStart(){
 		super.onStart();	
-	}
+		
+		try {
+			serviceCallback.visualStyleUpdated();
+		} catch (NullPointerException npe) {					
+		} catch (RemoteException e) {
+			ServiceUtils.log(e);
+		}
+		
+		if (mainScreen != null){
+			mainScreen.onStart();
+		}
+	}*/
 	
 	@Override
 	public void onRestart(){
 		super.onRestart();
-		
+		updateBackground();
 		if (runtimeService!=null){
 			try {
 				runtimeService.setAppVisible(true);
