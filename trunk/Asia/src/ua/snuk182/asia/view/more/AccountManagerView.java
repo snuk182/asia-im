@@ -133,7 +133,7 @@ public class AccountManagerView extends ListView implements ITabContent {
 	}
 
 	@Override
-	public void onResume() {
+	public void onStart() {
 	}
 
 

@@ -24,14 +24,16 @@ public class HistoryViewAdapter extends ArrayAdapter<Message> {
 	private int textColor = 0;
 	private int bgColor = 0xffffff;
 	private float textSize;
+	private boolean dontDrawSmileys = false;
 
-	public HistoryViewAdapter(Context context, int resource, int textViewResourceId, List<Message> objects, float textSize) {
+	public HistoryViewAdapter(Context context, int resource, int textViewResourceId, List<Message> objects, float textSize, boolean dontDrawSmileys) {
 		super(context, resource, textViewResourceId, objects);
 		this.textSize = textSize;
+		this.dontDrawSmileys = dontDrawSmileys;
 	}
 
-	public HistoryViewAdapter(Context context, List<Message> objects, float textSize) {
-		this(context, 0, 0, objects, textSize);
+	public HistoryViewAdapter(Context context, List<Message> objects, float textSize, boolean dontDrawSmileys) {
+		this(context, 0, 0, objects, textSize, dontDrawSmileys);
 	}
 
 	@Override
@@ -55,7 +57,7 @@ public class HistoryViewAdapter extends ArrayAdapter<Message> {
 					
 				});
 				
-				v.setTextAndFormat(msg, null);
+				v.setTextAndFormat(msg, null, dontDrawSmileys);
 			}
 			
 			v.setBackgroundColor(bgColor);
@@ -123,5 +125,13 @@ public class HistoryViewAdapter extends ArrayAdapter<Message> {
 
 	public void setBgColor(int bgColor) {
 		this.bgColor = bgColor;
+	}
+
+	public boolean isDontDrawSmileys() {
+		return dontDrawSmileys;
+	}
+
+	public void setDontDrawSmileys(boolean dontDrawSmileys) {
+		this.dontDrawSmileys = dontDrawSmileys;
 	}
 }

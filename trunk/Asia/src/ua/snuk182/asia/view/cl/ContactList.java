@@ -447,7 +447,7 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 	}
 
 	@Override
-	public void onResume() {
+	public void onStart() {
 			
 	}
 

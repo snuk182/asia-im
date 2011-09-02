@@ -310,7 +310,7 @@ public class NewAccountView extends ScrollView implements ITabContent {
 	}
 
 	@Override
-	public void onResume() {
+	public void onStart() {
 		visualStyleUpdated();
 	}
 

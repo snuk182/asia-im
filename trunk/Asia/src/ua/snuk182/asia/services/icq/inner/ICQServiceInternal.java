@@ -479,6 +479,10 @@ public class ICQServiceInternal {
 		return personalInfoEngine;		
 	}
 	
+	public boolean checkFileTransferEngineCreated(){
+		return fileTransferEngine != null;
+	}
+	
 	public FileTransferEngine getFileTransferEngine() {
 		if (fileTransferEngine == null){
 			fileTransferEngine = new FileTransferEngine(this);

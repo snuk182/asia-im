@@ -33,7 +33,7 @@ public class HistoryRecordView extends TextView {
         }        
     }
 	
-	public void setTextAndFormat(String text, String printDateMode){
+	public void setTextAndFormat(String text, String printDateMode, boolean dontDrawSmileys){
 		int startIndex = text.indexOf("(");
 		int endIndex = text.indexOf("):", startIndex)+2;
 		
@@ -146,6 +146,10 @@ public class HistoryRecordView extends TextView {
 						break;
 					}					
 				}				
+			}
+			
+			if (dontDrawSmileys){
+				return;
 			}
 			
 			TypedArray smileyNames = getContext().getResources().obtainTypedArray(R.array.smiley_names);

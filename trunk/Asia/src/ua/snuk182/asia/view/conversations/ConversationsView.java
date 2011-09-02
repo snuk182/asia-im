@@ -760,7 +760,7 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 					
 				});
 				
-				v.setTextAndFormat(msg, printDateMode);
+				v.setTextAndFormat(msg, printDateMode, getEntryPoint().dontDrawSmileys);
 				
 				v.setTextColor(0xff000000+textColor);
 				return v;
@@ -825,7 +825,7 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 	}
 
 	@Override
-	public void onResume() {
+	public void onStart() {
 		tabChangeListener.onTabChanged(chatId);	
 	}
 

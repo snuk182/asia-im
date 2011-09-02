@@ -196,7 +196,7 @@ public class ICBMMessagingEngine {
 
 			tlv2711data = new byte[2 + 2 + 16 + 2 + 4 + 1 + 2 + 2 + 2 + 12 + msgByteBlock.length];
 			System.arraycopy(ProtocolUtils.short2ByteLE((short) 27), 0, tlv2711data, 0, 2);
-			System.arraycopy(ProtocolUtils.short2ByteLE((short) 8), 0, tlv2711data, 2, 2);
+			System.arraycopy(ProtocolUtils.short2ByteLE((short) 9), 0, tlv2711data, 2, 2);
 			byte[] zeros = new byte[16];
 			Arrays.fill(zeros, (byte) 0);
 			System.arraycopy(zeros, 0, tlv2711data, 4, 16);
@@ -491,9 +491,12 @@ public class ICBMMessagingEngine {
 				}
 
 				service.log("message type " + message.messageType);
-				switch (message.messageType) {
-				case 0:
-					if (message.capability != null && message.capability.equals(ProtocolUtils.getHexString(ICQConstants.CLSID_AIM_FILESEND))) {
+				
+				
+				//if (service.checkFileTransferEngineCreated() && service.getFileTransferEngine().findMessageByMessageId(message.messageId)!=null){
+				if (!message.senderId.equals(service.getUn()) && message.capability != null && message.capability.equals(ProtocolUtils.getHexString(ICQConstants.CLSID_AIM_FILESEND))) {
+					switch (message.messageType) {
+					case 0:						
 						if (!message.connectFTPeer && !message.connectFTProxy) {
 							service.getFileTransferEngine().getMessages().add(message);
 							service.getServiceResponse().respond(ICQServiceResponse.RES_FILEMESSAGE, message);
@@ -502,15 +505,16 @@ public class ICBMMessagingEngine {
 							message.senderId = service.getUn();
 							service.getFileTransferEngine().redirectRequest(message);
 						}
+						break;
+					case 1:
+						service.getFileTransferEngine().transferFailed(new ICQException("Cancelled"), "", message, uin);
+						break;
+					case 2:
+						service.getFileTransferEngine().fireTransfer(message);
+						break;
 					}
-					break;
-				case 1:
-					service.getFileTransferEngine().transferFailed(new ICQException("Cancelled"), "", message, uin);
-					break;
-				case 2:
-					service.getFileTransferEngine().fireTransfer(message);
-					break;
 				}
+				
 			} catch (ICQException e) {
 				service.log(e);
 			}
@@ -788,6 +792,7 @@ public class ICBMMessagingEngine {
 				// message.text = "";
 				message.senderId = service.getUn();
 				if ((service.getOnlineInfo().userStatus & ICQConstants.STATUS_INVISIBLE) < 1) {
+					message.messageType = ICQConstants.MTYPE_PLAIN;
 					sendChannel2PluginMessage(message);
 				}
 			}

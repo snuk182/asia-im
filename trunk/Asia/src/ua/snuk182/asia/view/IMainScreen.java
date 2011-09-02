@@ -40,7 +40,7 @@ public interface IMainScreen {
 	public void setCurrentChatsTab(int tab);
 	public void setCurrentAccountsTab(int tab);
 	
-	public void onResume();
+	public void onStart();
 	public void onDestroy();
 	public boolean onPrepareOptionsMenu(Menu menu);
 	public boolean onOptionsItemSelected(MenuItem item);

@@ -8,13 +8,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.security.NoSuchAlgorithmException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -34,7 +36,6 @@ import ua.snuk182.asia.services.icq.inner.dataentity.ICQBuddy;
 import ua.snuk182.asia.services.icq.inner.dataentity.ICQOnlineInfo;
 import ua.snuk182.asia.services.icq.inner.dataentity.Snac;
 import ua.snuk182.asia.services.icq.inner.dataentity.TLV;
-import ua.snuk182.asia.services.utils.Checksum;
 import android.os.Environment;
 
 public class FileTransferEngine {
@@ -118,7 +119,7 @@ public class FileTransferEngine {
 	}
 
 	private void connectPeer(ICBMMessage message, FileRunnableService runnable, boolean incoming) {
-		service.log("connecting peer "+message.rvIp+":"+message.externalPort);
+		service.log("connecting peer "+message.rvIp+":"+message.externalPort+"//sender "+message.senderId+"//receiver "+message.receiverId);
 		
 		Socket socket;
 		try {
@@ -146,7 +147,9 @@ public class FileTransferEngine {
 				runnable.target = FileRunnableService.TARGET_PEER;
 			}
 			runnable.start();
-			message.receiverId = message.senderId;
+			if (!message.senderId.equals(service.getUn())){
+				message.receiverId = message.senderId;
+			}
 			service.getRunnableService().sendToSocket(getAcceptMessage(message));
 		} else {
 			service.log("ft: no direct connection");
@@ -216,6 +219,15 @@ public class FileTransferEngine {
 	public ICBMMessage findMessageByMessageId(long messageId) {
 		for (ICBMMessage msg : ftMessages) {
 			if (ProtocolUtils.bytes2LongBE(msg.messageId, 0) == messageId) {
+				return msg;
+			}
+		}
+		return null;
+	}
+	
+	public ICBMMessage findMessageByMessageId(byte[] messageId) {
+		for (ICBMMessage msg : ftMessages) {
+			if (Arrays.equals(messageId, msg.messageId)) {
 				return msg;
 			}
 		}
@@ -296,18 +308,18 @@ public class FileTransferEngine {
 			if (socket == null) {
 				return;
 			}
-
-			if (target == TARGET_PROXY) {
-				if (!message.receiverId.equals(service.getUn())){
-					message.receiverId = message.senderId;
-					message.senderId = service.getUn();
-				}
+			
+			if (message.receiverId.equals(service.getUn())){
+				message.receiverId = message.senderId;
+				message.senderId = service.getUn();
+			}
+			if (target == TARGET_PROXY) {				
 				sendHandshake();
-			} else {
+			} /*else {
 				if (files != null) {
 					sendFileInfo(files.get(0));
 				} 
-			}
+			}*/
 
 			getDataFromSocket();
 		}
@@ -317,7 +329,7 @@ public class FileTransferEngine {
 			
 			byte[] filenameBytes;
 			try {
-				filenameBytes = file.getName().getBytes("UTF-8");
+				filenameBytes = file.getName().getBytes("UTF-16BE");
 			} catch (UnsupportedEncodingException e) {
 				filenameBytes = file.getName().getBytes();
 			}
@@ -363,14 +375,11 @@ public class FileTransferEngine {
 			System.arraycopy(ProtocolUtils.int2ByteBE((int) file.lastModified()/1000), 0, infoBlob, pos, 4);
 			pos+=4;
 			try {
-				System.arraycopy(ProtocolUtils.int2ByteBE((int) Checksum.getMD5Checksum(file)), 0, infoBlob, pos, 4);
+				System.arraycopy(ProtocolUtils.int2ByteBE((int) getChecksum(file)), 0, infoBlob, pos, 4);
 			} catch (IOException e) {
 				service.log(e);
 				System.arraycopy(ProtocolUtils.int2ByteBE( 0), 0, infoBlob, pos, 4);
-			} catch (NoSuchAlgorithmException e) {
-				service.log(e);
-				System.arraycopy(ProtocolUtils.int2ByteBE( 0), 0, infoBlob, pos, 4);
-			}
+			} 
 			pos+=4;
 			
 			System.arraycopy(new byte[]{(byte) 0xff,(byte) 0xff,0,0}, 0, infoBlob, pos, 4); //dunno what's that
@@ -401,7 +410,7 @@ public class FileTransferEngine {
 			
 			pos+=16; //mac file info?
 			
-			System.arraycopy(new byte[]{0,0}, 0, infoBlob, pos, 2); //encoding
+			System.arraycopy(new byte[]{0,2}, 0, infoBlob, pos, 2); //encoding
 			pos+=2;
 			System.arraycopy(new byte[]{0,0}, 0, infoBlob, pos, 2); //encoding subcode
 			pos+=2;
@@ -759,11 +768,11 @@ public class FileTransferEngine {
 				cleanup();
 				return;
 			}
-			
-			if (file.length() > 8000){
+			long length = file.length();
+			if (length > 8000){
 				buffer = new byte[8000];
 			} else {
-				buffer = new byte[(int) file.length()];
+				buffer = new byte[(int) length];
 			}
 			
 			currentFileSizeLeft = 0;
@@ -777,15 +786,18 @@ public class FileTransferEngine {
 					fis.skip(startFrom);
 					currentFileSizeLeft += startFrom;
 				}
-				BufferedInputStream bis = new BufferedInputStream(fis, 88000);
-				while(currentFileSizeLeft < file.length()){
+				BufferedInputStream bis = new BufferedInputStream(fis, 8000);
+				while(currentFileSizeLeft < length){
 					read = bis.read(buffer, 0, buffer.length);
+					if (read < 0){
+						break;
+					}
 					os.write(buffer, 0, read);
 				    os.flush();
 				    currentFileSizeLeft += read;
 				    service.log("sent "+currentFileSizeLeft+" bytes");
 				    
-				    sendNotification(message.messageId, file.getAbsolutePath(), file.length(), currentFileSizeLeft, false, null, participantUid);	
+				    sendNotification(message.messageId, file.getAbsolutePath(), length, currentFileSizeLeft, false, null, participantUid);	
 				    
 				    try {
 						Thread.sleep(500);
@@ -857,6 +869,10 @@ public class FileTransferEngine {
 
 		public void fireTransfer() {
 			service.log("client ready, proceed FT");
+			if (message.receiverId.equals(service.getUn())){
+				message.receiverId = message.senderId;
+				message.senderId = service.getUn();
+			}
 			if (files != null){
 				if (currentFileSizeLeft < 1){
 					sendFileInfo(files.get(0));
@@ -877,6 +893,38 @@ public class FileTransferEngine {
 			}
 			
 		}.start();
+	}
+
+	public long getChecksum(File file) throws IOException, IllegalStateException {
+		long sum = 0;
+		    long end = file.length();
+		    try {
+		      FileTransferChecksum summer = new FileTransferChecksum();
+		      ByteBuffer buffer = ByteBuffer.allocate(1024);
+		      long remaining = end;
+		      RandomAccessFile aFile = new RandomAccessFile(file, "r");
+		      FileChannel channel = aFile.getChannel();
+		      while (remaining > 0) {
+		        buffer.rewind();
+		        buffer.limit((int) Math.min(remaining, buffer.capacity()));
+		        int count = channel.read(buffer);
+		        if (count == -1) break;
+		        buffer.flip();
+		        remaining -= buffer.limit();
+		        summer.update(buffer.array(), buffer.arrayOffset(), buffer.limit());
+		      }
+		      if (remaining > 0) {
+		        throw new IOException("could not get checksum for entire file; "
+		            + remaining + " failed of " + end);
+		      }
+
+		      sum = summer.getValue();
+
+		    } finally {
+		      
+		    }
+		    return sum;
+		  
 	}
 
 	private void sendNotifications() {
@@ -1401,5 +1449,74 @@ public class FileTransferEngine {
 				}
 			}
 		}
+	}
+	
+	/**
+	 * An implementation of the checksumming method used by AOL Instant Messenger's
+	 * file transfer protocol.
+	 */
+	public final class FileTransferChecksum {
+	    /** The checksum of an empty set of data. */
+	    public static final long CHECKSUM_EMPTY = 0xffff0000L;
+
+	    /** The checksum value. */
+	    private long checksum;
+
+	    { // init
+	        reset();
+	    }
+
+	    /**
+	     * Creates a new file transfer checksum computer object.
+	     */
+	    public FileTransferChecksum() { }
+
+	    public void update(int value) {
+	        update(new byte[] { (byte) value }, 0, 1);
+	    }
+
+	    public void update(final byte[] input, final int offset, final int len) {
+	        if (input == null){
+	        	return;
+	        }
+
+	        assert checksum >= 0;
+
+	        long check = (checksum >> 16) & 0xffffL;
+
+	        for (int i = 0; i < len; i++) {
+	            final long oldcheck = check;
+
+	            final int byteVal = input[offset + i] & 0xff;
+
+	            final int val;
+	            if ((i & 1) != 0) val = byteVal;
+	            else val = byteVal << 8;
+
+	            check -= val;
+
+	            if (check > oldcheck) check--;
+	        }
+
+	        check = ((check & 0x0000ffff) + (check >> 16));
+	        check = ((check & 0x0000ffff) + (check >> 16));
+
+	        checksum = check << 16 & 0xffffffffL;
+	        assert checksum >= 0;
+	    }
+
+	    public long getValue() {
+	        assert checksum >= 0;
+	        return checksum;
+	    }
+
+	    public void reset() {
+	        checksum = CHECKSUM_EMPTY;
+	        assert checksum >= 0;
+	    }
+
+	    public String toString() {
+	        return "FileTransferChecksum: " + checksum;
+	    }
 	}
 }

@@ -52,7 +52,7 @@ public class HistoryView extends ListView implements ITabContent, IHasMessages {
 		this.buddy = buddy;
 		historyId = tag;
 
-		setAdapter(new HistoryViewAdapter(entryPoint, messages, 16));
+		setAdapter(new HistoryViewAdapter(entryPoint, messages, 16, getEntryPoint().dontDrawSmileys));
 		setDividerHeight(0);
 		
 		visualStyleUpdated();
@@ -185,7 +185,7 @@ public class HistoryView extends ListView implements ITabContent, IHasMessages {
 	}
 
 	@Override
-	public void onResume() {}
+	public void onStart() {}
 
 	@Override
 	public void configChanged() {}

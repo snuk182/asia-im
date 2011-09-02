@@ -386,11 +386,13 @@ public class RuntimeService extends Service {
 					storage.getBitmapFromLocalFile(oldBuddy.getOwnerAccountId() + " " + oldBuddy.protocolUid);
 				}*/
 
-				try {
-					loadIcons = Boolean.parseBoolean(account.options.getString(getResources().getString(R.string.key_load_icons)));
-				} catch (Exception e1) {
+				String loadIconsStr = account.options.getString(getResources().getString(R.string.key_load_icons));
+				if (loadIconsStr == null){
 					loadIcons = true;
+				} else {
+					loadIcons = Boolean.parseBoolean(loadIconsStr);
 				}
+				
 				if (loadIcons/*
 							 * && (oldBuddy.icon == null ||
 							 * (oldBuddy.iconHash!=null &&

@@ -59,28 +59,8 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 	private final OnTabChangeListener scrollToSelectedListener = new OnTabChangeListener() {
 		
 		@Override
-		public void onTabChanged(final String tabId) {
-			tabScroller.post(new Runnable(){
-
-				@Override
-				public void run() {
-					TabInfo desiredTab = getTabByTag(tabId);
-					if (desiredTab == null){
-						return;
-					}
-					View tabWidget = desiredTab.tabWidgetLayout;
-					Rect rect = new Rect();
-					tabScroller.getDrawingRect(rect);
-					if (rect.left > tabWidget.getLeft()){
-						tabScroller.scrollTo(tabWidget.getLeft(),0);	
-						return;
-					}
-					if (rect.right < tabWidget.getRight()){
-						tabScroller.scrollTo(tabWidget.getRight(),0);	
-						return;
-					}
-				}				
-			});			
+		public void onTabChanged(String tabId) {
+			scrollToSelected(tabId);			
 		}
 	};
 
@@ -100,6 +80,38 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
     	addOnTabChangeListener(scrollToSelectedListener);    	
 	}
 	
+	private void scrollToSelected(final String tabId) {
+		tabScroller.post(new Runnable(){
+
+			@Override
+			public void run() {
+				TabInfo desiredTab = getTabByTag(tabId);
+				if (desiredTab == null){
+					return;
+				}
+				View tabWidget = desiredTab.tabWidgetLayout;
+				Rect rect = new Rect();
+				tabScroller.getDrawingRect(rect);
+				if (rect.left > tabWidget.getLeft()){
+					tabScroller.scrollTo(tabWidget.getLeft(),0);	
+					return;
+				}
+				if (rect.right < tabWidget.getRight()){
+					tabScroller.scrollTo(tabWidget.getRight(),0);	
+					return;
+				}
+			}				
+		});
+	}
+	
+	@Override
+	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+		super.onLayout(changed, left, top, right, bottom);
+		if (changed) {
+			scrollToSelected(getCurrentTabTag());
+		}
+	}
+
 	public HorizontalScrollView getTabScroller() {
 		return tabScroller;
 	}
@@ -147,7 +159,7 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 				tab.content.configChanged();
 			}
 		}
-		scrollToSelectedListener.onTabChanged(getCurrentTabTag());
+		//scrollToSelectedListener.onTabChanged(getCurrentTabTag());
 	}
 	
 	@Override
@@ -193,9 +205,9 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 	}
 
 	@Override
-	public void onResume() {
+	public void onStart() {
 		if (tabs.size() > 0 && tabs.get(getCurrentTab()).content != null){
-			tabs.get(getCurrentTab()).content.onResume();
+			tabs.get(getCurrentTab()).content.onStart();
 		}
 	}
 	
@@ -323,7 +335,9 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 		
 		if (!(getCurrentView() instanceof IHasAccount) || ((IHasAccount)getCurrentView()).getServiceId()!=message.serviceId){
 			try {
-				getEntryPoint().runtimeService.setUnread(getEntryPoint().runtimeService.getBuddy(message.serviceId, message.from), message);
+				Buddy budddy = getEntryPoint().runtimeService.getBuddy(message.serviceId, message.from);
+				budddy.unread++;
+				getEntryPoint().runtimeService.setUnread(budddy, message);
 			} catch (NullPointerException npe) {
 				ServiceUtils.log(npe);
 			} catch (RemoteException e) {

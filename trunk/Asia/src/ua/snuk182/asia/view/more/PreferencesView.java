@@ -169,7 +169,7 @@ public class PreferencesView extends PreferenceActivity implements ITabContent {
 	}
 	
 	@Override
-	public void onResume(){
+	public void onStart(){
 		super.onResume();
 	}
 	
