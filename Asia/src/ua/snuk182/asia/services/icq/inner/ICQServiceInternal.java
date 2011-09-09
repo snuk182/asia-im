@@ -203,27 +203,19 @@ public class ICQServiceInternal {
 					if (is.available()>0){
 						Thread.sleep(200);
 					
-						if (tail == null){
-							byte[] head = new byte[6];
-							
-							is.read(head, 0, 6);
-							
-							read = 0;
-							tailLength = ProtocolUtils.unsignedShort2Int(ProtocolUtils.bytes2ShortBE(head, 4));					
+						byte[] head = new byte[6];
 						
-							tail = new byte[6+tailLength];
-							System.arraycopy(head, 0, tail, 0, 6);
-							read += is.read(tail, 6, tailLength);
-							log("Got "+ProtocolUtils.getSpacedHexString(tail));
-							if (read<tailLength){
-								continue;
-							}			
-						}else{
+						is.read(head, 0, 6);
+						
+						tailLength = ProtocolUtils.unsignedShort2Int(ProtocolUtils.bytes2ShortBE(head, 4));					
+					
+						tail = new byte[6+tailLength];
+						System.arraycopy(head, 0, tail, 0, 6);
+						read = 0;
+						while (read < tailLength){
 							read += is.read(tail, 6+read, tailLength-read);
-							if (read<tailLength){
-								continue;
-							}
 						}
+						log("Got "+ProtocolUtils.getSpacedHexString(tail));
 						
 						try {
 							Flap flap = dataParser.parseFlap(tail);

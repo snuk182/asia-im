@@ -80,7 +80,7 @@
 		android:id="@+id/usernamelabel" 
 		android:layout_height="wrap_content" 
 		android:textColor="#ffff"
-		android:shadowColor="#cd000000"
+		android:shadowColor="#ef000000"
 		android:shadowDx="1"
 		android:shadowDy="1"
 		android:shadowRadius="1.4"

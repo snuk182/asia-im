@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string name="version">0.5.5.2b</string>
+	<string name="version">0.5.5.5b</string>
 	
 	<string name="label_view_type">App view type (needs restart)</string>
 	<string name="label_view_type_plain">Plain</string>

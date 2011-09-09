@@ -32,8 +32,14 @@
 			android:screenOrientation="behind"
 			android:configChanges="orientation|keyboardHidden">
 		</activity>
+		<uses-library android:name="android.test.runner"/>
 	</application>
 	<uses-sdk android:minSdkVersion="4"></uses-sdk>
+	
+	<instrumentation android:name="android.test.InstrumentationTestRunner"
+                     android:targetPackage="ua.snuk182.asia"
+                     android:label="Tests for ua.snuk182.asia"/>
+	
 	<supports-screens android:largeScreens="true"
 		android:normalScreens="true" android:smallScreens="true"
 		android:anyDensity="true" />

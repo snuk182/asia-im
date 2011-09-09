@@ -23,6 +23,7 @@ import android.widget.TextView;
 
 public class ContactListGridItem extends RelativeLayout implements Comparable<ContactListGridItem>, OnFocusChangeListener {
 	
+	public int status;
 	public TextView name;
 	public ImageView mainStatusIcon;
 	public ImageView xStatusIcon;
@@ -132,7 +133,8 @@ public class ContactListGridItem extends RelativeLayout implements Comparable<Co
 		        
 		setFocusable(true);
 		//setFocusableInTouchMode(true);
-				
+		
+		status = buddy.status;
 		mainStatusIcon.setImageResource(ServiceUtils.getStatusResIdByBuddyTiny(getContext(), buddy));
 		
 		if (buddy.status != Buddy.ST_OFFLINE && buddy.xstatus>-1){
@@ -194,6 +196,14 @@ public class ContactListGridItem extends RelativeLayout implements Comparable<Co
 
 	@Override
 	public int compareTo(ContactListGridItem another) {
+		if (status != another.status){
+			if (status == Buddy.ST_OFFLINE){
+				return -1;
+			}
+			if (another.status == Buddy.ST_OFFLINE){
+				return 1;
+			}
+		}
 		return name.getText().toString().compareToIgnoreCase(another.name.getText().toString());
 	}
 	
