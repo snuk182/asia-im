@@ -189,9 +189,9 @@ public class EntryPoint extends ActivityGroup {
 			//wallpaper.setGravity(Gravity.CENTER);
 			
 			if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
-				wallpaper.setGravity(Gravity.CENTER|Gravity.FILL_VERTICAL);
+				wallpaper.setGravity(Gravity.CENTER_HORIZONTAL|Gravity.FILL_VERTICAL);
 			} else {
-				wallpaper.setGravity(Gravity.CENTER|Gravity.FILL_HORIZONTAL);
+				wallpaper.setGravity(Gravity.CENTER_HORIZONTAL|Gravity.TOP);
 			}
 			mainScreen.setBackgroundDrawable(wallpaper);
 		}else {

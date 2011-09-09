@@ -2,6 +2,7 @@ package ua.snuk182.asia.services.mrim;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -112,12 +113,32 @@ public final class MrimEntityAdapter {
 			str = new String(dump, pos, len, "windows-1251");
 		} catch (UnsupportedEncodingException e) {
 			str = new String(dump, pos, len);
+		} catch (Exception ee){
+			byte[] dummy = new byte[len];
+			Arrays.fill(dummy, (byte) ' ');
+			try {
+				str = new String(dummy, "windows-1251");
+			} catch (UnsupportedEncodingException e) {
+				str = new String(dummy);
+			}
 		}
 		return str;
 	}
 
 	public static final long ul2Long(byte[] dump, int pos) {
 		return ProtocolUtils.unsignedInt2Long(ProtocolUtils.bytes2IntLE(dump, pos));
+	}
+	
+	public static final byte[] spacedHexString2Bytes(String str){
+		String[] strings = str.split(" ");
+		byte[] array = new byte[strings.length];
+		Arrays.fill(array, (byte) 0);
+		for (int i=0; i<strings.length; i++){
+			String hex = strings[i];
+			array[i] = (byte) Integer.parseInt(hex, 16);
+		}
+		
+		return array;
 	}
 
 	public static final String lpsw2String(byte[] dump, int pos) {
@@ -134,6 +155,14 @@ public final class MrimEntityAdapter {
 			str = new String(dump, pos, len, "UTF-16LE");
 		} catch (UnsupportedEncodingException e) {
 			str = new String(dump, pos, len);
+		} catch (Exception ee){
+			byte[] dummy = new byte[len];
+			Arrays.fill(dummy, (byte) ' ');
+			try {
+				str = new String(dummy, "UTF-16LE");
+			} catch (UnsupportedEncodingException e) {
+				str = new String(dummy);
+			}
 		}
 		return str;
 	}

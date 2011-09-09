@@ -171,11 +171,12 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 					unreadGroup.getBuddyList().add(item);
 				} else if (buddy.groupId == AccountService.NOT_IN_LIST_GROUP_ID) {
 					notInListGroup.getBuddyList().add(item);
-				} else if (buddy.status == Buddy.ST_OFFLINE) {
-					if (showOffline) {
-						offlineGroup.getBuddyList().add(item);
+				} else  {
+					if (buddy.status == Buddy.ST_OFFLINE) {
+						if (!showOffline) {
+							continue;
+						}
 					}
-				} else {
 					for (int i = 1; i < groups.size(); i++) {
 						ContactListGridGroupItem group = groups.get(i);
 						if (group.groupId == buddy.groupId) {
@@ -207,7 +208,7 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 			groups.add(notInListGroup);
 		}
 
-		if (showOffline) {
+		if (!showGroups && showOffline) {
 			groups.add(offlineGroup);
 		}
 

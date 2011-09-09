@@ -3,6 +3,7 @@ package ua.snuk182.asia.services;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Date;
 
 import ua.snuk182.asia.R;
 import ua.snuk182.asia.core.dataentity.AccountView;
@@ -64,7 +65,7 @@ public final class ServiceUtils {
 						logFile.createNewFile();
 					}
 					FileOutputStream fos = new FileOutputStream(logFile, true);
-					fos.write(new String(string+"\n").getBytes());
+					fos.write(new String(new Date()+" --> "+string+"\n").getBytes());
 					fos.close();
 				} catch (IOException e) {
 					e.printStackTrace();

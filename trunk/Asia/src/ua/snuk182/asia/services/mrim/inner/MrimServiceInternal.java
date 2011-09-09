@@ -173,34 +173,26 @@ public final class MrimServiceInternal {
 					if (is.available()>0){
 						Thread.sleep(200);
 					
-						if (tail == null){
-							byte[] head = new byte[44];
-							
-							read = is.read(head, 0, 44);
-							
-							if (currentState != STATE_CONNECTING_LOGIN){
-								tailLength = (int) ProtocolUtils.unsignedInt2Long(ProtocolUtils.bytes2ShortLE(head, 16));					
-								
-								tail = new byte[44+tailLength];
-								System.arraycopy(head, 0, tail, 0, 44);
-								read = is.read(tail, 44, tailLength);
-								log("Got "+ProtocolUtils.getSpacedHexString(tail));
-								if (read<tailLength){
-									continue;
-								}
-							} else {
-								// omit newline char at the end
-								tail = new byte[read-1];
-								log("Got "+ProtocolUtils.getSpacedHexString(tail));
-								System.arraycopy(head, 0, tail, 0, read-1);
-							}		
-						}else{
-							read += is.read(tail, 6+read, tailLength-read);
-							if (read<tailLength){
-								continue;
-							}
-						}
+						byte[] head = new byte[44];
 						
+						read = is.read(head, 0, 44);
+						
+						if (currentState != STATE_CONNECTING_LOGIN){
+							tailLength = (int) ProtocolUtils.unsignedInt2Long(ProtocolUtils.bytes2IntLE(head, 16));					
+							
+							tail = new byte[44+tailLength];
+							System.arraycopy(head, 0, tail, 0, 44);
+							read = 0;
+							while (read < tailLength){
+								read = is.read(tail, 44+read, tailLength-read);
+							}
+							log("Got "+ProtocolUtils.getSpacedHexString(tail));
+						} else {
+							// omit newline char at the end
+							tail = new byte[read-1];
+							log("Got "+ProtocolUtils.getSpacedHexString(tail));
+							System.arraycopy(head, 0, tail, 0, read-1);
+						} 						
 						try {
 							MrimPacket packet = processor.parsePacket(tail);
 							

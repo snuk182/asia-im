@@ -919,7 +919,9 @@ public class ICBMMessagingEngine {
 				int i;
 				if ((i = xmlData.indexOf("<NR><RES>")) < 0) {
 					service.log(message.senderId + " asks xstatus ");
-					answerOwnXStatus(message, uid);
+					if ((service.getOnlineInfo().userStatus & ICQConstants.STATUS_INVISIBLE) < 1){
+						answerOwnXStatus(message, uid);
+					}
 					return;
 				}
 				;
