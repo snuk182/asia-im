@@ -5,6 +5,7 @@ import android.os.Parcelable;
 
 public class TextMessage extends Message {
 	
+	public String writerUid = null;
 	public String to;
 	
 	public TextMessage(Parcel arg0) {
@@ -13,19 +14,26 @@ public class TextMessage extends Message {
 	}
 	
 	public TextMessage(String from){
+		this(from, from);
+	}
+	
+	public TextMessage(String writerUid, String from){
 		super(from);
+		this.writerUid = writerUid;
 	}
 
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
 		super.writeToParcel(dest, flags);
 		dest.writeString(to);
+		dest.writeString(writerUid);
 	}
 	
 	@Override
 	public void readFromParcel(Parcel in){
 		super.readFromParcel(in);
 		to = in.readString();
+		writerUid = in.readString();
 	}
 
 	public static final Parcelable.Creator<TextMessage> CREATOR = new Parcelable.Creator<TextMessage>(){

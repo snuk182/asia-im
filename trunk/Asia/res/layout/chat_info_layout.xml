@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:orientation="vertical"
+  android:layout_width="fill_parent"
+  android:layout_height="wrap_content">
+  <ScrollView android:layout_width="fill_parent" android:layout_height="wrap_content"
+  	android:layout_alignParentLeft="true"
+  	android:layout_alignParentTop="true"
+  	android:layout_alignParentRight="true" 
+  	android:id="@+id/scroller">
+  		<LinearLayout android:gravity="top"
+  			android:layout_width="fill_parent"
+  			android:layout_height="wrap_content"
+  			android:id="@+id/layout" 
+  			android:orientation="vertical"
+  			android:padding="2dip"/>
+  </ScrollView> 
+  <Button android:id="@+id/button_ok" android:text="@string/label_connect_to_chat" 
+  	android:layout_width="fill_parent" android:layout_height="wrap_content" 
+  	android:layout_below="@id/scroller"
+  	android:layout_alignParentBottom="true"
+  	android:layout_alignParentLeft="true"
+  	android:layout_alignParentRight="true"/>
+</RelativeLayout>

@@ -8,7 +8,10 @@ import ua.snuk182.asia.R;
 import ua.snuk182.asia.Splashscreen;
 import ua.snuk182.asia.core.dataentity.AccountView;
 import ua.snuk182.asia.core.dataentity.Buddy;
+import ua.snuk182.asia.core.dataentity.MultiChatRoom;
+import ua.snuk182.asia.core.dataentity.MultiChatRoomOccupants;
 import ua.snuk182.asia.core.dataentity.PersonalInfo;
+import ua.snuk182.asia.core.dataentity.ServiceMessage;
 import ua.snuk182.asia.core.dataentity.TabInfo;
 import ua.snuk182.asia.core.dataentity.TextMessage;
 import ua.snuk182.asia.services.ServiceUtils;
@@ -17,14 +20,15 @@ import ua.snuk182.asia.view.IHasAccount;
 import ua.snuk182.asia.view.IHasBuddy;
 import ua.snuk182.asia.view.IHasFileTransfer;
 import ua.snuk182.asia.view.IHasMessages;
+import ua.snuk182.asia.view.IHasServiceMessages;
 import ua.snuk182.asia.view.IMainScreen;
 import ua.snuk182.asia.view.cl.ContactList;
 import ua.snuk182.asia.view.conversations.ConversationsView;
+import ua.snuk182.asia.view.groupchats.GroupChatsView;
 import ua.snuk182.asia.view.more.HistoryView;
 import ua.snuk182.asia.view.more.PersonalInfoView;
 import ua.snuk182.asia.view.more.PreferencesView;
 import ua.snuk182.asia.view.more.SearchUsersView;
-import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.RemoteException;
@@ -154,7 +158,7 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
 		tabsAccount =  new ArrayList<TabInfo>();
 		tabsChat =  new ArrayList<TabInfo>();
 		
-		LayoutInflater inflate = (LayoutInflater) entryPoint.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		LayoutInflater inflate = LayoutInflater.from(entryPoint);
 		inflate.inflate(R.layout.tablet_layout, this);	
 		setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 		tabHostAccount = (TabHost) findViewById(R.id.tabhost_acc);
@@ -213,27 +217,29 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
 
 	@Override
 	public void visualStyleUpdated() {
-		if (getEntryPoint().bgColor != EntryPoint.BGCOLOR_WALLPAPER){
-			tabHostAccount.findViewById(R.id.divider).setVisibility(View.VISIBLE);
-			tabHostAccount.findViewById(R.id.divider).setBackgroundColor(0x60202020);
-			
-			tabHostChat.findViewById(R.id.divider).setVisibility(View.VISIBLE);
-			tabHostChat.findViewById(R.id.divider).setBackgroundColor(0x60202020);
+		if (EntryPoint.bgColor == 0xff7f7f80){
+			tabScrollerAccount.setBackgroundColor(0x0);
+			tabScrollerChat.setBackgroundColor(0x0);
+		} else if (EntryPoint.bgColor < 0xff7f7f80){
+			tabScrollerAccount.setBackgroundColor(0xff202020);
+			tabScrollerChat.setBackgroundColor(0xff202020);
 		} else {
-			tabHostAccount.findViewById(R.id.divider).setVisibility(View.GONE);
-			tabHostChat.findViewById(R.id.divider).setVisibility(View.GONE);
+			tabScrollerAccount.setBackgroundColor(0xffd0d0d0);
+			tabScrollerChat.setBackgroundColor(0xffd0d0d0);
 		}
 		
 		for (TabInfo tab:tabsAccount){
 			if (tab.content != null){
 				tab.content.visualStyleUpdated();
-				tab.tabWidgetLayout.color(getEntryPoint().bgColor);
+				getEntryPoint();
+				tab.tabWidgetLayout.color();
 			}
 		}
 		for (TabInfo tab:tabsChat){
 			if (tab.content != null){
 				tab.content.visualStyleUpdated();
-				tab.tabWidgetLayout.color(getEntryPoint().bgColor);
+				getEntryPoint();
+				tab.tabWidgetLayout.color();
 			}
 		}
 		
@@ -303,17 +309,7 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
 
 	@Override
 	public void removeTabByTag(String tag) {
-		/*String currentTag = tabHostAccount.getCurrentTabTag();
-    	
-    	if (currentTag.equals(tag)){
-    		tabHostAccount.setCurrentTab(0);
-    	}
-    	currentTag = tabHostChat.getCurrentTabTag();
-    	
-    	if (currentTag.equals(tag)){
-    		tabHostChat.setCurrentTab(0);
-    	}*/
-    	
+		
     	for (int i=0; i<tabsAccount.size(); i++){
     		if (tabsAccount.get(i).tag.equals(tag)){
     			removeTabAt(i, tabsAccount, tabHostAccount);
@@ -326,6 +322,8 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
     			return;
     		}
     	}
+    	
+    	setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 	}
 
 	private void removeTabAt(int pos, ArrayList<TabInfo> tabs, TabHost host) {
@@ -476,15 +474,15 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
 	}
 
 	@Override
-	public void accountStateChanged(AccountView account) {
+	public void accountStateChanged(AccountView account, boolean refreshContacts) {
 		for (TabInfo tab: tabsAccount){
 			if ((tab.content instanceof IHasAccount) && ((IHasAccount)tab.content).getServiceId()==account.serviceId){
-				((IHasAccount)tab.content).stateChanged(account);
+				((IHasAccount)tab.content).stateChanged(account, refreshContacts);
 			}
 		}
 		for (TabInfo tab: tabsChat){
 			if ((tab.content instanceof IHasAccount) && ((IHasAccount)tab.content).getServiceId()==account.serviceId){
-				((IHasAccount)tab.content).stateChanged(account);
+				((IHasAccount)tab.content).stateChanged(account, refreshContacts);
 			}
 		}
 	}
@@ -534,15 +532,15 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
 	}
 
 	@Override
-	public void accountUpdated(AccountView account) {
+	public void accountUpdated(AccountView account, boolean refreshContacts) {
 		for (TabInfo tab: tabsAccount){
 			if ((tab.content instanceof IHasAccount) && ((IHasAccount)tab.content).getServiceId()==account.serviceId){
-				((IHasAccount)tab.content).updated(account);
+				((IHasAccount)tab.content).updated(account, refreshContacts);
 			}
 		}
 		for (TabInfo tab: tabsChat){
 			if ((tab.content instanceof IHasAccount) && ((IHasAccount)tab.content).getServiceId()==account.serviceId){
-				((IHasAccount)tab.content).updated(account);
+				((IHasAccount)tab.content).updated(account, refreshContacts);
 			}
 		}
 	}
@@ -725,6 +723,40 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
 			return true;
 		} else {
 			return super.onKeyDown(i, event);
+		}
+	}
+
+	@Override
+	public void availableChatsList(byte serviceId, List<MultiChatRoom> chats) {
+		for (TabInfo tab: tabsChat){
+			if (tab.tag != null && tab.tag.equals(GroupChatsView.class.getSimpleName() + " " + serviceId)){
+				((GroupChatsView) tab.content).chatsList(chats);
+			}
+		}
+	}
+
+	@Override
+	public void chatRoomOccupants(byte serviceId, String chatId, MultiChatRoomOccupants occupants) {
+		for (TabInfo tab: tabsChat){
+			if (tab.tag != null && tab.tag.equals(ConversationsView.class.getSimpleName()+" "+serviceId+" "+chatId)){
+				((ConversationsView) tab.content).fillGroupChatView(occupants);
+			}
+		}
+	}
+
+	@Override
+	public void serviceMessage(ServiceMessage message) {
+		for (int i=0; i<tabsChat.size(); i++){
+			TabInfo tab = tabsChat.get(i);
+			if (tab.content != null && (tab.content instanceof IHasServiceMessages)){
+				((IHasServiceMessages)tab.content).serviceMessageReceived(message);					
+			}
+		}
+		for (int i=0; i<tabsAccount.size(); i++){
+			TabInfo tab = tabsAccount.get(i);
+			if (tab.content != null && (tab.content instanceof IHasServiceMessages)){
+				((IHasServiceMessages)tab.content).serviceMessageReceived(message);					
+			}
 		}
 	}
 }

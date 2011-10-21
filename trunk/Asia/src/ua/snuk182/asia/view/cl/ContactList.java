@@ -1,5 +1,9 @@
 package ua.snuk182.asia.view.cl;
 
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
 import ua.snuk182.asia.EntryPoint;
 import ua.snuk182.asia.R;
 import ua.snuk182.asia.core.dataentity.AccountView;
@@ -18,7 +22,6 @@ import ua.snuk182.asia.view.conversations.ConversationsView;
 import ua.snuk182.asia.view.more.StatusTextView;
 import ua.snuk182.asia.view.more.TabWidgetLayout;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.os.Handler;
@@ -34,7 +37,11 @@ import android.widget.ProgressBar;
 
 public class ContactList extends LinearLayout implements ITabContent, IHasMessages, IHasBuddy  {
 	
-	private AccountView account;
+	public static final byte CL_STATE_CREATED = 0;
+	public static final byte CL_STATE_INITED = 1;
+	public static final byte CL_STATE_UPDATED = 2;
+	
+	public final AccountView account;
 	
 	private IContactListDrawer contactList;
 	private ImageView ownIcon;
@@ -43,7 +50,9 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 	private StatusTextView notificationText;
 	private TabWidgetLayout tabWidgetLayout;
 	private LinearLayout statusPanel;
-	public boolean sort = true;
+	
+	private boolean clReady = false;
+	public final List<Buddy> buddiesStateChangedCache = Collections.synchronizedList(new LinkedList<Buddy>());
 	
 	private ProgressBar progressBar;
 	
@@ -60,6 +69,36 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 	
 	private final Handler handler = new Handler();
 
+	private Runnable visualStyleUpdatedRunnable = new Runnable() {
+		
+		@Override
+		public void run() {
+			updateView(true);	
+			
+			String bgType;
+			
+			try {
+				bgType = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_bg_type));
+			} catch (NullPointerException npe) {
+				bgType = null;
+				ServiceUtils.log(npe);
+			} if (bgType == null || bgType.equals("wallpaper")){
+				notificationText.setBackgroundColor(0x60000000);
+				notificationText.setTextColor(0xffffffff);
+				((View) contactList).setBackgroundColor(0x60000000);
+			}else {
+				try {
+					int color = (int) Long.parseLong(bgType);
+					notificationText.setBackgroundColor(0);
+					notificationText.setTextColor((color-0xff000000)>0x777777?0xff000000:0xffffffff);
+					((View) contactList).setBackgroundColor(0);
+				} catch (NumberFormatException e) {				
+					ServiceUtils.log(e);
+				}
+			}
+		}
+	};
+
 	/*private OnTabChangeListener tabChangeListener = new OnTabChangeListener(){
 
 		@Override
@@ -74,7 +113,7 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 	public ContactList(EntryPoint entryPoint, AccountView account) {
 		super(entryPoint);
 		
-		LayoutInflater inflate = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		LayoutInflater inflate = LayoutInflater.from(getContext());
 		inflate.inflate(R.layout.contact_list_grid, this);	
 		setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 		setOrientation(LinearLayout.VERTICAL);
@@ -102,7 +141,8 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 		
 		requestIcon();
 		
-		stateChanged(null);
+		populate(account);
+		updateView(false);
 	}
 	
 	@Override
@@ -145,6 +185,17 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 			} 
 		}
 		
+		MenuItem groupChatsItem = menu.findItem(R.id.menuitem_groupchats);
+		if (groupChatsItem != null){
+			try {
+				groupChatsItem.setVisible(account.getConnectionState() != Buddy.ST_OFFLINE && getEntryPoint().runtimeService.checkGroupChatsAvailability(account.serviceId));
+			} catch (NullPointerException npe) {
+				ServiceUtils.log(npe);
+			} catch (RemoteException e) {
+				getEntryPoint().onRemoteCallFailed(e);
+			} 
+		}
+		
 		MenuItem editStatusItem = menu.findItem(R.id.menuitem_editstatus);
 		editStatusItem.setIcon(ServiceUtils.getStatusResIdByAccountMedium(getContext(), account, true));
 		
@@ -167,6 +218,9 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
+		case R.id.menuitem_groupchats:
+			ViewUtils.getGroupChatAction(getEntryPoint(), account);
+			break;
 		case R.id.menuitem_search:
 			getEntryPoint().addSearchTab(account);
 			break;
@@ -230,7 +284,7 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 	    return false;
 	}
 	
-	public void updateView() {
+	public void updateView(boolean refreshContacts) {
 		try {
 			account.merge(getEntryPoint().runtimeService.getAccountView(account.serviceId));
 		} catch (NullPointerException npe) {	
@@ -238,15 +292,6 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 		} catch (RemoteException e1) {
 			getEntryPoint().onRemoteCallFailed(e1);
 		}
-		
-		try {
-			String doSort = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_sort_lists));
-			if (doSort !=null){
-				sort = Boolean.parseBoolean(doSort);
-			}
-		} catch (NullPointerException npe) {		
-			ServiceUtils.log(npe);
-		} 
 		
 		String clType = account.options.getString(getResources().getString(R.string.key_list_type));
     	if (clType == null){
@@ -287,10 +332,10 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 			ServiceUtils.log(npe);
 		} 
 		
-		updated(null);
+		updated(null, refreshContacts);
 	}
 	
-	public void updated(AccountView origin){
+	public void updated(AccountView origin, boolean refreshContacts){
 		if (origin!=null){
 			this.account.merge(origin);
 		}
@@ -307,9 +352,11 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 			}
 		}		
 		
-		tabWidgetLayout.getTabName().setText(account.ownName == null ? account.protocolUid : account.ownName);
+		tabWidgetLayout.getTabName().setText(account.getSafeName());
 		
-		contactList.updateView();
+		if (refreshContacts){
+			contactList.updateView();
+		}
 	}
 
 	private void requestIcon() {
@@ -338,12 +385,37 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 	}
 	
 	@Override
-	public void updateBuddyState(Buddy buddy){
-		contactList.updateBuddyState(buddy);
-		if (contactList.hasUnreadMessages()){
-			tabWidgetLayout.getTabIcon().setImageResource(R.drawable.message_medium);
+	public void updateBuddyState(final Buddy buddy){
+		if (clReady){
+			handler.post(new Runnable() {
+				
+				@Override
+				public void run() {
+					contactList.updateBuddyState(buddy);
+					
+					checkBuddyStateCache();
+					
+					if (contactList.hasUnreadMessages()){
+						tabWidgetLayout.getTabIcon().setImageResource(R.drawable.message_medium);
+					} else {
+						tabWidgetLayout.getTabIcon().setImageResource(ServiceUtils.getStatusResIdByAccountMedium(getContext(), account, false));
+					}
+				}
+			});
 		} else {
-			tabWidgetLayout.getTabIcon().setImageResource(ServiceUtils.getStatusResIdByAccountMedium(getContext(), account, false));
+			synchronized (buddiesStateChangedCache){
+				buddiesStateChangedCache.add(buddy);
+			}
+		}
+	}
+
+	private void checkBuddyStateCache() {
+		synchronized (buddiesStateChangedCache) {
+			while (buddiesStateChangedCache.size() > 0){
+				for (int i=buddiesStateChangedCache.size()-1; i>=0; i--){
+					contactList.updateBuddyState(buddiesStateChangedCache.remove(i));
+				}
+			}
 		}
 	}
 
@@ -381,7 +453,7 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 	}
 
 	@Override
-	public int getServiceId() {
+	public byte getServiceId() {
 		if (account == null){
 			return -1;
 		}
@@ -398,12 +470,23 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 	}
 
 	@Override
-	public void stateChanged(AccountView account) {
+	public void stateChanged(final AccountView account, final boolean refreshContacts) {
+		handler.post(new Runnable() {
+			
+			@Override
+			public void run() {
+				populate(account);
+				updateView(refreshContacts);
+			}
+		});	
+	}
+
+	private void populate(AccountView account) {
 		this.account.merge(account);
 		statusPanel.setVisibility(View.VISIBLE);
 		progressBar.setVisibility(View.GONE);
-		tabWidgetLayout.getTabIcon().setImageResource(ServiceUtils.getStatusResIdByAccountMedium(getContext(), this.account, false));
-		updateView();		
+		tabWidgetLayout.getTabIcon().setImageResource(ServiceUtils.getStatusResIdByAccountMedium(getContext(), ContactList.this.account, false));
+		
 	}
 
 	public EntryPoint getEntryPoint(){
@@ -412,29 +495,7 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 
 	@Override
 	public void visualStyleUpdated() {
-		updateView();	
-		
-		String bgType;
-		
-		try {
-			bgType = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_bg_type));
-		} catch (NullPointerException npe) {
-			bgType = null;
-			ServiceUtils.log(npe);
-		} if (bgType == null || bgType.equals("wallpaper")){
-			notificationText.setBackgroundColor(0x60000000);
-			notificationText.setTextColor(0xffffffff);
-			((View) contactList).setBackgroundColor(0x60000000);
-		}else {
-			try {
-				int color = (int) Long.parseLong(bgType);
-				notificationText.setBackgroundColor(0);
-				notificationText.setTextColor((color-0xff000000)>0x777777?0xff000000:0xffffffff);
-				((View) contactList).setBackgroundColor(0);
-			} catch (NumberFormatException e) {				
-				ServiceUtils.log(e);
-			}
-		}		
+		handler.post(visualStyleUpdatedRunnable );		
 	}
 	
 	@Override
@@ -452,16 +513,38 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 	}
 
 	@Override
-	public void bitmap(String uid) {
-		if (uid.equals(account.protocolUid)){
-			requestIcon();	
-		} else {
-			contactList.bitmap(uid);
-		}
+	public void bitmap(final String uid) {
+		getEntryPoint().threadMsgHandler.post(new Runnable() {
+			
+			@Override
+			public void run() {
+				if (uid.equals(account.protocolUid)){
+					requestIcon();	
+				} else {
+					contactList.bitmap(uid);
+				}
+			}
+		});
 	}
 
 	@Override
 	public void configChanged() {
 		contactList.configChanged();
+	}
+
+	public boolean isClReady() {
+		return clReady;
+	}
+
+	public void setClReady(boolean clReady) {
+		this.clReady = clReady;
+		if (clReady){
+			tabWidgetLayout.getTabIcon().setImageResource(ServiceUtils.getStatusResIdByAccountMedium(getContext(), account, false));
+			tabWidgetLayout.getTabName().setText(account.getSafeName());
+			checkBuddyStateCache();
+		} else {
+			tabWidgetLayout.getTabIcon().setImageResource(R.drawable.logo_32px);
+			tabWidgetLayout.getTabName().setText(R.string.label_wait);
+		}
 	}	
 }

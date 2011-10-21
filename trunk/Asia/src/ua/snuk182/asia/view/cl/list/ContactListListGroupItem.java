@@ -7,7 +7,7 @@ import java.util.List;
 import ua.snuk182.asia.EntryPoint;
 import ua.snuk182.asia.R;
 import ua.snuk182.asia.services.ServiceUtils;
-import android.content.Context;
+import ua.snuk182.asia.view.ViewUtils;
 import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -30,7 +30,6 @@ public class ContactListListGroupItem extends LinearLayout implements OnClickLis
 	private List<ContactListListItem> buddyRows = new ArrayList<ContactListListItem>();
 	private ViewGroup ownerLayout;
 	private boolean refreshContents = false;
-	private boolean sort = true;
 	private boolean collapsed = false;
 	
 	public ContactListListGroupItem(final EntryPoint entryPoint, AttributeSet attrs, ViewGroup owner, String tag, String name) {
@@ -38,7 +37,7 @@ public class ContactListListGroupItem extends LinearLayout implements OnClickLis
 		
 		ownerLayout = owner;
 		
-		LayoutInflater inflate = (LayoutInflater)entryPoint.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		LayoutInflater inflate = LayoutInflater.from(entryPoint);
 		inflate.inflate(R.layout.contact_list_grid_panel_item, this); 
 		setLayoutParams(new ListView.LayoutParams(
 		        ListView.LayoutParams.FILL_PARENT,
@@ -70,9 +69,9 @@ public class ContactListListGroupItem extends LinearLayout implements OnClickLis
 		}
 	}
 	
-	public void refresh(String bgType){
+	public void refresh(){
 		if (refreshContents){
-			forceRefresh(bgType, sort);
+			forceRefresh();
 			refreshContents = false;
 		} else {
 			ownerLayout.removeView(this);
@@ -86,12 +85,8 @@ public class ContactListListGroupItem extends LinearLayout implements OnClickLis
 		setCollapsed(collapsed);
 	}
 	
-	public void forceRefresh(String bgType, boolean sort){
-		this.sort = sort;
-		
-		if (sort){
-			Collections.sort(buddyList);
-		}
+	public void forceRefresh(){
+		Collections.sort(buddyList);
 		
 		ownerLayout.removeView(this);
 		
@@ -200,5 +195,10 @@ public class ContactListListGroupItem extends LinearLayout implements OnClickLis
 
 	public boolean isCollapsed() {
 		return collapsed;
+	}
+	
+	public void color() {
+		ViewUtils.styleTextView(subGroupCountText);
+		ViewUtils.styleTextView(subGroupNameText);
 	}
 }

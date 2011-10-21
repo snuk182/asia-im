@@ -3,7 +3,10 @@ package ua.snuk182.asia.services;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import ua.snuk182.asia.R;
 import ua.snuk182.asia.core.dataentity.AccountView;
@@ -11,9 +14,9 @@ import ua.snuk182.asia.core.dataentity.Buddy;
 import ua.snuk182.asia.core.dataentity.OnlineInfo;
 import ua.snuk182.asia.core.dataentity.ServiceMessage;
 import ua.snuk182.asia.core.dataentity.TextMessage;
-import ua.snuk182.asia.services.icq.ICQService;
-import ua.snuk182.asia.services.mrim.MrimService;
-import ua.snuk182.asia.services.xmpp.XMPPService;
+import ua.snuk182.asia.services.icq.ICQServiceUtils;
+import ua.snuk182.asia.services.mrim.MrimServiceUtils;
+import ua.snuk182.asia.services.xmpp.XMPPServiceUtils;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -22,7 +25,15 @@ import android.util.Log;
 
 public final class ServiceUtils {
 	
+	public static final Set<String> GROUPCHAT_PREFERENCE_MAP;
 	public static boolean logToFile = false;
+	
+	static {
+		Set<String> set = new HashSet<String>();
+		set.add(ServiceConstants.GROUPCHAT_PREFERENCE_NICKNAME);
+		set.add(ServiceConstants.GROUPCHAT_PREFERENCE_PASSWORD);
+		GROUPCHAT_PREFERENCE_MAP = Collections.unmodifiableSet(set);
+	}
 	
 	public static Buddy mergeBuddyWithOnlineInfo(Buddy buddy, OnlineInfo info){
 		if (buddy==null || info == null) return null;
@@ -44,9 +55,13 @@ public final class ServiceUtils {
 		return buddy;
 	}
 
-	public static void log(String string, AccountView account) {
+	public static void log(String string, AccountView account, boolean isError) {
 		if (logToFile){
-			Log.i("Asia"+((account!=null)?" "+account.getAccountId():""), string);
+			if (isError){
+				Log.w("Asia"+((account!=null)?" "+account.getAccountId():""), string);
+			} else {
+				Log.i("Asia"+((account!=null)?" "+account.getAccountId():""), string);
+			}
 			
 			String storageState = Environment.getExternalStorageState();
 			if (storageState.equals(Environment.MEDIA_MOUNTED)){
@@ -75,7 +90,7 @@ public final class ServiceUtils {
 	}
 
 	public static void log(String string) {
-		log(string, null);		
+		log(string, null, false);		
 	}
 	
 	public static void log(Throwable e, AccountView account){
@@ -84,7 +99,7 @@ public final class ServiceUtils {
 		for (StackTraceElement el:e.getStackTrace()){
 			sb.append("\n"+el);
 		}
-		log(sb.toString(), account);
+		log(sb.toString(), account, true);
 	}
 	
 	public static void log(Throwable e){
@@ -110,91 +125,91 @@ public final class ServiceUtils {
 
 	public static int getMenuResIdByAccount(Context context, AccountView account) {
 		if (account.protocolName.equals(context.getResources().getString(R.string.icq_service_name))){
-			return ICQService.getMenuResIdByAccount(account);
+			return ICQServiceUtils.getMenuResIdByAccount(account);
 		}
 		if (account.protocolName.equals(context.getResources().getString(R.string.xmpp_service_name))){
-			return XMPPService.getMenuResIdByAccount(account);
+			return XMPPServiceUtils.getMenuResIdByAccount(account);
 		}
 		if (account.protocolName.equals(context.getResources().getString(R.string.mrim_service_name))){
-			return MrimService.getMenuResIdByAccount(account);
+			return MrimServiceUtils.getMenuResIdByAccount(account);
 		}
 		return 0;
 	}
 	
 	public static int getStatusResIdByAccountTiny(Context context, AccountView account, boolean withoutConnectionState) {
 		if (account.protocolName.equals(context.getResources().getString(R.string.icq_service_name))){
-			return ICQService.getStatusResIdByAccountTiny(account, withoutConnectionState);
+			return ICQServiceUtils.getStatusResIdByAccountTiny(account, withoutConnectionState);
 		}
 		if (account.protocolName.equals(context.getResources().getString(R.string.xmpp_service_name))){
-			return XMPPService.getStatusResIdByAccountTiny(account, withoutConnectionState);
+			return XMPPServiceUtils.getStatusResIdByAccountTiny(account, withoutConnectionState);
 		}
 		if (account.protocolName.equals(context.getResources().getString(R.string.mrim_service_name))){
-			return MrimService.getStatusResIdByAccountTiny(account, withoutConnectionState);
+			return MrimServiceUtils.getStatusResIdByAccountTiny(account, withoutConnectionState);
 		}
 		return 0;
 	}
 	
 	public static int getStatusResIdByBuddyTiny(Context context, Buddy buddy){
 		if (buddy.serviceName.equals(context.getResources().getString(R.string.icq_service_name))){
-			return ICQService.getStatusResIdByStatusIdTiny(buddy.status);
+			return ICQServiceUtils.getStatusResIdByStatusIdTiny(buddy.status);
 		}
 		if (buddy.serviceName.equals(context.getResources().getString(R.string.xmpp_service_name))){
-			return XMPPService.getStatusResIdByStatusIdTiny(buddy.status);
+			return XMPPServiceUtils.getStatusResIdByStatusIdTiny(buddy.status);
 		}
 		if (buddy.serviceName.equals(context.getResources().getString(R.string.mrim_service_name))){
-			return MrimService.getStatusResIdByStatusIdTiny(buddy.status);
+			return MrimServiceUtils.getStatusResIdByStatusIdTiny(buddy.status);
 		}
 		return 0;
 	}
 	
 	public static int getStatusResIdByAccountSmall(Context context, AccountView account, boolean withoutConnectionState) {
 		if (account.protocolName.equals(context.getResources().getString(R.string.icq_service_name))){
-			return ICQService.getStatusResIdByAccountSmall(account, withoutConnectionState);
+			return ICQServiceUtils.getStatusResIdByAccountSmall(account, withoutConnectionState);
 		}
 		if (account.protocolName.equals(context.getResources().getString(R.string.xmpp_service_name))){
-			return XMPPService.getStatusResIdByAccountSmall(account, withoutConnectionState);
+			return XMPPServiceUtils.getStatusResIdByAccountSmall(account, withoutConnectionState);
 		}
 		if (account.protocolName.equals(context.getResources().getString(R.string.mrim_service_name))){
-			return MrimService.getStatusResIdByAccountSmall(account, withoutConnectionState);
+			return MrimServiceUtils.getStatusResIdByAccountSmall(account, withoutConnectionState);
 		}
 		return 0;
 	}
 	
 	public static int getStatusResIdByBuddyMedium(Context context, Buddy buddy){
 		if (buddy.serviceName.equals(context.getResources().getString(R.string.icq_service_name))){
-			return ICQService.getStatusResIdByStatusIdMedium(buddy.status);
+			return ICQServiceUtils.getStatusResIdByStatusIdMedium(buddy.status);
 		}
 		if (buddy.serviceName.equals(context.getResources().getString(R.string.xmpp_service_name))){
-			return XMPPService.getStatusResIdByStatusIdMedium(buddy.status);
+			return XMPPServiceUtils.getStatusResIdByStatusIdMedium(buddy.status);
 		}
 		if (buddy.serviceName.equals(context.getResources().getString(R.string.mrim_service_name))){
-			return MrimService.getStatusResIdByStatusIdMedium(buddy.status);
+			return MrimServiceUtils.getStatusResIdByStatusIdMedium(buddy.status);
 		}
 		return 0;
 	}
 	
 	public static int getStatusResIdByAccountMedium(Context context, AccountView account, boolean withoutConnectionState) {
 		if (account.protocolName.equals(context.getResources().getString(R.string.icq_service_name))){
-			return ICQService.getStatusResIdByAccountMedium(account, withoutConnectionState);
+			return ICQServiceUtils.getStatusResIdByAccountMedium(account, withoutConnectionState);
 		}
 		if (account.protocolName.equals(context.getResources().getString(R.string.xmpp_service_name))){
-			return XMPPService.getStatusResIdByAccountMedium(account, withoutConnectionState);
+			return XMPPServiceUtils.getStatusResIdByAccountMedium(account, withoutConnectionState);
 		}
 		if (account.protocolName.equals(context.getResources().getString(R.string.mrim_service_name))){
-			return MrimService.getStatusResIdByAccountMedium(account, withoutConnectionState);
+			return MrimServiceUtils.getStatusResIdByAccountMedium(account, withoutConnectionState);
 		}
 		return 0;
 	}
 	
 	public static int getStatusResIdByBuddySmall(Context context, Buddy buddy){
 		if (buddy.serviceName.equals(context.getResources().getString(R.string.icq_service_name))){
-			return ICQService.getStatusResIdByStatusIdSmall(buddy.status);
+			return ICQServiceUtils.getStatusResIdByStatusIdSmall(buddy.status);
 		}
 		if (buddy.serviceName.equals(context.getResources().getString(R.string.xmpp_service_name))){
-			return XMPPService.getStatusResIdByStatusIdSmall(buddy.status);
+			return XMPPServiceUtils.getStatusResIdByStatusIdSmall(buddy.status);
 		}
 		if (buddy.serviceName.equals(context.getResources().getString(R.string.mrim_service_name))){
-			return MrimService.getStatusResIdByStatusIdSmall(buddy.status);
+			return MrimServiceUtils.getStatusResIdByStatusIdSmall(buddy.status);
 		}
 		return 0;
 	}
@@ -213,52 +228,52 @@ public final class ServiceUtils {
 	}*/
 	public static int getStatusResIdByBuddyBigger(Context context, Buddy buddy) {
 		if (buddy.serviceName.equals(context.getResources().getString(R.string.icq_service_name))){
-			return ICQService.getStatusResIdByStatusIdBigger(buddy.status);
+			return ICQServiceUtils.getStatusResIdByStatusIdBigger(buddy.status);
 		}
 		if (buddy.serviceName.equals(context.getResources().getString(R.string.xmpp_service_name))){
-			return XMPPService.getStatusResIdByStatusIdBigger(buddy.status);
+			return XMPPServiceUtils.getStatusResIdByStatusIdBigger(buddy.status);
 		}
 		if (buddy.serviceName.equals(context.getResources().getString(R.string.mrim_service_name))){
-			return MrimService.getStatusResIdByStatusIdBigger(buddy.status);
+			return MrimServiceUtils.getStatusResIdByStatusIdBigger(buddy.status);
 		}
 		return 0;
 	}
 	
 	public static int getStatusResIdByBuddyBig(Context context, Buddy buddy){
 		if (buddy.serviceName.equals(context.getResources().getString(R.string.icq_service_name))){
-			return ICQService.getStatusResIdByStatusIdBig(buddy.status);
+			return ICQServiceUtils.getStatusResIdByStatusIdBig(buddy.status);
 		}
 		if (buddy.serviceName.equals(context.getResources().getString(R.string.xmpp_service_name))){
-			return XMPPService.getStatusResIdByStatusIdBig(buddy.status);
+			return XMPPServiceUtils.getStatusResIdByStatusIdBig(buddy.status);
 		}
 		if (buddy.serviceName.equals(context.getResources().getString(R.string.mrim_service_name))){
-			return MrimService.getStatusResIdByStatusIdBig(buddy.status);
+			return MrimServiceUtils.getStatusResIdByStatusIdBig(buddy.status);
 		}
 		return 0;
 	}
 
 	public static String[] getStatusNamesByAccount(AccountView account, Context context) {
 		if (account.protocolName.equals(context.getResources().getString(R.string.icq_service_name))){
-			return ICQService.getStatusListNames(context);
+			return ICQServiceUtils.getStatusListNames(context);
 		}
 		if (account.protocolName.equals(context.getResources().getString(R.string.xmpp_service_name))){
-			return XMPPService.getStatusListNames(context);
+			return XMPPServiceUtils.getStatusListNames(context);
 		}
 		if (account.protocolName.equals(context.getResources().getString(R.string.mrim_service_name))){
-			return MrimService.getStatusListNames(context);
+			return MrimServiceUtils.getStatusListNames(context);
 		}
 		return null;
 	}
 
 	public static byte getStatusValueByCount(Context context, AccountView account, int which) {
 		if (account.protocolName.equals(context.getResources().getString(R.string.icq_service_name))){
-			return ICQService.getStatusValueByCount(which);
+			return ICQServiceUtils.getStatusValueByCount(which);
 		}
 		if (account.protocolName.equals(context.getResources().getString(R.string.xmpp_service_name))){
-			return XMPPService.getStatusValueByCount(which);
+			return XMPPServiceUtils.getStatusValueByCount(which);
 		}
 		if (account.protocolName.equals(context.getResources().getString(R.string.mrim_service_name))){
-			return MrimService.getStatusValueByCount(which);
+			return MrimServiceUtils.getStatusValueByCount(which);
 		}
 		return 0;
 	}
@@ -285,13 +300,13 @@ public final class ServiceUtils {
 	
 	public static TypedArray getStatusResIdsByAccount(AccountView account, Context context){
 		if (account.protocolName.equals(context.getResources().getString(R.string.icq_service_name))){
-			return ICQService.getStatusResIds(context);
+			return ICQServiceUtils.getStatusResIds(context);
 		}
 		if (account.protocolName.equals(context.getResources().getString(R.string.xmpp_service_name))){
-			return XMPPService.getStatusResIds(context);
+			return XMPPServiceUtils.getStatusResIds(context);
 		}
 		if (account.protocolName.equals(context.getResources().getString(R.string.mrim_service_name))){
-			return MrimService.getStatusResIds(context);
+			return MrimServiceUtils.getStatusResIds(context);
 		}
 		return null;
 	}

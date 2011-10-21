@@ -39,18 +39,26 @@
 				android:src="@drawable/typing" />
 		</RelativeLayout>
 	</FrameLayout>
-	<LinearLayout android:layout_width="fill_parent"
+	<RelativeLayout android:layout_width="fill_parent"
 		android:layout_height="fill_parent" android:orientation="horizontal"
 		android:padding="3dip" android:layout_above="@id/convframepanel"
 		android:id="@+id/conversationTopLayout">
+		<ExpandableListView android:id="@+id/buddiesScrollView" 
+			android:layout_height="fill_parent" android:layout_width="wrap_content"
+			android:scrollingCache="true" 
+			android:layout_alignParentRight="true"
+			android:layout_alignParentTop="true"
+			android:layout_alignParentBottom="true"
+			android:visibility="gone"/>
 		<ScrollView android:layout_height="fill_parent"
-			android:layout_width="fill_parent" android:id="@+id/scroller">
+			android:layout_width="fill_parent" android:id="@+id/scroller" 
+			android:layout_alignParentLeft="true"
+			android:layout_alignParentTop="true"
+			android:layout_alignParentBottom="true"
+			android:layout_toLeftOf="@id/buddiesScrollView" >
 			<LinearLayout android:id="@+id/historyScrollView"
 				android:gravity="bottom" android:layout_height="wrap_content"
 				android:layout_width="fill_parent" android:orientation="vertical" />
-		</ScrollView>
-		<ListView android:id="@+id/buddiesScrollView"
-			android:layout_height="fill_parent" android:layout_width="fill_parent"
-			android:layout_weight="80" android:scrollingCache="true" />
-	</LinearLayout>
+		</ScrollView>		
+	</RelativeLayout>
 </merge>

@@ -5,10 +5,13 @@ import ua.snuk182.asia.core.dataentity.BuddyGroup;
 import ua.snuk182.asia.core.dataentity.AccountView;
 import ua.snuk182.asia.core.dataentity.FileMessage;
 import ua.snuk182.asia.core.dataentity.ServiceMessage;
+import ua.snuk182.asia.core.dataentity.PersonalInfo;
 import ua.snuk182.asia.core.dataentity.TextMessage;
 import ua.snuk182.asia.core.dataentity.TabInfo;
 import ua.snuk182.asia.core.dataentity.ContactListViewGroup;
 import ua.snuk182.asia.services.IRuntimeServiceCallback;
+import ua.snuk182.asia.core.dataentity.MultiChatRoom;
+import ua.snuk182.asia.core.dataentity.MultiChatRoomOccupants;
 
 interface IRuntimeService{
 	String sendMessage(in TextMessage message, byte serviceId);
@@ -69,4 +72,14 @@ interface IRuntimeService{
 	void sendTyping(byte serviceId, String buddyUid);
 	void editBuddyVisibility(in Buddy buddy);
 	void editMyVisibility(byte serviceId, byte visibility);
+	
+	void requestAvailableChatRooms(byte serviceId);
+	
+	byte createChat(byte serviceId, String chatId, String chatNickname, String chatName, String chatPassword);
+	byte joinExistingChat(byte serviceId, String chatId);
+	byte leaveChat(byte serviceId, String chatId);
+	byte joinChat(byte serviceId, String chatId, String chatNickname, String chatPassword);
+	boolean checkGroupChatsAvailability(byte serviceId);
+	MultiChatRoomOccupants getChatRoomOccupants(byte serviceId, String chatId);
+	PersonalInfo getChatInfo(byte serviceId, String chatId);
 }

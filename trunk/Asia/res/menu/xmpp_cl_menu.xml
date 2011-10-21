@@ -3,6 +3,8 @@
 		android:title="@string/label_connect" />
 	<item android:id="@+id/menuitem_editstatus" android:icon="@drawable/xmpp_online_medium"
 		android:title="@string/label_set_status" />
+	<item android:id="@+id/menuitem_groupchats" android:icon="@android:drawable/ic_menu_agenda"
+		android:title="@string/label_chats_group" />
 	<!--<item android:id="@+id/menuitem_editxstatus" android:icon="@drawable/icq_online_medium"
 		android:title="@string/label_set_xstatus" />
 	--><item android:id="@+id/menuitem_showtabs" android:icon="@drawable/tabs"

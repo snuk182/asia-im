@@ -177,7 +177,7 @@ public class ICQServiceInternal {
 			flapSeqNumber = ProtocolUtils.getAtomicShort();
 			try {
 				//socket = new Socket();
-				socket.setSoTimeout(30000);
+				socket.setSoTimeout(300000);
 				socket.connect(new InetSocketAddress(InetAddress.getByName(host), port));
 				connected = true;
 				getDataFromSocket();

@@ -66,7 +66,6 @@
 	<string name="key_notinlist_save">PrefNotInListSave</string>
 	<string name="key_deny_messages_not_from_list">PrefDenyAllMessagesNotFromList</string>
 	<string name="key_bg_type">PrefBgTypeList</string>
-	<string name="key_sort_lists">PrefSortLists</string>
 	
 	<string name="key_pref_account">PrefAccount</string>
 	<string name="key_pref_common">PrefCommon</string>

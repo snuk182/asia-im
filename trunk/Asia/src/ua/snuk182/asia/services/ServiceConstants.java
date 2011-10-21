@@ -12,9 +12,15 @@ public final class ServiceConstants {
 	public static final String VIEWGROUP_ONLINE = "AsiaOnline";
 	public static final String VIEWGROUP_OFFLINE = "AsiaOffline";
 	public static final String VIEWGROUP_UNREAD = "AsiaUnread";
+	public static final String VIEWGROUP_CHATS = "AsiaChats";
 	public static final String VIEWGROUP_NOT_IN_LIST = "AsiaNotInList";
 	
 	public static final byte NOTIFICATION_PLAIN = 0;
 	public static final byte NOTIFICATION_URGENT = 1;
 	public static final byte NOTIFICATION_TOAST = 2;
+	
+	public static final String GROUPCHAT_PREFERENCE_NICKNAME = "GroupChatNickname";
+	public static final String GROUPCHAT_PREFERENCE_PASSWORD = "GroupChatPassword";
+	public static final String GROUPCHAT_PREFERENCES_PREFIX = "GroupChatPfx";
+	public static final String SERVICE_MESSAGE_PREFIX = "--- ";
 }

@@ -159,6 +159,7 @@ public final class ServiceStoredPreferences {
 					accountContacts.append(CONTACT_OPTION_DIVIDER+account.getBuddyList().get(i).unread);
 					accountContacts.append(CONTACT_OPTION_DIVIDER+account.getBuddyList().get(i).groupId);
 					accountContacts.append(CONTACT_OPTION_DIVIDER+account.getBuddyList().get(i).iconHash);
+					accountContacts.append(CONTACT_OPTION_DIVIDER+account.getBuddyList().get(i).visibility);
 					if (i < account.getBuddyList().size()-1) {
 						accountContacts.append(CONTACT_ITEM_DIVIDER);
 					}	
@@ -256,6 +257,10 @@ public final class ServiceStoredPreferences {
 					buddy.iconHash = contactAttrs[4];
 				}
 				
+				if (contactAttrs.length>5){
+					buddy.visibility = Byte.parseByte(contactAttrs[5]);
+				}
+				
 				buddy.serviceId = account.serviceId;
 				
 				account.getBuddyList().add(buddy);
@@ -272,6 +277,14 @@ public final class ServiceStoredPreferences {
 			
 			if (contactAttrs.length>3){
 				buddy.groupId = Integer.parseInt(contactAttrs[3]);
+			}
+			
+			if (contactAttrs.length>4){
+				buddy.iconHash = contactAttrs[4];
+			}
+			
+			if (contactAttrs.length>5){
+				buddy.visibility = Byte.parseByte(contactAttrs[5]);
 			}
 			
 			account.getBuddyList().add(buddy);
@@ -436,5 +449,9 @@ public final class ServiceStoredPreferences {
 		context.deleteFile(account.getAccountId());
 		
 		context.deleteFile(account.getAccountId()+" "+IAccountServiceResponse.SHARED_PREFERENCES);
+	}
+
+	public void delete(String groupchatStorageName) {
+		context.deleteFile(groupchatStorageName);
 	}
 }

@@ -39,11 +39,12 @@ public final class HistorySaver {
 	public static TextMessage formatMessageForHistory(TextMessage message, Buddy buddy, String myName){
 		StringBuilder bu = new StringBuilder();
 		
-		if (buddy.protocolUid.equals(message.from)){
+		if (buddy.protocolUid.equals(message.writerUid)){
 			bu.append(buddy.getName());
-			
-		} else {
+		} else if (buddy.ownerUid.equals(message.writerUid)){	
 			bu.append(myName);
+		} else {
+			bu.append(message.writerUid);
 		}
 		
 		bu.append(" (");

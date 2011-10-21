@@ -5,52 +5,57 @@ import ua.snuk182.asia.R;
 import ua.snuk182.asia.core.dataentity.Buddy;
 import ua.snuk182.asia.services.ServiceUtils;
 import ua.snuk182.asia.view.ViewUtils;
+import ua.snuk182.asia.view.cl.ContactListItem;
+import ua.snuk182.asia.view.more.BuddyImage;
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.Handler;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-public class ContactListListItem extends RelativeLayout implements Comparable<ContactListListItem>, OnFocusChangeListener {
+public class ContactListListItem extends RelativeLayout implements ContactListItem, Comparable<ContactListListItem> {
+	
+	private byte status = Buddy.ST_OFFLINE;
 	
 	public TextView name;
 	public ImageView mainStatusIcon;
 	public ImageView xStatusIcon;
 	//public ImageView clientAppIcon;
 	public LinearLayout nameLayout;
-	public ImageView picLayout;
+	public BuddyImage picLayout;
 	public TextView xStatusText;
 	public ImageView authIcon;
 	
 	public static int itemHeight = 48;
 	
-	private static int defaultImageResource = R.drawable.contact_48px;
+	//private static int defaultImageResource = R.drawable.contact_48px;
 	private static float nameTextSize = 14;
 	private static float statusTextSize = 10;
 	
 	private Bitmap icon;
-	
-	private final Handler handler = new Handler();
 	
 	private final Runnable iconGot = new Runnable(){
 
 		@Override
 		public void run() {
 			if (icon != null){
-				BitmapDrawable bicon = new BitmapDrawable(ViewUtils.scaleBitmap(icon, (int) (itemHeight*getEntryPoint().metrics.density), false));
-				bicon.setGravity(Gravity.CENTER);
-				picLayout.setImageDrawable(bicon);
-			} 
+				int picSize = itemHeight;
+				if (EntryPoint.bgColor == EntryPoint.BGCOLOR_WALLPAPER){
+					picSize -= 10;
+				}
+				BitmapDrawable bd = new BitmapDrawable(ViewUtils.scaleBitmap(icon, (int) ((picSize) * getEntryPoint().metrics.density), false));
+				bd.setGravity(Gravity.CENTER);
+				picLayout.setBuddyImage(bd);
+			} else {
+				picLayout.setBuddyImage(R.drawable.dummy_48);
+			}
 		}		
 	};
 	
@@ -62,16 +67,23 @@ public class ContactListListItem extends RelativeLayout implements Comparable<Co
 		super(context, null);
 		setClickable(true);
 		
-		LayoutInflater inflate = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		LayoutInflater inflate = LayoutInflater.from(context);
 		inflate.inflate(R.layout.contact_list_list_item, this); 
 		
 		name = (TextView) findViewById(R.id.usernamelabel);
 		mainStatusIcon = (ImageView) findViewById(R.id.statusimage);
 		xStatusIcon = (ImageView) findViewById(R.id.xstatusimage);
-		picLayout = (ImageView)findViewById(R.id.iconlayout);
+		picLayout = (BuddyImage)findViewById(R.id.iconlayout);
 		authIcon = (ImageView) findViewById(R.id.authimage);
 		xStatusText = (TextView) findViewById(R.id.xstatuslabel);  
-		picLayout.setImageResource(defaultImageResource);
+		picLayout.setBuddyImage(R.drawable.dummy_48);
+		
+		int size = (int) (itemHeight * getEntryPoint().metrics.density);
+		RelativeLayout.LayoutParams layout = new RelativeLayout.LayoutParams(size, size);
+		layout.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+		layout.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+		layout.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+		picLayout.setLayoutParams(layout);
 		
 		setPadding(2,2,2,2);	
 		
@@ -80,20 +92,9 @@ public class ContactListListItem extends RelativeLayout implements Comparable<Co
 		setOnFocusChangeListener(this);
 	}
 	
-	public void populate(Buddy buddy, String bgType, boolean showIcons){
+	public void populate(Buddy buddy, boolean showIcons){
 		if (!buddy.protocolUid.equals(getTag())){
 			return;
-		}
-		
-		if (bgType == null || bgType.equals("wallpaper")){
-			name.setTextColor(0xffffffff);
-		}else {
-			try {
-				int color = (int) Long.parseLong(bgType);
-				name.setTextColor(ColorStateList.valueOf((color-0xff000000)>0x777777?0xff000000:0xffffffff));
-			} catch (NumberFormatException e) {
-				ServiceUtils.log(e);
-			}
 		}
 		
 		name.setText(buddy.getName());
@@ -119,6 +120,9 @@ public class ContactListListItem extends RelativeLayout implements Comparable<Co
 			mainStatusIcon.setImageResource(ServiceUtils.getStatusResIdByBuddyBig(getContext(), buddy));
 			break;
 		}
+		
+		status = buddy.status;
+		
 		switch(buddy.status){
 		case Buddy.ST_ONLINE:
 			xStatusText.setText(R.string.label_st_online);
@@ -248,26 +252,29 @@ public class ContactListListItem extends RelativeLayout implements Comparable<Co
 
 	@Override
 	public int compareTo(ContactListListItem another) {
+		if (status != another.status){
+			if (status == Buddy.ST_OFFLINE){
+				return 1;
+			}
+			if (another.status == Buddy.ST_OFFLINE){
+				return -1;
+			}
+		}
 		return name.getText().toString().compareToIgnoreCase(another.name.getText().toString());
 	}
 	
+	@Override
 	public void requestIcon(final Buddy buddy){
 		if (showIcons){
 			new Thread("CL list item icon request"){
 				@Override
 				public void run(){
-					Bitmap b = buddy.getIcon(getEntryPoint());
-						if (b != null){
-							icon = b;
-							handler.post(iconGot);
-						} else {
-							picLayout.setImageResource(defaultImageResource);
-						}
-					
+					icon = buddy.getIcon(getEntryPoint());
+					getEntryPoint().threadMsgHandler.post(iconGot);
 				}
 			}.start();
 		} else {
-			picLayout.setImageResource(defaultImageResource);
+			picLayout.setBuddyImage(R.drawable.dummy_48);
 		}
 	}
 	
@@ -276,22 +283,18 @@ public class ContactListListItem extends RelativeLayout implements Comparable<Co
 		//picLayout.setLayoutParams(new RelativeLayout.LayoutParams(size, size));		
 		switch(itemHeight){
 		case 24:
-			defaultImageResource = R.drawable.contact_24px;
 			nameTextSize = 8;
 			statusTextSize = 5;
 			break;
 		case 32:
-			defaultImageResource = R.drawable.contact_32px;
 			nameTextSize = 12;
 			statusTextSize = 7;
 			break;
 		case 48:
-			defaultImageResource = R.drawable.contact_48px;
 			nameTextSize = 18;
 			statusTextSize = 10;
 			break;
 		default:
-			defaultImageResource = R.drawable.contact_64px;
 			nameTextSize = 25;
 			statusTextSize = 13;
 			break;
@@ -302,7 +305,19 @@ public class ContactListListItem extends RelativeLayout implements Comparable<Co
 		return (EntryPoint) getContext();
 	}
 
-	public void populate(Buddy buddy, String bgType) {
-		populate(buddy, bgType, showIcons);
+	@Override
+	public void populate(Buddy buddy) {
+		populate(buddy, showIcons);
+	}
+	
+	@Override
+	public void color(){
+		ViewUtils.styleTextView(name);
+		picLayout.onFocusChange(null, false);
+	}
+
+	@Override
+	public void setTag(String tag) {
+		super.setTag(tag);
 	}
 }

@@ -2,29 +2,49 @@ package ua.snuk182.asia.services.xmpp;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.RosterGroup;
+import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.Presence.Mode;
 import org.jivesoftware.smack.packet.Presence.Type;
+import org.jivesoftware.smack.util.StringUtils;
+import org.jivesoftware.smackx.MessageEventManager;
+import org.jivesoftware.smackx.muc.HostedRoom;
+import org.jivesoftware.smackx.muc.MultiUserChat;
+import org.jivesoftware.smackx.muc.Occupant;
+import org.jivesoftware.smackx.muc.RoomInfo;
 
 import ua.snuk182.asia.core.dataentity.Buddy;
 import ua.snuk182.asia.core.dataentity.BuddyGroup;
+import ua.snuk182.asia.core.dataentity.MultiChatRoom;
+import ua.snuk182.asia.core.dataentity.MultiChatRoomOccupants;
 import ua.snuk182.asia.core.dataentity.OnlineInfo;
 import ua.snuk182.asia.core.dataentity.TextMessage;
 
 public final class XMPPEntityAdapter {
 	
-	public static final TextMessage xmppMessage2TextMessage(Message message, byte serviceId){
+	public static final TextMessage xmppMessage2TextMessage(Message message, byte serviceId, boolean resourceAsWriterId){
 		if (message == null){
 			return null;
 		}
 		
-		TextMessage txtMessage = new TextMessage(normalizeJID(message.getFrom()));
+		TextMessage txtMessage;
+		if (resourceAsWriterId){
+			String[] reqisites = message.getFrom().split("/");		
+			txtMessage = new TextMessage(reqisites[1], reqisites[0]);			
+		} else {
+			String from	= normalizeJID(message.getFrom());
+			txtMessage = new TextMessage(from, from);
+		}
 		txtMessage.serviceId = serviceId;
 		txtMessage.messageId = message.getPacketID() != null ? message.getPacketID().hashCode() : message.hashCode();
 		txtMessage.time = new Date();
@@ -95,23 +115,36 @@ public final class XMPPEntityAdapter {
 	}
 	
 	public static String normalizeJID(String jid){
-		if (jid == null){
+		/*if (jid == null){
 			return null;
 		}
 		if (jid.indexOf("/")>-1){
 			return jid.split("/")[0];
 		}
 		
+		return jid;*/
+		return StringUtils.parseBareAddress(jid);
+	}
+	
+	public static String getClientId(String jid){
+		if (jid == null){
+			return null;
+		}
+		if (jid.indexOf("/")>-1){
+			return jid.split("/")[1];
+		}
+		
 		return jid;
 	}
 
-	public static final Buddy rosterEntry2Buddy(XMPPService service, RosterEntry entry, String ownerUid, byte serviceId){
+	public static final Buddy rosterEntry2Buddy(XMPPService service, RosterEntry entry){
 		if (entry == null){
 			return null;
 		}
-		Buddy buddy = new Buddy(normalizeJID(entry.getUser()), ownerUid, service.getServiceName(), serviceId);
+		Buddy buddy = new Buddy(normalizeJID(entry.getUser()), service.getUserID(), service.getServiceName(), service.getServiceId());
 		buddy.name = entry.getName();
 		buddy.id = entry.getUser().hashCode();
+		buddy.clientId = getClientId(entry.getUser());
 		
 		return buddy;
 	}
@@ -129,13 +162,13 @@ public final class XMPPEntityAdapter {
 		return group;
 	}
 	
-	public static final List<Buddy> rosterEntryCollection2BuddyList(XMPPService service, Collection<RosterEntry> entries, String ownerUid, byte serviceId){
+	public static final List<Buddy> rosterEntryCollection2BuddyList(XMPPService service, Collection<RosterEntry> entries){
 		if (entries == null){
 			return null;
 		}
 		List<Buddy> buddies = new ArrayList<Buddy>(entries.size());
 		for (RosterEntry entry: entries){
-			buddies.add(rosterEntry2Buddy(service, entry, ownerUid, serviceId));
+			buddies.add(rosterEntry2Buddy(service, entry));
 		}
 		return buddies;
 	}
@@ -148,6 +181,146 @@ public final class XMPPEntityAdapter {
 		for (RosterGroup entry: entries){
 			groups.add(rosterGroup2BuddyGroup(entry, ownerUid, serviceId));
 		}
-		return groups;
+		return Collections.unmodifiableList(groups);
+	}
+
+	public static final List<MultiChatRoom> xmppHostedRooms2MultiChatRooms(XMPPService service, Collection<HostedRoom> hostedRooms) {
+		if (hostedRooms == null){
+			return new ArrayList<MultiChatRoom>(0);
+		}
+		
+		List<MultiChatRoom> chats = new ArrayList<MultiChatRoom>(hostedRooms.size());
+		for (HostedRoom room: hostedRooms){
+			chats.add(xmppHostedRoom2MultiChatRoom(service, room));
+		}
+		return chats;
+	}
+
+	public static final MultiChatRoom xmppHostedRoom2MultiChatRoom(XMPPService service, HostedRoom room) {
+		MultiChatRoom chat = new MultiChatRoom(room.getJid(), service.getUserID(), service.getServiceName(), service.getServiceId());
+		chat.name = room.getName();
+		return chat;
+	}
+
+	public static MultiChatRoom xmppRoomInfo2MultiChatRoom(XMPPService service, RoomInfo info) {
+		MultiChatRoom chat = new MultiChatRoom(info.getRoom(), service.getUserID(), service.getServiceName(), service.getServiceId());
+		chat.name = info.getDescription();
+		return chat;
+	}
+
+	public static Buddy chatRoomInfo2Buddy(XMPPService service, RoomInfo info, String ownerUid, byte serviceId, boolean joined) {
+		Buddy buddy = new Buddy(normalizeJID(info.getRoom()), ownerUid, service.getServiceName(), serviceId);
+		buddy.name = (info.getSubject()!= null && info.getSubject().length() > 0) ? info.getSubject() : info.getRoom();
+		buddy.xstatusName = info.getDescription();
+		buddy.id = buddy.protocolUid.hashCode();
+		buddy.visibility = Buddy.VIS_GROUPCHAT;
+		if (joined){
+			buddy.status = Buddy.ST_ONLINE;
+		}
+		
+		return buddy;
+	}
+
+	public static Buddy chatInfo2Buddy(XMPPService service, String chatId, String chatName, boolean joined) {
+		Buddy buddy = new Buddy(chatId, service.getUserID(), service.getServiceName(), service.getServiceId());
+		buddy.name = chatName;
+		buddy.id = buddy.protocolUid.hashCode();
+		buddy.visibility = Buddy.VIS_GROUPCHAT;
+		if (joined){
+			buddy.status = Buddy.ST_ONLINE;
+		}
+		
+		return buddy;
+	}
+
+	public static Message textMessage2XMPPMessage(TextMessage textMessage, String thread, String to, Message.Type messageType) {
+		Message message = new Message(to, messageType);
+		message.setThread(thread);
+		message.setPacketID(textMessage.messageId + "");
+		message.setBody(textMessage.text);
+		MessageEventManager.addNotificationsRequests(message, true, true, true, true);
+		
+		return message;
+	}
+	
+	public static final MultiChatRoomOccupants xmppMUCOccupants2mcrOccupants(MultiUserChat muc, XMPPService service, boolean loadIcons) throws XMPPException {
+		List<BuddyGroup> groups = new ArrayList<BuddyGroup>();
+		BuddyGroup moderators = new BuddyGroup(2, service.getUserID(), service.getServiceId());
+		BuddyGroup participants = new BuddyGroup(5, service.getUserID(), service.getServiceId());
+		BuddyGroup other = new BuddyGroup(7, service.getUserID(), service.getServiceId());
+		BuddyGroup all = new BuddyGroup(8, service.getUserID(), service.getServiceId());
+		moderators.name = "Moderators";
+		participants.name = "Participants";
+		other.name = "Other";
+		all.name = "All";
+		
+		Map<String, Buddy> buddies = new HashMap<String, Buddy>();
+		
+		Iterator<String> it = muc.getOccupants(); 
+		
+		for (;it.hasNext();){
+			String occupant = it.next();
+			String buddyId;
+			Occupant occu = muc.getOccupant(occupant);
+			if (occu != null && occu.getJid() != null){
+				buddyId = normalizeJID(occu.getJid());
+				if (loadIcons){
+					try {
+						service.loadCard(buddyId);
+					} catch (Exception e) {
+						service.log(e);
+					}
+				}
+			} else {
+				buddyId = occupant;
+			}
+			Buddy buddy = new Buddy(buddyId, service.getUserID(), service.getServiceName(), service.getServiceId());
+			buddy.name = buddyId.equals(occupant) ? StringUtils.parseResource(occupant) : occu.getNick();
+			buddy.status = xmppPresence2UserStatus(muc.getOccupantPresence(occupant));
+			
+			buddies.put(buddy.protocolUid, buddy);
+			buddy.id = buddyId.hashCode();
+			all.buddyList.add(buddy.id);
+		}
+		
+		try {
+			fillMUCGroup(muc, service, muc.getParticipants(), participants, loadIcons, buddies);
+			fillMUCGroup(muc, service, muc.getModerators(), moderators, loadIcons, buddies);
+			groups.add(moderators);
+			groups.add(participants);
+			groups.add(other);
+		} catch (Exception e1) {
+			service.log(e1);
+		}
+		
+		if (groups.size() < 1){
+			groups.add(all);			
+		}
+		
+		MultiChatRoomOccupants mcro = new MultiChatRoomOccupants(service.getServiceId(), groups, Collections.unmodifiableList(new ArrayList<Buddy>(buddies.values())));
+		
+		return mcro;
+	}
+
+	private static void fillMUCGroup(MultiUserChat muc, XMPPService service, Collection<Occupant> occupants, BuddyGroup group, boolean loadIcons, Map<String, Buddy> map) {
+		for (Occupant occu : occupants){
+			group.buddyList.add(normalizeJID(occu.getJid()).hashCode());
+			String buddyId = normalizeJID(occu.getJid());
+			if (loadIcons){
+				try {
+					service.loadCard(buddyId);
+				} catch (Exception e) {
+					service.log(e);
+				}
+			}
+			Buddy buddy = new Buddy(buddyId, service.getUserID(), service.getServiceName(), service.getServiceId());
+			buddy.name = occu.getNick();
+			
+			byte status = xmppPresence2UserStatus(muc.getOccupantPresence(muc.getRoom()+"/"+occu.getNick()));
+			buddy.status = status != Buddy.ST_OFFLINE ? status : Buddy.ST_ONLINE;
+		
+			map.put(buddy.protocolUid, buddy);
+			buddy.id = buddyId.hashCode();
+		}		
 	}
 }

@@ -6,6 +6,4 @@ public interface IHasMessages {
 	
 	public void messageReceived(TextMessage message, boolean activeTab);
 
-	//public void serviceMessageReceived(ServiceMessage msg);
-
 }

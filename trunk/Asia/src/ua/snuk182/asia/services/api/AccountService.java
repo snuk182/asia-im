@@ -8,6 +8,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import ua.snuk182.asia.core.dataentity.TextMessage;
+import ua.snuk182.asia.services.ServiceUtils;
 import ua.snuk182.asia.services.icq.inner.ICQServiceInternal;
 import android.content.Context;
 
@@ -71,6 +72,14 @@ public abstract class AccountService {
 	public static final short REQ_SENDTYPING = 32;
 	public static final short REQ_VISIBILITY = 33;
 	
+	public static final short REQ_GET_CHAT_ROOMS = 34;
+	public static final short REQ_CREATE_CHAT_ROOM = 35;
+	public static final short REQ_JOIN_CHAT_ROOM = 36;
+	public static final short REQ_LEAVE_CHAT_ROOM = 37;
+	public static final short REQ_CHECK_GROUPCHATS_AVAILABLE = 38;
+	public static final short REQ_GET_CHAT_ROOM_OCCUPANTS = 39;
+
+	
 	public static final String ERR_HOST_NOT_FOUND = "host not found";
 	public static final int NOT_IN_LIST_GROUP_ID = -666;
 	
@@ -81,22 +90,11 @@ public abstract class AccountService {
 	}
 
 	public void log(String log) {
-		if (serviceResponse!=null){
-			try {
-				serviceResponse.respond(IAccountServiceResponse.RES_LOG, serviceId, log);
-			} catch (ProtocolException e) {
-				e.printStackTrace();
-			}
-		}
+		ServiceUtils.log(log);
 	}
 	
 	public void log(Throwable e){
-		StringBuilder sb = new StringBuilder();
-		sb.append(e.toString());
-		for (StackTraceElement el:e.getStackTrace()){
-			sb.append("\n"+el);
-		}
-		log(sb.toString());
+		ServiceUtils.log(e);
 	}
 
 	public abstract int getProtocolOptionNames();

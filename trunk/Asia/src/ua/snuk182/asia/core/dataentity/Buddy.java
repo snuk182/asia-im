@@ -1,7 +1,6 @@
 package ua.snuk182.asia.core.dataentity;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.util.Date;
 import java.util.List;
 
@@ -39,6 +38,7 @@ public class Buddy implements Parcelable, Comparable<Buddy> {
 	public static final byte VIS_IGNORED = 3;
 	public static final byte VIS_REGULAR = 0;
 	public static final byte VIS_NOT_AUTHORIZED = 4;
+	public static final byte VIS_GROUPCHAT = 5;
 	
 	public int id;
 	
@@ -208,6 +208,14 @@ public class Buddy implements Parcelable, Comparable<Buddy> {
 
 	@Override
 	public int compareTo(Buddy another) {
+		if (status != another.status){
+			if (status == Buddy.ST_OFFLINE){
+				return -1;
+			}
+			if (another.status == Buddy.ST_OFFLINE){
+				return 1;
+			}
+		}
 		return name.compareToIgnoreCase(another.name);
 	}
 
@@ -219,7 +227,7 @@ public class Buddy implements Parcelable, Comparable<Buddy> {
 		FileInputStream fis = null;
 		try {
 			fis = context.openFileInput(getFilename()+BUDDYICON_FILEEXT);
-		} catch (FileNotFoundException e) {
+		} catch (Exception e) {
 		}
 		
 		if (fis == null) return null;

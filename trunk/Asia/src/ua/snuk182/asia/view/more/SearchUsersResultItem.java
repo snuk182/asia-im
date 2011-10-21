@@ -20,7 +20,7 @@ public class SearchUsersResultItem extends RelativeLayout {
 
 	public SearchUsersResultItem(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		LayoutInflater inflate = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		LayoutInflater inflate = LayoutInflater.from(context);
 		inflate.inflate(R.layout.buddy_search_item, this); 
 		
 		statusImage = (ImageView) findViewById(R.id.statusimage);

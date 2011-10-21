@@ -5,7 +5,10 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import ua.snuk182.asia.services.RuntimeService;
 import ua.snuk182.asia.services.api.AccountService;
@@ -36,6 +39,7 @@ public class AccountView implements Parcelable {
 	public byte visibility = VIS_TO_BUDDIES;
 	private List<Buddy> buddyList = Collections.synchronizedList(new ArrayList<Buddy>());
 	private List<BuddyGroup> buddyGroupList = Collections.synchronizedList(new ArrayList<BuddyGroup>());
+	private Map<String, Byte> unreadsMap = new HashMap<String, Byte>();
 	public Bundle options = new Bundle();
 	private short connectionState = AccountService.STATE_DISCONNECTED;
 	public long lastUpdateTime = new Date().getTime();
@@ -199,12 +203,17 @@ public class AccountView implements Parcelable {
 		this.lastUpdateTime = new Date().getTime();
 	}
 
-	public void removeAllBuddiesExceptNotInList(List<Buddy> args) {
+	public void removeAllBuddies(List<Buddy> args, boolean keepNotInList) {
 		synchronized (buddyList) {
 			for (int i = buddyList.size() - 1; i >= 0; i--) {
-				if (buddyList.get(i).groupId != AccountService.NOT_IN_LIST_GROUP_ID) {
-					buddyList.remove(i);
+				Buddy bu = buddyList.get(i);
+				if (bu.unread > 0){
+					unreadsMap.put(bu.protocolUid, bu.unread);
 				}
+				if ((bu.groupId == AccountService.NOT_IN_LIST_GROUP_ID && keepNotInList) || bu.visibility == Buddy.VIS_GROUPCHAT) {
+					continue;
+				}
+				buddyList.remove(i);				
 			}
 			for (int i = buddyList.size() - 1; i >= 0; i--) { // if not-in-listed is in new list
 				for (Buddy bu : args) {
@@ -362,11 +371,20 @@ public class AccountView implements Parcelable {
 		synchronized (buddyList) {
 			this.buddyList.addAll(buddyList);
 		}
+		for (Iterator<String> unreads = unreadsMap.keySet().iterator(); unreads.hasNext();){
+			String unreadKey = unreads.next();
+			for (Buddy bu : buddyList){
+				if (bu.protocolUid.equals(unreadKey)){
+					bu.unread = unreadsMap.get(unreadKey);
+				}
+			}
+		}
+		unreadsMap.clear();
 		if (getIcons){
 			for (Buddy b:buddyList){
-				if (b.status != Buddy.ST_OFFLINE){
+				//if (b.status != Buddy.ST_OFFLINE){
 					runtimeService.requestIcon(b.serviceId, b.protocolUid);
-				}
+				//}
 			}
 		}
 	}

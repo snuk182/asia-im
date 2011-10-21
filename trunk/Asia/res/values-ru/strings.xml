@@ -82,6 +82,7 @@
     <string name="label_unread_group">"Непрочитанные"</string>
     <string name="label_online_group">"В сети"</string>
     <string name="label_offline_group">"Не в сети"</string>
+    <string name="label_chats_group">"Чаты"</string>
     <string name="label_not_in_list_group">"Не в списке"</string>
     <string name="label_connect">"Подключиться"</string>
     <string name="label_disconnect">"Отключиться"</string>
@@ -95,14 +96,13 @@
     <string name="label_pick_status">"Выбрать статус"</string>
     <string name="label_disconnected">"Отключился"</string>
     <string name="label_buddy_details">"Инфо контакта"</string>
-    <string name="label_close_chat">"Закрыть чат"</string>
+    <string name="label_close">"Закрыть"</string>
     <string name="label_return_to_buddylist">"Вернуться к списку контактов"</string>
     <string name="label_edit">"Править "</string>
     <string name="label_remove">"Удалить "</string>
     <string name="label_are_you_sure_you_want_to_remove">"Вы действительно хотите удалить "</string>
     <string name="label_yes">"Да"</string>
     <string name="label_no">"Нет"</string>
-    <string name="label_close">"Закрыть"</string>
     <string name="label_add_new_account">"Добавить учетную запись"</string>
     <string name="label_account_type">"Тип учетной записи:"</string>
     <string name="label_account_id">"ID записи (UIN):"</string>
@@ -195,8 +195,6 @@
 	<string name="label_text_size">Размер шрифта в чате</string>
 	<string name="label_cl_item_size">Размер контакта в списке</string>
 	
-	<string name="label_sort_lists">"Сортировать по алфавиту"</string>
-	
 	<string name="menu_value_copy">Копировать</string>
 	<string name="menu_value_add_to_copied">Добавить к скопированному</string>
 	<string name="menu_value_copy_all">Копировать все</string>
@@ -216,4 +214,23 @@
 	<string name="menu_value_delete_group">"Удалить группу"</string>
 	
 	<string name="label_too_many_accounts">Слишком много учетных записей!</string>
+	
+	<string name="menu_value_join_chat">Войти в чат</string>
+	<string name="menu_value_leave_chat">Выйти из чата</string>
+	
+	<string name="label_hide_participants">Спрятать участников</string>
+	<string name="label_show_participants">Показать участников</string>
+	
+	<string name="label_create_groupchat">Создать новый чат</string>
+	<string name="label_connect_to_chat">Подключиться к чату</string>
+	<string name="label_refresh_chat_list">Обновить список</string>
+	<string name="label_joinedchats">Чаты</string>
+	<string name="label_chat_name">Имя чата</string>
+	<string name="label_nickname">Ваш ник в чате</string>
+	<string name="label_chat_id">ID чата (только буквы, цифры, тире и подчеркивание)</string>
+	<string name="label_pwd_protected">Нужен пароль</string>
+	<string name="label_password">Пароль</string>
+	<string name="label_get_available_chats">Получить доступные чаты</string>
+	<string name="label_chat_options">Опции чата</string>
+	<string name="label_chat_enter_manually">Ввести вручную</string>
 </resources>

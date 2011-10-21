@@ -9,7 +9,6 @@ import ua.snuk182.asia.services.icq.ICQService;
 import ua.snuk182.asia.services.mrim.MrimService;
 import ua.snuk182.asia.services.xmpp.XMPPService;
 import ua.snuk182.asia.view.ITabContent;
-import android.content.Context;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -42,7 +41,7 @@ public class NewAccountView extends ScrollView implements ITabContent {
 	
 	public NewAccountView(EntryPoint entryPoint, final AccountView account){
 		super(entryPoint);
-		LayoutInflater inflate = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		LayoutInflater inflate = LayoutInflater.from(entryPoint);
 		inflate.inflate(R.layout.new_account_view, this);
 		
 		this.account = account;

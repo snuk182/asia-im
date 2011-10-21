@@ -8,8 +8,8 @@ import java.util.List;
 import ua.snuk182.asia.EntryPoint;
 import ua.snuk182.asia.R;
 import ua.snuk182.asia.services.ServiceUtils;
+import ua.snuk182.asia.view.ViewUtils;
 import ua.snuk182.asia.view.cl.list.ContactListListItem;
-import android.content.Context;
 import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.view.Gravity;
@@ -25,7 +25,7 @@ import android.widget.TextView;
 public class DoubleContactListGroupItem extends LinearLayout implements OnClickListener, OnFocusChangeListener{
 	
 	private static final String SPACE = "  ";
-	public static int itemSize = 120;
+	public static int itemSize = 0;
 	
 	private TextView subGroupNameText;
 	private TextView subGroupCountText;
@@ -34,9 +34,8 @@ public class DoubleContactListGroupItem extends LinearLayout implements OnClickL
 	private List<ContactListListItem> buddyList = new ArrayList<ContactListListItem>();
 	private List<LinearLayout> buddyRows = new ArrayList<LinearLayout>();
 	private ViewGroup ownerLayout;
-	private boolean refreshContents = false;
+	private boolean refreshContents = true;
 	private final int columnCount = 2;
-	private boolean sort = true;
 	private boolean collapsed = false;
 	
 	public DoubleContactListGroupItem(final EntryPoint entryPoint, AttributeSet attrs, ViewGroup owner, String tag, String name){
@@ -44,7 +43,7 @@ public class DoubleContactListGroupItem extends LinearLayout implements OnClickL
 		
 		ownerLayout = owner;
 		
-		LayoutInflater inflate = (LayoutInflater)entryPoint.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		LayoutInflater inflate = LayoutInflater.from(entryPoint);
 		inflate.inflate(R.layout.contact_list_grid_panel_item, this); 
 		setLayoutParams(new ListView.LayoutParams(
 		        ListView.LayoutParams.FILL_PARENT,
@@ -76,7 +75,7 @@ public class DoubleContactListGroupItem extends LinearLayout implements OnClickL
 		}
 	}
 
-	public void refresh(boolean refreshLayout){
+	public synchronized void refresh(boolean refreshLayout){
 		if (refreshLayout){
 			/*for (ContactListListItem item: buddyList){
 				item.setLayoutParams(new LinearLayout.LayoutParams(DoubleContactListGroupItem.itemSize, LayoutParams.WRAP_CONTENT, 1));
@@ -90,7 +89,7 @@ public class DoubleContactListGroupItem extends LinearLayout implements OnClickL
 			}
 		}
 		if (refreshContents){
-			forceRefresh(sort);
+			forceRefresh();
 			refreshContents = false;
 		} else {
 			ownerLayout.removeView(this);
@@ -104,13 +103,8 @@ public class DoubleContactListGroupItem extends LinearLayout implements OnClickL
 		setCollapsedInternal(false);
 	}
 	
-	public void forceRefresh(boolean sort){
-		
-		this.sort = sort;
-		
-		if (sort){
-			Collections.sort(buddyList);
-		}
+	public void forceRefresh(){
+		Collections.sort(buddyList);
 		
 		ownerLayout.removeView(this);
 		for (LinearLayout row : buddyRows) {
@@ -148,6 +142,10 @@ public class DoubleContactListGroupItem extends LinearLayout implements OnClickL
 				row.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
 			}
 			
+			/*if (row.getParent() != null){
+				((ViewGroup)row.getParent()).removeView(row);
+			}
+			ownerLayout.addView(row);*/
 			if (row.getParent() == null){
 				ownerLayout.addView(row);
 			}
@@ -181,6 +179,8 @@ public class DoubleContactListGroupItem extends LinearLayout implements OnClickL
 				ownerLayout.removeView(buddyRows.remove(i));
 			}
 		}
+		
+		refreshContents = false;
 	}
 	
 	private View newDummy() {
@@ -291,5 +291,10 @@ public class DoubleContactListGroupItem extends LinearLayout implements OnClickL
 		}
 		subGroupNameText.setTextSize(textSize);
 		subGroupCountText.setTextSize(textSize);
+	}
+	
+	public void color() {
+		ViewUtils.styleTextView(subGroupCountText);
+		ViewUtils.styleTextView(subGroupNameText);
 	}
 }

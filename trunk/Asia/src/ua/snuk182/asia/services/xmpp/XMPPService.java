@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -14,37 +15,77 @@ import org.jivesoftware.smack.ChatManagerListener;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.MessageListener;
+import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterListener;
+import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.SmackConfiguration;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.Presence;
+import org.jivesoftware.smack.provider.PrivacyProvider;
+import org.jivesoftware.smack.provider.ProviderManager;
+import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.ChatState;
 import org.jivesoftware.smackx.ChatStateListener;
 import org.jivesoftware.smackx.DefaultMessageEventRequestListener;
+import org.jivesoftware.smackx.Form;
+import org.jivesoftware.smackx.FormField;
+import org.jivesoftware.smackx.GroupChatInvitation;
 import org.jivesoftware.smackx.MessageEventManager;
 import org.jivesoftware.smackx.MessageEventNotificationListener;
+import org.jivesoftware.smackx.PrivateDataManager;
+import org.jivesoftware.smackx.ServiceDiscoveryManager;
+import org.jivesoftware.smackx.bytestreams.ibb.provider.CloseIQProvider;
+import org.jivesoftware.smackx.bytestreams.ibb.provider.DataPacketProvider;
+import org.jivesoftware.smackx.bytestreams.ibb.provider.OpenIQProvider;
+import org.jivesoftware.smackx.bytestreams.socks5.provider.BytestreamsProvider;
+import org.jivesoftware.smackx.muc.Affiliate;
+import org.jivesoftware.smackx.muc.HostedRoom;
+import org.jivesoftware.smackx.muc.InvitationRejectionListener;
+import org.jivesoftware.smackx.muc.MultiUserChat;
+import org.jivesoftware.smackx.muc.ParticipantStatusListener;
+import org.jivesoftware.smackx.muc.RoomInfo;
+import org.jivesoftware.smackx.muc.SubjectUpdatedListener;
+import org.jivesoftware.smackx.packet.ChatStateExtension;
+import org.jivesoftware.smackx.packet.LastActivity;
+import org.jivesoftware.smackx.packet.OfflineMessageInfo;
+import org.jivesoftware.smackx.packet.OfflineMessageRequest;
+import org.jivesoftware.smackx.packet.SharedGroupsInfo;
 import org.jivesoftware.smackx.packet.VCard;
+import org.jivesoftware.smackx.provider.AdHocCommandDataProvider;
+import org.jivesoftware.smackx.provider.DataFormProvider;
+import org.jivesoftware.smackx.provider.DelayInformationProvider;
+import org.jivesoftware.smackx.provider.DiscoverInfoProvider;
+import org.jivesoftware.smackx.provider.DiscoverItemsProvider;
+import org.jivesoftware.smackx.provider.MUCAdminProvider;
+import org.jivesoftware.smackx.provider.MUCOwnerProvider;
+import org.jivesoftware.smackx.provider.MUCUserProvider;
+import org.jivesoftware.smackx.provider.MessageEventProvider;
+import org.jivesoftware.smackx.provider.MultipleAddressesProvider;
+import org.jivesoftware.smackx.provider.RosterExchangeProvider;
+import org.jivesoftware.smackx.provider.StreamInitiationProvider;
+import org.jivesoftware.smackx.provider.VCardProvider;
+import org.jivesoftware.smackx.provider.XHTMLExtensionProvider;
+import org.jivesoftware.smackx.search.UserSearch;
+import org.jivesoftware.spark.util.DummySSLSocketFactory;
 
 import ua.snuk182.asia.R;
-import ua.snuk182.asia.core.dataentity.AccountView;
 import ua.snuk182.asia.core.dataentity.Buddy;
 import ua.snuk182.asia.core.dataentity.BuddyGroup;
+import ua.snuk182.asia.core.dataentity.MultiChatRoom;
+import ua.snuk182.asia.core.dataentity.MultiChatRoomOccupants;
 import ua.snuk182.asia.core.dataentity.OnlineInfo;
 import ua.snuk182.asia.core.dataentity.PersonalInfo;
 import ua.snuk182.asia.core.dataentity.TextMessage;
 import ua.snuk182.asia.services.api.AccountService;
 import ua.snuk182.asia.services.api.IAccountServiceResponse;
 import ua.snuk182.asia.services.api.ProtocolException;
-import ua.snuk182.asia.services.icq.inner.ICQServiceResponse;
 import android.content.Context;
-import android.content.res.TypedArray;
 
 public class XMPPService extends AccountService implements ConnectionListener, MessageListener, ChatManagerListener, RosterListener, MessageEventNotificationListener, ChatStateListener {
-
-	public static final byte[] statusValues = new byte[] { Buddy.ST_ONLINE, Buddy.ST_AWAY, Buddy.ST_NA, Buddy.ST_BUSY, Buddy.ST_FREE4CHAT, Buddy.ST_INVISIBLE };
 
 	private static final String LOGIN_PORT = "loginport";
 
@@ -53,7 +94,7 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 	private static final String PASSWORD = "password";
 
 	private static final String JID = "jid";
-	
+
 	private static final Random random = new Random();
 
 	private OnlineInfo onlineInfo;
@@ -61,9 +102,15 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 	XMPPConnection connection;
 
 	final Map<String, Chat> chats = new HashMap<String, Chat>();
-	
+	final Map<String, MultiUserChat> multichats = new HashMap<String, MultiUserChat>();
+
 	private volatile boolean isContactListReady = false;
 	
+	@SuppressWarnings("unused")
+	private boolean isSecure = false;
+	
+	String groupchatService = null;
+
 	private List<OnlineInfo> infos = Collections.synchronizedList(new ArrayList<OnlineInfo>());
 
 	private final DefaultMessageEventRequestListener messageEventListener = new DefaultMessageEventRequestListener();
@@ -73,24 +120,23 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 	public void processMessage(Chat chat, final Message message) {
 		final String log = "message " + chat.getParticipant();
 		log(log);
-		/*new Thread(log){
-			@Override 
-			public void run(){
-				try {
-					TextMessage txtmessage = XMPPEntityAdapter.xmppMessage2TextMessage(message, serviceId);
-					if (txtmessage.from.equals(getUserID())) {
-						resetHeartbeat();
-						return;
-					}
-					serviceResponse.respond(IAccountServiceResponse.RES_MESSAGE, getServiceId(), txtmessage);
-				} catch (ProtocolException e) {
-					log(e);
-				}
-			}
-		}.start();*/
-		
+		/*
+		 * new Thread(log){
+		 * 
+		 * @Override public void run(){ try { TextMessage txtmessage =
+		 * XMPPEntityAdapter.xmppMessage2TextMessage(message, serviceId); if
+		 * (txtmessage.from.equals(getUserID())) { resetHeartbeat(); return; }
+		 * serviceResponse.respond(IAccountServiceResponse.RES_MESSAGE,
+		 * getServiceId(), txtmessage); } catch (ProtocolException e) { log(e);
+		 * } } }.start();
+		 */
+
+		processMessageInternal(message, false);
+	}
+
+	private void processMessageInternal(final Message message, boolean resourceAsWriterId) {
 		try {
-			TextMessage txtmessage = XMPPEntityAdapter.xmppMessage2TextMessage(message, serviceId);
+			TextMessage txtmessage = XMPPEntityAdapter.xmppMessage2TextMessage(message, serviceId, resourceAsWriterId);
 			if (txtmessage.from.equals(getUserID())) {
 				resetHeartbeat();
 			}
@@ -104,16 +150,7 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 	public void chatCreated(final Chat chat, boolean createdLocally) {
 		final String log = "chat " + chat.getParticipant();
 		log(log);
-		/*new Thread(log){
-			@Override
-			public void run(){
-				if (chats.get(XMPPEntityAdapter.normalizeJID(chat.getParticipant())) == null) {
-					chat.addMessageListener(XMPPService.this);
-					chats.put(XMPPEntityAdapter.normalizeJID(chat.getParticipant()), chat);
-				}
-			}
-		}.start();*/
-		
+
 		if (chats.get(XMPPEntityAdapter.normalizeJID(chat.getParticipant())) == null) {
 			chat.addMessageListener(this);
 			chats.put(XMPPEntityAdapter.normalizeJID(chat.getParticipant()), chat);
@@ -122,32 +159,22 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 
 	@Override
 	public void presenceChanged(final Presence presence) {
-		final String log = "presence "+presence.getFrom();
+		final String log = "presence " + presence.getFrom();
 		log(log);
-		/*new Thread(log){
-			@Override
-			public void run(){
-				try {
-					serviceResponse.respond(IAccountServiceResponse.RES_BUDDYSTATECHANGED, serviceId, XMPPEntityAdapter.presence2OnlineInfo(presence));
-				} catch (ProtocolException e) {
-					log(e);
-				}
-			}
-		}.start();*/
-		
+
 		OnlineInfo info = XMPPEntityAdapter.presence2OnlineInfo(presence);
 		synchronized (infos) {
 			infos.add(info);
 		}
-		
-		if (isContactListReady){
+
+		if (isContactListReady) {
 			checkCachedInfos();
-		} 
+		}
 	}
 
 	private void checkCachedInfos() {
 		synchronized (infos) {
-			if (infos.size() > 0) {
+			while (infos.size() > 0) {
 				for (int i = infos.size() - 1; i >= 0; i--) {
 					OnlineInfo info = infos.remove(i);
 					try {
@@ -157,25 +184,19 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 					}
 				}
 			}
-		}		
+		}
 	}
 
 	@Override
 	public void entriesUpdated(Collection<String> addresses) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void entriesDeleted(Collection<String> addresses) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void entriesAdded(Collection<String> addresses) {
-		// TODO Auto-generated method stub
-
 	}
 
 	private String un = null;
@@ -187,7 +208,7 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 
 	public XMPPService(Context context, IAccountServiceResponse serviceResponse, byte serviceId) {
 		super(context, serviceResponse, serviceId);
-		
+
 		options.put(JID, null);
 		options.put(PASSWORD, null);
 		options.put(LOGIN_HOST, loginHost);
@@ -230,7 +251,7 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 			break;
 		case AccountService.REQ_DISCONNECT:
 			// closeKeepaliveThread();
-			if (connection != null){
+			if (connection != null) {
 				connection.disconnect();
 			}
 			break;
@@ -240,7 +261,7 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 				onlineInfo.protocolUid = getJID();
 				onlineInfo.userStatus = (Byte) args[0];
 			}
-			connect();
+			connect(args);
 			break;
 		case AccountService.REQ_GETCONTACTLIST:
 			break;
@@ -268,7 +289,7 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 			}
 			break;
 		case AccountService.REQ_GETICON:
-			if (connection == null){
+			if (connection == null) {
 				return null;
 			}
 			getPersonalInfo((String) args[0]);
@@ -276,32 +297,364 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 		case AccountService.REQ_REMOVEGROUP:
 			break;
 		case AccountService.REQ_SENDTYPING:
-			if (connection == null){
+			if (connection == null) {
 				return null;
 			}
-			sendTyping((String)args[0]);
+			sendTyping((String) args[0]);
 			break;
+		case AccountService.REQ_GET_CHAT_ROOMS:
+			getAvailableChatRooms();
+			break;
+		case AccountService.REQ_CREATE_CHAT_ROOM:
+			return createChatRoom((String) args[0], (String) args[1], (String) args[2], args.length > 3 ? (String) args[3] : null);
+		case AccountService.REQ_JOIN_CHAT_ROOM:
+			return joinChatRoom((String) args[0], (String) args[1], args.length > 2 ? (String) args[2] : null);
+		case AccountService.REQ_CHECK_GROUPCHATS_AVAILABLE:
+			return groupchatService!=null;
+		case AccountService.REQ_LEAVE_CHAT_ROOM:
+			leaveChatRoom((String) args[0]);
+			break;
+		case AccountService.REQ_GET_CHAT_ROOM_OCCUPANTS:
+			return getChatRoomOccupants((String)args[0], (Boolean) args[1]);
+		case AccountService.REQ_GETFULLBUDDYINFO:
+			return getFullInfo((String)args[0]);
 		}
 		return null;
 	}
+	
+	private PersonalInfo getFullInfo(String uid) throws ProtocolException {
+		PersonalInfo info = new PersonalInfo();
+		info.protocolUid = uid;
+		
+		if (uid.indexOf(groupchatService) > -1){
+			try {
+				RoomInfo room = MultiUserChat.getRoomInfo(connection, uid);
+				info.properties.putCharSequence(PersonalInfo.INFO_CHAT_DESCRIPTION, room.getDescription());
+				info.properties.putCharSequence(PersonalInfo.INFO_CHAT_OCCUPANTS, room.getOccupantsCount()+"");
+				info.properties.putCharSequence(PersonalInfo.INFO_CHAT_SUBJECT, room.getSubject());
+				return info;				
+			} catch (XMPPException e) {
+				throw new ProtocolException(e.getLocalizedMessage());
+			}
+		} else {
+			VCard card = new VCard();
+			try {
+				card.load(connection, uid);
+				info.properties.putCharSequence(PersonalInfo.INFO_FIRST_NAME, card.getFirstName());
+				info.properties.putCharSequence(PersonalInfo.INFO_LAST_NAME, card.getLastName());
+				info.properties.putCharSequence(PersonalInfo.INFO_NICK, card.getNickName());
+				info.properties.putCharSequence(PersonalInfo.INFO_EMAIL, card.getEmailHome());
+				
+				info.properties.putCharSequence("Organization", card.getOrganization());
+				info.properties.putCharSequence("Work email", card.getEmailWork());
+				
+				return info;
+			} catch (XMPPException e) {
+				throw new ProtocolException(e.getLocalizedMessage());
+			}
+		}
+	}
+
+	private MultiChatRoomOccupants getChatRoomOccupants(String chatId, boolean loadOccupantIcons) throws ProtocolException {
+		String roomJid = chatId.indexOf("@")>1 ? chatId : chatId+"@"+groupchatService;
+		MultiUserChat muc = multichats.get(roomJid);
+		if (muc == null){
+			throw new ProtocolException("No joined chat found");
+		}
+		
+		try {
+			return XMPPEntityAdapter.xmppMUCOccupants2mcrOccupants(muc, this, loadOccupantIcons);
+		} catch (XMPPException e) {
+			throw new ProtocolException(e.getLocalizedMessage());
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private boolean amIOwner(MultiUserChat chat) throws XMPPException{
+		for (Affiliate aff: chat.getOwners()){
+			if (XMPPEntityAdapter.normalizeJID(aff.getJid()).equals(getJID())){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private void leaveChatRoom(String chatId) throws ProtocolException {
+		String roomJid = chatId.indexOf("@")>1 ? chatId : chatId+"@"+groupchatService;
+		MultiUserChat muc = multichats.get(roomJid);
+		if (muc == null){
+			throw new ProtocolException("No joined chat found");
+		}
+		muc.leave();
+		
+		/*if (muc.getParticipants().size() < 2 && amIOwner(muc)){
+		
+		}*/
+	}
+
+	private Buddy joinChatRoom(String chatId, String chatPassword, String nickName) throws ProtocolException{
+		String roomJid = chatId.indexOf("@")>1 ? chatId : chatId+"@"+groupchatService;
+		MultiUserChat chat = new MultiUserChat(connection, roomJid);
+		try {
+			/*DiscussionHistory history = new DiscussionHistory();
+			history.setMaxStanzas(5);
+		    chat.join(nickName == null ? un : nickName, chatPassword, history, SmackConfiguration.getPacketReplyTimeout());*/
+			
+			chat.join(nickName == null ? un : nickName, chatPassword);
+			
+			fillWithListeners(chat);
+			multichats.put(chat.getRoom(), chat);
+
+			RoomInfo info = MultiUserChat.getRoomInfo(connection, roomJid);			
+			return XMPPEntityAdapter.chatRoomInfo2Buddy(this, info, getJID(), getServiceId(), true);
+		} catch (XMPPException e) {
+			notification(e.getLocalizedMessage());
+			throw new ProtocolException(e.getLocalizedMessage());
+		}
+	}
+
+	private Buddy createChatRoom(String chatId, String chatName, String chatPassword, String nickName) throws ProtocolException {
+		try {
+			String roomJid = chatId.indexOf("@")>1 ? chatId : chatId+"@"+groupchatService;
+			MultiUserChat chat = new MultiUserChat(connection, roomJid);
+			chat.create(nickName == null ? un : nickName);
+			// TODO more!!!!11
+
+			Form form = chat.getConfigurationForm();
+			Form submitForm = form.createAnswerForm();
+			for (Iterator<FormField> fields = form.getFields(); fields.hasNext();) {
+				FormField field = fields.next();
+				log(field.getVariable());
+				if (!FormField.TYPE_HIDDEN.equals(field.getType()) && field.getVariable() != null) {
+					submitForm.setDefaultAnswer(field.getVariable());
+				}
+			}
+			try {
+				List<String> owners = new ArrayList<String>();
+				owners.add(getJID());
+				submitForm.setAnswer("muc#roomconfig_roomowners", owners);
+			} catch (Exception e) {
+				log("Could not set XMPP muc room owners");
+			}
+
+			if (chatPassword != null) {
+				submitForm.setAnswer("muc#roomconfig_roomsecret", chatPassword);
+				submitForm.setAnswer("muc#roomconfig_publicroom", false);
+				submitForm.setAnswer("muc#roomconfig_passwordprotectedroom", true);
+			}
+
+			chat.sendConfigurationForm(submitForm);
+			
+			chat.changeSubject(chatName);
+			
+			fillWithListeners(chat);
+			multichats.put(chat.getRoom(), chat);
+
+			return XMPPEntityAdapter.chatInfo2Buddy(this, chat.getRoom(), chatName, true);
+		} catch (XMPPException e) {
+			notification(e.getLocalizedMessage());
+			throw new ProtocolException(e.getLocalizedMessage());
+		}
+	}
+
+	private List<Buddy> getJoinedChatRooms() {
+		Iterator<String> joinedRooms = MultiUserChat.getJoinedRooms(connection, getJID());
+		List<Buddy> multiChatBuddies = new ArrayList<Buddy>();
+		for (; joinedRooms.hasNext();) {
+			String roomJid = joinedRooms.next();
+			try {
+				RoomInfo info = MultiUserChat.getRoomInfo(connection, roomJid);
+				multiChatBuddies.add(XMPPEntityAdapter.chatRoomInfo2Buddy(this, info, getJID(), getServiceId(), true));
+			} catch (XMPPException e) {
+				log(e);
+			}
+		}
+		
+		for (final Buddy room : multiChatBuddies) {
+			MultiUserChat chat = new MultiUserChat(connection, room.protocolUid);
+			fillWithListeners(chat);			
+			multichats.put(room.protocolUid, chat);
+		}		
+		
+		return multiChatBuddies;
+	}
+	
+	private void chatDefaultAction(String chatId, String serviceMessage){
+		try {
+			serviceResponse.respond(IAccountServiceResponse.RES_SERVICEMESSAGE, serviceId, chatId, serviceMessage);
+			serviceResponse.respond(IAccountServiceResponse.RES_CHAT_PARTICIPANTS, serviceId, chatId, getChatRoomOccupants(chatId, false));
+		} catch (ProtocolException e) {
+			log(e);
+		}
+		
+	}
+
+	private void fillWithListeners(final MultiUserChat chat) {
+		chat.addMessageListener(new PacketListener() {
+
+			@Override
+			public void processPacket(Packet packet) {
+				Message message = (Message) packet;
+				if (message.getFrom().split("/")[1].equals(chat.getNickname())){
+					return;
+				}
+				processMessageInternal(message, true);
+			}
+		});
+		
+		chat.addParticipantListener(new PacketListener() {
+			
+			@Override
+			public void processPacket(Packet packet) {
+				try {
+					serviceResponse.respond(IAccountServiceResponse.RES_CHAT_PARTICIPANTS, serviceId, getChatRoomOccupants(chat.getRoom(), false));
+				} catch (ProtocolException e) {
+					log(e);
+				}				
+			}
+		});
+		
+		chat.addInvitationRejectionListener(new InvitationRejectionListener() {
+			
+			@Override
+			public void invitationDeclined(String invitee, String reason) {
+				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(invitee)+" declined invitation: "+reason);
+			}
+		});
+		
+		chat.addParticipantStatusListener(new ParticipantStatusListener() {
+			
+			@Override
+			public void voiceRevoked(String participant) {
+				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant)+" voice revoked");
+			}
+			
+			@Override
+			public void voiceGranted(String participant) {
+				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant)+" voice granted");
+			}
+			
+			@Override
+			public void ownershipRevoked(String participant) {
+				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant)+" ownership revoked");
+			}
+			
+			@Override
+			public void ownershipGranted(String participant) {
+				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant)+" ownership granted");
+			}
+			
+			@Override
+			public void nicknameChanged(String participant, String newNickname) {
+				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant)+" changed nick to "+newNickname);
+			}
+			
+			@Override
+			public void moderatorRevoked(String participant) {
+				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant)+" moderator revoked");
+			}
+			
+			@Override
+			public void moderatorGranted(String participant) {
+				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant)+" moderator granted");
+			}
+			
+			@Override
+			public void membershipRevoked(String participant) {
+				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant)+" membership revoked");
+			}
+			
+			@Override
+			public void membershipGranted(String participant) {
+				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant)+" membership granted");
+			}
+			
+			@Override
+			public void left(String participant) {
+				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant)+" left the chat");
+			}
+			
+			@Override
+			public void kicked(String participant, String actor, String reason) {
+				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant)+" was kicked by "+actor+": "+reason);
+			}
+			
+			@Override
+			public void joined(String participant) {
+				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant)+" joined the chat");
+			}
+			
+			@Override
+			public void banned(String participant, String actor, String reason) {
+				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant)+" was banned by "+actor+": "+reason);
+			}
+			
+			@Override
+			public void adminRevoked(String participant) {
+				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant)+" admin revoked");
+			}
+			
+			@Override
+			public void adminGranted(String participant) {
+				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant)+" admin granted");
+			}
+		});
+		
+		chat.addSubjectUpdatedListener(new SubjectUpdatedListener() {
+			
+			@Override
+			public void subjectUpdated(String subject, String from) {
+				try {
+					serviceResponse.respond(IAccountServiceResponse.RES_SERVICEMESSAGE, serviceId, chat.getRoom(), StringUtils.parseResource(from)+" set chat topic to \""+subject+"\"");
+					serviceResponse.respond(IAccountServiceResponse.RES_BUDDYMODIFIED, getServiceId(), XMPPEntityAdapter.chatInfo2Buddy(XMPPService.this, chat.getRoom(), subject, true));
+				} catch (ProtocolException e) {
+					log(e);
+				}
+			}
+		});
+		
+	}
+
+	private void getAvailableChatRooms() throws ProtocolException {
+		try {
+			Collection<String> mucServices = MultiUserChat.getServiceNames(connection);
+			if (mucServices.isEmpty()){
+				throw new ProtocolException(ProtocolException.ERROR_NO_GROUPCHAT_AVAILABLE, "This server does not support group chats");
+			}
+			List<HostedRoom> rooms = new ArrayList<HostedRoom>();
+			for (String service : mucServices) {
+				try {
+					rooms.addAll(MultiUserChat.getHostedRooms(connection, service));
+				} catch (XMPPException e) {
+					log(e);
+				}
+			}
+			List<MultiChatRoom> chats = XMPPEntityAdapter.xmppHostedRooms2MultiChatRooms(this, rooms);
+			serviceResponse.respond(IAccountServiceResponse.RES_AVAILABLE_CHATS, serviceId, chats);
+		} catch (XMPPException e) {
+			throw new ProtocolException(e.getLocalizedMessage());
+		}
+	}
 
 	private void sendTyping(String jid) {
-		messageEventManager.sendComposingNotification(jid, random.nextLong()+"");
+		messageEventManager.sendComposingNotification(jid, random.nextLong() + "");
 	}
 
 	private void sendMessage(TextMessage textMessage) throws XMPPException {
+		MultiUserChat muc = multichats.get(textMessage.to);
+		
+		if (muc != null){
+			muc.sendMessage(textMessage.text);
+			return;
+		}
+		
 		Chat chat = chats.get(textMessage.to);
 		if (chat == null) {
 			chat = connection.getChatManager().createChat(textMessage.to, this);
 			chats.put(textMessage.to, chat);
 		}
-
-		Message message = new Message(chat.getParticipant(), Message.Type.chat);
-		message.setThread(chat.getThreadID());
-		message.setPacketID(textMessage.messageId + "");
-		message.setBody(textMessage.text);
-		MessageEventManager.addNotificationsRequests(message, true, true, true, true);
-		chat.sendMessage(message);
+		
+		chat.sendMessage(XMPPEntityAdapter.textMessage2XMPPMessage(textMessage, chat.getThreadID(), chat.getParticipant(), Message.Type.chat));
 
 	}
 
@@ -309,7 +662,7 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 		return un + "@" + serviceName;
 	}
 
-	private void connect() throws ProtocolException {
+	private void connect(Object[] args) throws ProtocolException {
 		@SuppressWarnings("unchecked")
 		Map<String, String> sharedPreferences = (Map<String, String>) serviceResponse.respond(IAccountServiceResponse.RES_GETFROMSTORAGE, getServiceId(), IAccountServiceResponse.SHARED_PREFERENCES, options.keySet());
 		if (sharedPreferences == null) {
@@ -347,41 +700,67 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 			} catch (Exception e) {
 			}
 		}
+		
+		if (args.length > 9){
+			isSecure = true;
+		} else {
+			isSecure = false;
+		}
 
 		new Thread("XMPP connector " + getJID()) {
 			@Override
 			public void run() {
-				SmackConfiguration.setPacketReplyTimeout(10000);
+				SmackConfiguration.setPacketReplyTimeout(120000);
 				ConnectionConfiguration config = new ConnectionConfiguration(loginHost, loginPort);
-				config.setServiceName(serviceName);
-
-				// config.setSASLAuthenticationEnabled(false);
-
+				String login;
+				if (isGmail()){
+					SASLAuthentication.supportSASLMechanism("PLAIN", 0);
+					config.setSocketFactory(new DummySSLSocketFactory());
+					login = getJID();
+				} else {
+					login = un;
+				}
+				config.setServiceName(serviceName);					
+				configure(ProviderManager.getInstance());
 				connection = new XMPPConnection(config);
 				try {
 					isContactListReady = false;
-					serviceResponse.respond(ICQServiceResponse.RES_CONNECTING, serviceId, 1);
+					serviceResponse.respond(IAccountServiceResponse.RES_CONNECTING, serviceId, 1);
 					connection.connect();
-					serviceResponse.respond(ICQServiceResponse.RES_CONNECTING, serviceId, 2);
-					connection.login(un, pw);
-					/*ServiceDiscoveryManager discoManager = new ServiceDiscoveryManager(connection);
-					discoManager.addFeature("http://jabber.org/protocol/disco#info");*/
-					connection.addConnectionListener(XMPPService.this);
-					serviceResponse.respond(ICQServiceResponse.RES_CONNECTING, serviceId, 3);
-					connection.sendPacket(XMPPEntityAdapter.userStatus2XMPPPresence(onlineInfo.userStatus));
-					serviceResponse.respond(ICQServiceResponse.RES_CONNECTING, serviceId, 5);
+					serviceResponse.respond(IAccountServiceResponse.RES_CONNECTING, serviceId, 2);
+					new ServiceDiscoveryManager(connection);
+					connection.login(login, pw, "AsiaIM");
 					Roster roster = connection.getRoster();
 					roster.addRosterListener(XMPPService.this);
-					List<Buddy> buddies = XMPPEntityAdapter.rosterEntryCollection2BuddyList(XMPPService.this, roster.getEntries(), getJID(), serviceId);
+					/*
+					 * ServiceDiscoveryManager discoManager = new
+					 * ServiceDiscoveryManager(connection);
+					 * discoManager.addFeature
+					 * ("http://jabber.org/protocol/disco#info");
+					 */
+					connection.addConnectionListener(XMPPService.this);
+					serviceResponse.respond(IAccountServiceResponse.RES_CONNECTING, serviceId, 3);
+					connection.sendPacket(XMPPEntityAdapter.userStatus2XMPPPresence(onlineInfo.userStatus));
+					serviceResponse.respond(IAccountServiceResponse.RES_CONNECTING, serviceId, 5);
+					while(!roster.rosterInitialized){
+						Thread.sleep(500);
+					}
+					List<Buddy> buddies = XMPPEntityAdapter.rosterEntryCollection2BuddyList(XMPPService.this, roster.getEntries());
 					List<BuddyGroup> groups = XMPPEntityAdapter.rosterGroupCollection2BuddyGroupList(roster.getGroups(), getJID(), serviceId);
-					serviceResponse.respond(ICQServiceResponse.RES_CONNECTING, serviceId, 7);
+					serviceResponse.respond(IAccountServiceResponse.RES_CONNECTING, serviceId, 7);
 					connection.getChatManager().addChatListener(XMPPService.this);
+					try {
+						chechGroupChatAvailability();
+						buddies.addAll(getJoinedChatRooms());
+					} catch (Exception e) {
+						log(e);
+					}
 					serviceResponse.respond(IAccountServiceResponse.RES_CLUPDATED, getServiceId(), buddies, groups);
-					isContactListReady = true;
-					serviceResponse.respond(ICQServiceResponse.RES_CONNECTING, serviceId, 9);
+					serviceResponse.respond(IAccountServiceResponse.RES_CONNECTING, serviceId, 9);
 					serviceResponse.respond(IAccountServiceResponse.RES_ACCOUNTUPDATED, serviceId, onlineInfo);
 					serviceResponse.respond(IAccountServiceResponse.RES_CONNECTED, getServiceId());
 					getPersonalInfo(getJID());
+					isContactListReady = true;
 					checkCachedInfos();
 					messageEventManager = new MessageEventManager(connection);
 					if (onlineInfo.userStatus != Buddy.ST_INVISIBLE) {
@@ -393,10 +772,22 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 					log(e);
 					connection = null;
 					connectionClosedOnError(e);
-					
+
 				}
 			}
 		}.start();
+	}
+
+	protected boolean isGmail() {
+		return serviceName.equals("gmail.com") || serviceName.equals("googlemail.com");
+	}
+
+	protected void chechGroupChatAvailability() throws XMPPException {
+		Collection<String> mucServices = MultiUserChat.getServiceNames(connection);
+		
+		if (!mucServices.isEmpty()){
+			groupchatService = mucServices.iterator().next();
+		}		
 	}
 
 	private void respondInfo(VCard card, String jid, PersonalInfo personalInfo) throws ProtocolException {
@@ -405,7 +796,7 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 		if (card.getNickName() != null && card.getNickName().length() > 0) {
 			personalInfo.properties.putString(PersonalInfo.INFO_NICK, card.getNickName());
 			serviceResponse.respond(IAccountServiceResponse.RES_USERINFO, getServiceId(), personalInfo);
-		} else if ((fn = card.getField("FN")) != null && fn.length() > 0){
+		} else if ((fn = card.getField("FN")) != null && fn.length() > 0) {
 			personalInfo.properties.putString(PersonalInfo.INFO_NICK, fn);
 			serviceResponse.respond(IAccountServiceResponse.RES_USERINFO, getServiceId(), personalInfo);
 		}
@@ -440,289 +831,42 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 		return R.array.xmpp_preference_strings;
 	}
 
-	/*public static int getStatusResIdByStatusId(int statusId, int size) {
-
-		if (size <= 16) {
-			return getStatusResIdByStatusIdTiny(statusId);
-		} else if (size <= 24) {
-			return getStatusResIdByStatusIdSmall(statusId);
-		} else if (size <= 32) {
-			return getStatusResIdByStatusIdMedium(statusId);
-		} else {
-			return getStatusResIdByStatusIdBig(statusId);
-		}
-	}*/
-	
-	public static int getStatusResIdByStatusIdBigger(int statusId) {
-		int statusResId;
-
-		switch (statusId) {
-		case Buddy.ST_ONLINE:
-			statusResId = R.drawable.xmpp_online_bigger;
-			break;
-		case Buddy.ST_FREE4CHAT:
-			statusResId = R.drawable.xmpp_free4chat_bigger;
-			break;
-		case Buddy.ST_AWAY:
-			statusResId = R.drawable.xmpp_away_bigger;
-			break;
-		case Buddy.ST_DND:
-			statusResId = R.drawable.xmpp_dnd_bigger;
-			break;
-		case Buddy.ST_INVISIBLE:
-			statusResId = R.drawable.xmpp_invisible_bigger;
-			break;
-		case Buddy.ST_NA:
-			statusResId = R.drawable.xmpp_na_bigger;
-			break;
-		default:
-			statusResId = R.drawable.xmpp_offline_bigger;
-			break;
-		}
-
-		return statusResId;
-	}
-
-	public static int getStatusResIdByStatusIdBig(int statusId) {
-		int statusResId;
-
-		switch (statusId) {
-		case Buddy.ST_ONLINE:
-			statusResId = R.drawable.xmpp_online_big;
-			break;
-		case Buddy.ST_FREE4CHAT:
-			statusResId = R.drawable.xmpp_free4chat_big;
-			break;
-		case Buddy.ST_AWAY:
-			statusResId = R.drawable.xmpp_away_big;
-			break;
-		case Buddy.ST_DND:
-			statusResId = R.drawable.xmpp_dnd_big;
-			break;
-		case Buddy.ST_INVISIBLE:
-			statusResId = R.drawable.xmpp_invisible_big;
-			break;
-		case Buddy.ST_NA:
-			statusResId = R.drawable.xmpp_na_big;
-			break;
-		default:
-			statusResId = R.drawable.xmpp_offline_big;
-			break;
-		}
-
-		return statusResId;
-	}
-
-	/*private static int getStatusResIdByStatusId64(int statusId) {
-		int statusResId;
-
-		switch (statusId) {
-		case Buddy.ST_ONLINE:
-			statusResId = R.drawable.xmpp_online_64;
-			break;
-		case Buddy.ST_FREE4CHAT:
-			statusResId = R.drawable.xmpp_free4chat_64;
-			break;
-		case Buddy.ST_AWAY:
-			statusResId = R.drawable.xmpp_away_64;
-			break;
-		case Buddy.ST_DND:
-			statusResId = R.drawable.xmpp_dnd_64;
-			break;
-		case Buddy.ST_INVISIBLE:
-			statusResId = R.drawable.xmpp_invisible_64;
-			break;
-		case Buddy.ST_NA:
-			statusResId = R.drawable.xmpp_na_64;
-			break;
-		default:
-			statusResId = R.drawable.xmpp_offline_64;
-			break;
-		}
-
-		return statusResId;
-	}*/
-
-	public static int getStatusResIdByStatusIdSmall(int statusId) {
-		int statusResId;
-
-		switch (statusId) {
-		case Buddy.ST_ONLINE:
-			statusResId = R.drawable.xmpp_online_small;
-			break;
-		case Buddy.ST_FREE4CHAT:
-			statusResId = R.drawable.xmpp_free4chat_small;
-			break;
-		case Buddy.ST_AWAY:
-			statusResId = R.drawable.xmpp_away_small;
-			break;
-		case Buddy.ST_DND:
-			statusResId = R.drawable.xmpp_dnd_small;
-			break;
-		case Buddy.ST_INVISIBLE:
-			statusResId = R.drawable.xmpp_invisible_small;
-			break;
-		case Buddy.ST_NA:
-			statusResId = R.drawable.xmpp_na_small;
-			break;
-		default:
-			statusResId = R.drawable.xmpp_offline_small;
-			break;
-		}
-
-		return statusResId;
-	}
-
-	public static int getStatusResIdByStatusIdMedium(int statusId) {
-		int statusResId;
-
-		switch (statusId) {
-		case Buddy.ST_ONLINE:
-			statusResId = R.drawable.xmpp_online_medium;
-			break;
-		case Buddy.ST_FREE4CHAT:
-			statusResId = R.drawable.xmpp_free4chat_medium;
-			break;
-		case Buddy.ST_AWAY:
-			statusResId = R.drawable.xmpp_away_medium;
-			break;
-		case Buddy.ST_DND:
-			statusResId = R.drawable.xmpp_dnd_medium;
-			break;
-		case Buddy.ST_INVISIBLE:
-			statusResId = R.drawable.xmpp_invisible_medium;
-			break;
-		case Buddy.ST_NA:
-			statusResId = R.drawable.xmpp_na_medium;
-			break;
-		default:
-			statusResId = R.drawable.xmpp_offline_medium;
-			break;
-		}
-
-		return statusResId;
-	}
-
-	public static int getStatusResIdByStatusIdTiny(int statusId) {
-		int statusResId;
-
-		switch (statusId) {
-		case Buddy.ST_ONLINE:
-			statusResId = R.drawable.xmpp_online_tiny;
-			break;
-		case Buddy.ST_FREE4CHAT:
-			statusResId = R.drawable.xmpp_free4chat_tiny;
-			break;
-		case Buddy.ST_AWAY:
-			statusResId = R.drawable.xmpp_away_tiny;
-			break;
-		case Buddy.ST_DND:
-			statusResId = R.drawable.xmpp_dnd_tiny;
-			break;
-		case Buddy.ST_INVISIBLE:
-			statusResId = R.drawable.xmpp_invisible_tiny;
-			break;
-		case Buddy.ST_NA:
-			statusResId = R.drawable.xmpp_na_tiny;
-			break;
-		default:
-			statusResId = R.drawable.xmpp_offline_tiny;
-			break;
-		}
-
-		return statusResId;
-	}
-
-	/*public static int getStatusResIdByAccount(AccountView account, int size, boolean withoutConnectionState) {
-
-		if (size <= 16) {
-			return getStatusResIdByAccountTiny(account, withoutConnectionState);
-		} else {
-			return getStatusResIdByAccountMedium(account, withoutConnectionState);
-		}
-	}
-*/
-	public static int getStatusResIdByAccountTiny(AccountView account, boolean withoutConnectionState) {
-		if (!withoutConnectionState) {
-			switch (account.getConnectionState()) {
-			case AccountService.STATE_DISCONNECTED:
-				return R.drawable.xmpp_offline_tiny;
-			case AccountService.STATE_CONNECTING:
-				return R.drawable.xmpp_connecting_tiny;
-			}
-		}
-
-		return getStatusResIdByStatusIdTiny(account.status);
-	}
-	
-	public static final int getStatusResIdByAccountSmall(AccountView account, boolean withoutConnectionState) {
-		if (!withoutConnectionState) {
-			switch (account.getConnectionState()) {
-			case AccountService.STATE_DISCONNECTED:
-				return R.drawable.xmpp_offline_small;
-			case AccountService.STATE_CONNECTING:
-				return R.drawable.xmpp_connecting_small;
-			}
-		}
-
-		return getStatusResIdByStatusIdSmall(account.status);
-	}
-
-	public static final int getStatusResIdByAccountMedium(AccountView account, boolean withoutConnectionState) {
-		if (!withoutConnectionState) {
-			switch (account.getConnectionState()) {
-			case AccountService.STATE_DISCONNECTED:
-				return R.drawable.xmpp_offline_medium;
-			case AccountService.STATE_CONNECTING:
-				return R.drawable.xmpp_connecting_medium;
-			}
-		}
-
-		return getStatusResIdByStatusIdMedium(account.status);
-	}
-
-	/*private static final int getStatusResIdByAccount48(AccountView account, boolean withoutConnectionState) {
-		if (!withoutConnectionState) {
-			switch (account.getConnectionState()) {
-			case AccountService.STATE_DISCONNECTED:
-				return R.drawable.xmpp_offline_48;
-			case AccountService.STATE_CONNECTING:
-				return R.drawable.xmpp_connecting_48;
-			}
-		}
-
-		return getStatusResIdByStatusId48(account.status);
-	}*/
-
-	public static int getMenuResIdByAccount(AccountView account) {
-		return R.menu.xmpp_cl_menu;
-	}
-
-	public static final String[] getStatusListNames(Context context) {
-		return context.getResources().getStringArray(R.array.xmpp_status_strings);
-	}
-
-	public static final byte getStatusValueByCount(int count) {
-		return statusValues[count];
-	}
+	/*
+	 * public static int getStatusResIdByStatusId(int statusId, int size) {
+	 * 
+	 * if (size <= 16) { return getStatusResIdByStatusIdTiny(statusId); } else
+	 * if (size <= 24) { return getStatusResIdByStatusIdSmall(statusId); } else
+	 * if (size <= 32) { return getStatusResIdByStatusIdMedium(statusId); } else
+	 * { return getStatusResIdByStatusIdBig(statusId); } }
+	 */
 
 	private final void getPersonalInfo(final String jid) {
 		new Thread("XMPP icon getter " + jid) {
 			@Override
 			public void run() {
-				VCard card = new VCard();
-				try {
-					SmackConfiguration.setPacketReplyTimeout(25000);
-					card.load(connection, jid);
-					log("got card " + jid + " " + card.getNickName() + " " + card.getAvatar());
-					respondInfo(card, jid, new PersonalInfo());
-				} catch (Exception e) {
-					log(e);
-					return;
-				}
-
+				loadCard(jid);
 			}
 		}.start();
+	}
+
+	synchronized void loadCard(final String jid) {
+		final VCard card = new VCard();
+		try {
+			card.load(connection, jid);
+			log("got card " + jid + " " + card.getNickName() + " " + card.getAvatar());
+			new Thread(){
+				@Override
+				public void run(){
+					try {
+						respondInfo(card, jid, new PersonalInfo());
+					} catch (ProtocolException e) {
+						log(e);
+					}
+				}
+			}.start();
+		} catch (Exception e) {
+			log(e);
+		}
 	}
 
 	@Override
@@ -730,7 +874,8 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 		closeKeepaliveThread();
 		connection.disconnect();
 		/*
-		 * try { serviceResponse.respond(ICQServiceResponse.RES_DISCONNECTED,
+		 * try {
+		 * serviceResponse.respond(IAccountServiceResponse.RES_DISCONNECTED,
 		 * serviceId); } catch (ProtocolException e) { log(e); }
 		 */
 	}
@@ -745,17 +890,13 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 		return getJID();
 	}
 
-	public static TypedArray getStatusResIds(Context context) {
-		return context.getResources().obtainTypedArray(R.array.xmpp_status_icons);
-	}
-
 	@Override
 	public void connectionClosed() {
 		log("Connection closed " + getJID());
 		closeKeepaliveThread();
 		isContactListReady = false;
 		try {
-			serviceResponse.respond(ICQServiceResponse.RES_DISCONNECTED, serviceId);
+			serviceResponse.respond(IAccountServiceResponse.RES_DISCONNECTED, serviceId);
 		} catch (ProtocolException e) {
 			log(e);
 		}
@@ -763,7 +904,8 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 
 	@Override
 	public void connectionClosedOnError(Exception e) {
-		log("Connection closed " + getJID() + ": " + e.getLocalizedMessage());
+		log("Connection closed " + getJID());
+		log(e);
 		closeKeepaliveThread();
 		isContactListReady = false;
 		try {
@@ -781,7 +923,7 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 	public void reconnectingIn(int seconds) {
 		log("Connection reconnect " + getJID() + " in " + seconds);
 		try {
-			serviceResponse.respond(ICQServiceResponse.RES_CONNECTING, serviceId, 1);
+			serviceResponse.respond(IAccountServiceResponse.RES_CONNECTING, serviceId, 1);
 		} catch (ProtocolException e) {
 			log(e);
 		}
@@ -806,7 +948,7 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 	@Override
 	public void cancelledNotification(String from, String packetID) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -832,7 +974,7 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 	@Override
 	public void displayedNotification(String from, String packetID) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -848,12 +990,102 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 
 	@Override
 	public void stateChanged(Chat chat, ChatState state) {
-		if (state == ChatState.composing){
+		if (state == ChatState.composing) {
 			try {
 				serviceResponse.respond(IAccountServiceResponse.RES_TYPING, getServiceId(), XMPPEntityAdapter.normalizeJID(chat.getParticipant()));
 			} catch (ProtocolException e) {
 				log(e);
 			}
+		}
+	}
+
+	private void configure(ProviderManager pm) {
+
+		// Version
+		try {
+			pm.addIQProvider("query", "jabber:iq:version", Class.forName("org.jivesoftware.smackx.packet.Version"));
+		} catch (ClassNotFoundException e) {
+			// Not sure what's happening here.
+		}
+
+		// JEP-33: Extended Stanza Addressing
+		pm.addExtensionProvider("addresses", "http://jabber.org/protocol/address", new MultipleAddressesProvider());
+
+		// Privacy
+		pm.addIQProvider("query", "jabber:iq:privacy", new PrivacyProvider());
+		pm.addIQProvider("command", "http://jabber.org/protocol/commands", new AdHocCommandDataProvider());
+		pm.addExtensionProvider("malformed-action", "http://jabber.org/protocol/commands", new AdHocCommandDataProvider.MalformedActionError());
+		pm.addExtensionProvider("bad-locale", "http://jabber.org/protocol/commands", new AdHocCommandDataProvider.BadLocaleError());
+		pm.addExtensionProvider("bad-payload", "http://jabber.org/protocol/commands", new AdHocCommandDataProvider.BadPayloadError());
+		pm.addExtensionProvider("bad-sessionid", "http://jabber.org/protocol/commands", new AdHocCommandDataProvider.BadSessionIDError());
+		pm.addExtensionProvider("session-expired", "http://jabber.org/protocol/commands", new AdHocCommandDataProvider.SessionExpiredError());
+
+		// Private Data Storage
+		pm.addIQProvider("query", "jabber:iq:private", new PrivateDataManager.PrivateDataIQProvider());
+
+		// Time
+		try {
+			pm.addIQProvider("query", "jabber:iq:time", Class.forName("org.jivesoftware.smackx.packet.Time"));
+		} catch (ClassNotFoundException e) {
+			log(e);
+		}
+
+		// XHTML
+		pm.addExtensionProvider("html", "http://jabber.org/protocol/xhtml-im", new XHTMLExtensionProvider());
+
+		// Roster Exchange
+		pm.addExtensionProvider("x", "jabber:x:roster", new RosterExchangeProvider());
+		// Message Events
+		pm.addExtensionProvider("x", "jabber:x:event", new MessageEventProvider());
+		// Chat State
+		pm.addExtensionProvider("active", "http://jabber.org/protocol/chatstates", new ChatStateExtension.Provider());
+		pm.addExtensionProvider("composing", "http://jabber.org/protocol/chatstates", new ChatStateExtension.Provider());
+		pm.addExtensionProvider("paused", "http://jabber.org/protocol/chatstates", new ChatStateExtension.Provider());
+		pm.addExtensionProvider("inactive", "http://jabber.org/protocol/chatstates", new ChatStateExtension.Provider());
+		pm.addExtensionProvider("gone", "http://jabber.org/protocol/chatstates", new ChatStateExtension.Provider());
+
+		// FileTransfer
+		pm.addIQProvider("si", "http://jabber.org/protocol/si", new StreamInitiationProvider());
+		pm.addIQProvider("query", "http://jabber.org/protocol/bytestreams", new BytestreamsProvider());
+		pm.addIQProvider("open", "http://jabber.org/protocol/ibb", new OpenIQProvider());
+		pm.addIQProvider("close", "http://jabber.org/protocol/ibb", new CloseIQProvider());
+		pm.addExtensionProvider("data", "http://jabber.org/protocol/ibb", new DataPacketProvider());
+
+		// Group Chat Invitations
+		pm.addExtensionProvider("x", "jabber:x:conference", new GroupChatInvitation.Provider());
+		// Service Discovery # Items
+		pm.addIQProvider("query", "http://jabber.org/protocol/disco#items", new DiscoverItemsProvider());
+		// Service Discovery # Info
+		pm.addIQProvider("query", "http://jabber.org/protocol/disco#info", new DiscoverInfoProvider());
+		// Data Forms
+		pm.addExtensionProvider("x", "jabber:x:data", new DataFormProvider());
+		// MUC User
+		pm.addExtensionProvider("x", "http://jabber.org/protocol/muc#user", new MUCUserProvider());
+		// MUC Admin
+		pm.addIQProvider("query", "http://jabber.org/protocol/muc#admin", new MUCAdminProvider());
+		// MUC Owner
+		pm.addIQProvider("query", "http://jabber.org/protocol/muc#owner", new MUCOwnerProvider());
+		// Delayed Delivery
+		pm.addExtensionProvider("x", "jabber:x:delay", new DelayInformationProvider());
+		// VCard
+		pm.addIQProvider("vCard", "vcard-temp", new VCardProvider());
+		// Offline Message Requests
+		pm.addIQProvider("offline", "http://jabber.org/protocol/offline", new OfflineMessageRequest.Provider());
+		// Offline Message Indicator
+		pm.addExtensionProvider("offline", "http://jabber.org/protocol/offline", new OfflineMessageInfo.Provider());
+		// Last Activity
+		pm.addIQProvider("query", "jabber:iq:last", new LastActivity.Provider());
+		// User Search
+		pm.addIQProvider("query", "jabber:iq:search", new UserSearch.Provider());
+		// SharedGroupsInfo
+		pm.addIQProvider("sharedgroup", "http://www.jivesoftware.org/protocol/sharedgroup", new SharedGroupsInfo.Provider());
+	}
+	
+	private void notification(String text){
+		try {
+			serviceResponse.respond(IAccountServiceResponse.RES_NOTIFICATION, getServiceId(), text);
+		} catch (ProtocolException e) {
+			log(e);
 		}
 	}
 }

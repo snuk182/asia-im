@@ -14,7 +14,6 @@
   	<ListPreference android:persistent="false" android:title="@string/label_text_size" android:key="@string/key_text_size" android:entries="@array/list_size_names" android:entryValues="@array/list_size_values" android:defaultValue="@string/value_size_medium"/>
   	<CheckBoxPreference android:persistent="false" android:title="@string/label_log_to_file" android:key="@string/key_log_to_file" android:defaultValue="false" />
   	<CheckBoxPreference android:persistent="false" android:title="@string/label_send_by_enter" android:key="@string/key_send_by_enter" android:defaultValue="true"/>
-  	<CheckBoxPreference android:persistent="false" android:title="@string/label_sort_lists" android:key="@string/key_sort_lists" android:defaultValue="true"/>
   	<CheckBoxPreference android:persistent="false" android:title="@string/label_autoconnect" android:key="@string/key_autoconnect" android:defaultValue="false"/>
   	<ListPreference android:persistent="false" android:title="@string/label_screen_orientation" android:key="@string/key_screen_orientation" android:entries="@array/list_screen_orientation_names" android:entryValues="@array/list_screen_orientation_values" android:defaultValue="@string/value_screen_orientation_system"/>
   	<CheckBoxPreference android:persistent="false" android:title="@string/label_fullscreen_landscape_kb" android:key="@string/key_fullscreen_landscape_kb" android:defaultValue="true"/>

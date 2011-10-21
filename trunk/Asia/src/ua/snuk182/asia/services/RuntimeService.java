@@ -19,6 +19,8 @@ import ua.snuk182.asia.core.dataentity.AccountView;
 import ua.snuk182.asia.core.dataentity.Buddy;
 import ua.snuk182.asia.core.dataentity.BuddyGroup;
 import ua.snuk182.asia.core.dataentity.FileMessage;
+import ua.snuk182.asia.core.dataentity.MultiChatRoom;
+import ua.snuk182.asia.core.dataentity.MultiChatRoomOccupants;
 import ua.snuk182.asia.core.dataentity.OnlineInfo;
 import ua.snuk182.asia.core.dataentity.PersonalInfo;
 import ua.snuk182.asia.core.dataentity.ServiceMessage;
@@ -46,7 +48,6 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.telephony.TelephonyManager;
-import android.view.Gravity;
 import android.widget.Toast;
 
 public class RuntimeService extends Service {
@@ -190,11 +191,11 @@ public class RuntimeService extends Service {
 			final AccountView account = a.accountView;
 			account.updateTime();			
 			switch (action) {
-			case IAccountServiceResponse.RES_LOG:
+			/*case IAccountServiceResponse.RES_LOG:
 				synchronized (this) {
-					ServiceUtils.log((String) args[0], account);
+					ServiceUtils.log((String) args[0], account, false);
 				}
-				break;
+				break;*/
 			case IAccountServiceResponse.RES_GETFROMSTORAGE:
 				return storage.getMap((Set<String>) args[1], account.getAccountId() + " " + (String) args[0]);
 			case IAccountServiceResponse.RES_SAVETOSTORAGE:
@@ -331,20 +332,16 @@ public class RuntimeService extends Service {
 					loadIcons = true;
 				}
 
-				if (saveNotInList != null && saveNotInList) {
-						account.removeAllBuddiesExceptNotInList((List<Buddy>) args[0]);
-					} else {
-						account.getBuddyList().clear();
-					}
-					account.setBuddyGroupList((List<BuddyGroup>) args[1]);
-					account.setBuddyList((List<Buddy>) args[0], RuntimeService.this, loadIcons);
-					storage.saveAccount(account);
-				
+				account.removeAllBuddies((List<Buddy>) args[0], saveNotInList != null && saveNotInList);
+				account.setBuddyGroupList((List<BuddyGroup>) args[1]);
+				account.setBuddyList((List<Buddy>) args[0], RuntimeService.this, loadIcons);
 				try {
 					uiCallback.contactListUpdated(account);
 				} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e2) {
 					ServiceUtils.log(e2);
 				}
+				
+				storage.saveAccount(account);
 				break;
 			case IAccountServiceResponse.RES_MESSAGE:
 				final TextMessage message = (TextMessage) args[0];
@@ -426,7 +423,7 @@ public class RuntimeService extends Service {
 					ServiceUtils.log(e2);
 				}
 				
-				statusbarNotifyAccountChanged();
+				
 
 				break;
 			case IAccountServiceResponse.RES_ACCOUNTUPDATED:
@@ -495,7 +492,7 @@ public class RuntimeService extends Service {
 				storage.saveAccount(account);
 				break;
 			case IAccountServiceResponse.RES_AUTHREQUEST:
-				final ServiceMessage sm = new ServiceMessage((String) args[0]);
+				ServiceMessage sm = new ServiceMessage((String) args[0]);
 				sm.type = ServiceMessage.TYPE_AUTHREQUEST;
 				sm.text = (String) args[1];
 				sm.serviceId = serviceId;
@@ -629,6 +626,34 @@ public class RuntimeService extends Service {
 					ServiceUtils.log(e);
 				}
 				break;
+			case IAccountServiceResponse.RES_AVAILABLE_CHATS:
+				try {
+					uiCallback.availableChatsList(serviceId, (List<MultiChatRoom>) args[0]);
+				} catch (NullPointerException npe) {					
+				} catch (RemoteException e) {
+					ServiceUtils.log(e);
+				}
+				break;
+			case IAccountServiceResponse.RES_CHAT_PARTICIPANTS:
+				try {
+					uiCallback.chatRoomOccupants(serviceId, (String) args[0], (MultiChatRoomOccupants)args[1]);
+				} catch (NullPointerException npe) {					
+				} catch (RemoteException e) {
+					ServiceUtils.log(e);
+				}
+				break;
+			case IAccountServiceResponse.RES_SERVICEMESSAGE:
+				sm = new ServiceMessage((String) args[0]);
+				sm.type = ServiceMessage.TYPE_CHAT_MESSAGE;
+				sm.text = (String) args[1];
+				sm.serviceId = serviceId;
+				try {
+					uiCallback.serviceMessage(sm);
+				} catch (NullPointerException npe) {					
+				} catch (RemoteException e) {
+					ServiceUtils.log(e);
+				}
+				break;
 			}
 
 			return null;
@@ -744,7 +769,7 @@ public class RuntimeService extends Service {
 	}
 
 	void log(String string) {
-		ServiceUtils.log(string, null);
+		ServiceUtils.log(string, null, false);
 	}
 	
 	private byte[] getMyIp(){
@@ -787,6 +812,7 @@ public class RuntimeService extends Service {
 			@Override
 			public void run() {
 				a.accountView.setConnectionState(AccountService.STATE_CONNECTING);
+				statusbarNotifyAccountChanged();
 				String secure = a.accountView.options.getString(getResources().getString(R.string.key_secure_login));
 				try {
 					if (secure != null && secure.equalsIgnoreCase("true")){
@@ -1142,13 +1168,18 @@ public class RuntimeService extends Service {
 				return;
 			}
 			Account account = getAccountInternal(buddy.serviceId);
-			if (buddy.groupId != AccountService.NOT_IN_LIST_GROUP_ID) {
+			if (buddy.groupId != AccountService.NOT_IN_LIST_GROUP_ID && buddy.visibility != Buddy.VIS_GROUPCHAT) {
 				try {
 					account.accountService.request(AccountService.REQ_REMOVEBUDDY, buddy);
 				} catch (ProtocolException e) {
 					ServiceUtils.log(e);
 				}
 			}
+			
+			if (buddy.visibility == Buddy.VIS_GROUPCHAT){
+				storage.delete(getGroupchatStorageName(account.accountView, buddy.protocolUid));
+			}
+			
 			account.accountView.removeBuddyByUid(buddy);
 			storage.saveAccount(account.accountView);
 			uiCallback.contactListUpdated(account.accountView);
@@ -1453,6 +1484,149 @@ public class RuntimeService extends Service {
 			}
 			uiCallback.accountUpdated(acc.accountView);
 		}
+
+		@Override
+		public void requestAvailableChatRooms(byte serviceId) throws RemoteException {
+			Account acc = getAccountInternal(serviceId);
+			try {				
+				acc.accountService.request(AccountService.REQ_GET_CHAT_ROOMS);
+			} catch (ProtocolException e) {
+				ServiceUtils.log(e);
+			}
+		}
+
+		@Override
+		public byte createChat(byte serviceId, String chatId, String chatNickname, String chatName, String chatPassword) throws RemoteException {
+			Account acc = getAccountInternal(serviceId);
+			try {				
+				Buddy chat = (Buddy) acc.accountService.request(AccountService.REQ_CREATE_CHAT_ROOM, chatId, chatName, (chatPassword == null || chatPassword.length()<1) ? null : chatPassword, chatNickname);
+				
+				AccountView account = acc.accountView;
+				account.addBuddyToList(chat);
+				storage.saveAccount(account);
+				
+				Map<String, String> map = new HashMap<String, String>();
+				map.put(ServiceConstants.GROUPCHAT_PREFERENCE_NICKNAME, chatNickname);
+				map.put(ServiceConstants.GROUPCHAT_PREFERENCE_PASSWORD, chatPassword);
+				storage.saveMap(map, getGroupchatStorageName(account, chat.protocolUid));
+				
+				try {
+					uiCallback.buddyAdded(chat, account);
+				} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e) {
+					ServiceUtils.log(e);
+				}
+				return ProtocolException.ERROR_NONE;
+			} catch (ProtocolException e) {
+				ServiceUtils.log(e);
+				return e.errorCode;
+			}
+		}
+		
+		private String getGroupchatStorageName(AccountView account, String chatId){
+			return ServiceConstants.GROUPCHAT_PREFERENCES_PREFIX+" "+account.protocolUid+" "+chatId;
+		}
+		
+		@Override
+		public byte joinExistingChat(byte serviceId, String chatId) throws RemoteException {
+			Account acc = getAccountInternal(serviceId);
+			
+			Map<String, String> map = storage.getMap(ServiceUtils.GROUPCHAT_PREFERENCE_MAP, getGroupchatStorageName(acc.accountView, chatId));
+			return joinChatInternal(acc, chatId, map.get(ServiceConstants.GROUPCHAT_PREFERENCE_NICKNAME), map.get(ServiceConstants.GROUPCHAT_PREFERENCE_PASSWORD), false);
+		}
+
+		@Override
+		public byte joinChat(byte serviceId, String chatId, String chatNickname, String chatPassword) throws RemoteException {
+			Account acc = getAccountInternal(serviceId);
+			return joinChatInternal(acc, chatId, chatNickname, chatPassword, true);
+		}
+
+		private byte joinChatInternal(Account acc, String chatId, String chatNickname, String chatPassword, boolean saveChatData) {
+			try {				
+				Buddy chat = (Buddy) acc.accountService.request(AccountService.REQ_JOIN_CHAT_ROOM, chatId, (chatPassword == null || chatPassword.length()<1) ? null : chatPassword, chatNickname);
+				
+				AccountView account = acc.accountView;
+				account.addBuddyToList(chat);
+				storage.saveAccount(account);
+				
+				if (saveChatData){
+					Map<String, String> map = new HashMap<String, String>();
+					map.put(ServiceConstants.GROUPCHAT_PREFERENCE_NICKNAME, chatNickname);
+					map.put(ServiceConstants.GROUPCHAT_PREFERENCE_PASSWORD, chatPassword);
+					storage.saveMap(map, getGroupchatStorageName(account, chat.protocolUid));
+				}
+				try {					
+					if (acc.accountView.getBuddyByProtocolUid(chatId) != null){
+						uiCallback.buddyStateChanged(chat);
+					} else {
+						uiCallback.buddyAdded(chat, account);
+					}					
+				} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e) {
+					ServiceUtils.log(e);
+				}
+				return ProtocolException.ERROR_NONE;
+			} catch (ProtocolException e) {
+				ServiceUtils.log(e);
+				return e.errorCode;
+			}
+		}
+
+		@Override
+		public boolean checkGroupChatsAvailability(byte serviceId) throws RemoteException {
+			Account acc = getAccountInternal(serviceId);
+			try {
+				return (Boolean) acc.accountService.request(AccountService.REQ_CHECK_GROUPCHATS_AVAILABLE);
+			} catch (Exception e) {}
+			return false;
+		}
+
+		@Override
+		public byte leaveChat(byte serviceId, String chatId) throws RemoteException {
+			Account acc = getAccountInternal(serviceId);
+			try {
+				acc.accountService.request(AccountService.REQ_LEAVE_CHAT_ROOM, chatId);
+				Buddy buddy = acc.accountView.getBuddyByProtocolUid(chatId);
+				buddy.status = Buddy.ST_OFFLINE;
+				try {
+					uiCallback.buddyStateChanged(buddy);
+				} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e) {
+					ServiceUtils.log(e);
+				}
+				return ProtocolException.ERROR_NONE;
+			} catch (ProtocolException e) {
+				ServiceUtils.log(e);
+				return e.errorCode;
+			}
+		}
+
+		@Override
+		public MultiChatRoomOccupants getChatRoomOccupants(byte serviceId, String chatId) throws RemoteException {
+			Account acc = getAccountInternal(serviceId);
+			try {
+				boolean loadIcons;
+				String loadIconsStr = acc.accountView.options.getString(getResources().getString(R.string.key_load_icons));
+				if (loadIconsStr == null){
+					loadIcons = true;
+				} else {
+					loadIcons = Boolean.parseBoolean(loadIconsStr);
+				}
+				
+				return (MultiChatRoomOccupants) acc.accountService.request(AccountService.REQ_GET_CHAT_ROOM_OCCUPANTS, chatId, loadIcons);				
+			} catch (ProtocolException e) {
+				ServiceUtils.log(e);
+				return null;
+			}
+		}
+
+		@Override
+		public PersonalInfo getChatInfo(byte serviceId, String chatId) throws RemoteException {
+			Account acc = getAccountInternal(serviceId);
+			try {
+				return (PersonalInfo) acc.accountService.request(AccountService.REQ_GETFULLBUDDYINFO, chatId);
+			} catch (ProtocolException e) {
+				ServiceUtils.log(e);
+				return null;
+			}
+		}
 	};
 
 	protected Account getAccountInternal(byte serviceId) {
@@ -1572,7 +1746,7 @@ public class RuntimeService extends Service {
 			@Override
 			public void run() {
 				Toast toast = Toast.makeText(RuntimeService.this, text, Toast.LENGTH_LONG);
-				toast.setGravity(Gravity.CENTER_HORIZONTAL|Gravity.TOP, 0, 4);
+				//toast.setGravity(Gravity.CENTER_HORIZONTAL|Gravity.TOP, 0, 4);
 				toast.show();
 			}
 			

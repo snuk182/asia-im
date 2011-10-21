@@ -8,7 +8,7 @@ import java.util.List;
 import ua.snuk182.asia.EntryPoint;
 import ua.snuk182.asia.R;
 import ua.snuk182.asia.services.ServiceUtils;
-import android.content.Context;
+import ua.snuk182.asia.view.ViewUtils;
 import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.view.Gravity;
@@ -32,8 +32,7 @@ public class ContactListGridGroupItem extends LinearLayout implements OnClickLis
 	//private List<Buddy> buddyList = new ArrayList<Buddy>();
 	private List<LinearLayout> buddyRows = new ArrayList<LinearLayout>();
 	private ViewGroup ownerLayout;
-	private boolean refreshContents = false;
-	private boolean sort = true;
+	private boolean refreshContents = true;
 	private boolean collapsed = false;
 	
 	ContactListGridGroupItem(final EntryPoint entryPoint, AttributeSet attrs, ViewGroup owner, String tag, String name) {
@@ -41,7 +40,7 @@ public class ContactListGridGroupItem extends LinearLayout implements OnClickLis
 
 		ownerLayout = owner;
 		
-		LayoutInflater inflate = (LayoutInflater) entryPoint.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		LayoutInflater inflate = LayoutInflater.from(entryPoint);
 		inflate.inflate(R.layout.contact_list_grid_panel_item, this);
 		setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
 		setOrientation(LinearLayout.HORIZONTAL);
@@ -73,7 +72,7 @@ public class ContactListGridGroupItem extends LinearLayout implements OnClickLis
 
 	void refresh() {
 		if (refreshContents) {
-			refresh(0, sort);
+			refresh(0);
 			refreshContents = false;
 		} else {
 			ownerLayout.removeView(this);
@@ -87,12 +86,8 @@ public class ContactListGridGroupItem extends LinearLayout implements OnClickLis
 		setCollapsedInternal(false);
 	}
 
-	void refresh(int column_count, boolean sort) {
-		this.sort  = sort;
-		
-		if (sort){
-			Collections.sort(buddyList);
-		}
+	void refresh(int column_count) {
+		Collections.sort(buddyList);
 		ownerLayout.removeView(this);
 		for (LinearLayout row : buddyRows) {
 			ownerLayout.removeView(row);
@@ -141,6 +136,10 @@ public class ContactListGridGroupItem extends LinearLayout implements OnClickLis
 			if (row.getParent() == null){
 				ownerLayout.addView(row);
 			}
+			/*if (row.getParent() != null){
+				((ViewGroup)row.getParent()).removeView(row);
+			}
+			ownerLayout.addView(row);*/
 						
 			if (currentColumn == 0){
 				row.addView(newDivider());
@@ -265,5 +264,10 @@ public class ContactListGridGroupItem extends LinearLayout implements OnClickLis
 	
 	public EntryPoint getEntryPoint() {
 		return (EntryPoint) getContext();
+	}
+
+	public void color() {
+		ViewUtils.styleTextView(subGroupCountText);
+		ViewUtils.styleTextView(subGroupNameText);
 	}
 }

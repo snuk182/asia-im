@@ -10,7 +10,9 @@ import ua.snuk182.asia.EntryPoint;
 import ua.snuk182.asia.R;
 import ua.snuk182.asia.core.dataentity.AccountView;
 import ua.snuk182.asia.core.dataentity.Buddy;
+import ua.snuk182.asia.core.dataentity.BuddyGroup;
 import ua.snuk182.asia.core.dataentity.Message;
+import ua.snuk182.asia.core.dataentity.MultiChatRoomOccupants;
 import ua.snuk182.asia.core.dataentity.ServiceMessage;
 import ua.snuk182.asia.core.dataentity.TextMessage;
 import ua.snuk182.asia.services.HistorySaver;
@@ -19,9 +21,11 @@ import ua.snuk182.asia.services.api.AccountService;
 import ua.snuk182.asia.services.plus.ImageGridAdapter;
 import ua.snuk182.asia.view.IHasBuddy;
 import ua.snuk182.asia.view.IHasMessages;
+import ua.snuk182.asia.view.IHasServiceMessages;
 import ua.snuk182.asia.view.ITabContent;
 import ua.snuk182.asia.view.ViewUtils;
 import ua.snuk182.asia.view.cl.ContactList;
+import ua.snuk182.asia.view.cl.grid.ContactListGridItem;
 import ua.snuk182.asia.view.more.StatusTextView;
 import ua.snuk182.asia.view.more.TabWidgetLayout;
 import android.app.AlertDialog;
@@ -29,6 +33,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.location.Location;
@@ -53,6 +58,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
+import android.widget.ExpandableListView;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -65,17 +71,21 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
-public class ConversationsView extends RelativeLayout implements ITabContent, IHasBuddy, IHasMessages {
+public class ConversationsView extends RelativeLayout implements ITabContent, IHasBuddy, IHasMessages, IHasServiceMessages {
 
-	public final List<Buddy> buddies;
-	public AccountView account;
+	public final Buddy buddy;
+	private short accountConnectionState = AccountService.STATE_DISCONNECTED;
+	//public AccountView account;
 	private List<TextMessage> messages;
 	private final ImageButton sendBtn;
 	private final ImageButton smileyBtn;
 	private final EditText textEditor;
 	private final LinearLayout historyView;
 	private final ScrollView scroller;
-	private final ListView participantsView;
+	
+	private final ExpandableListView participantsView;
+	private ConversationsViewParticipantsAdapter participantsAdapter;
+	
 	public String chatId = null;
 	private InputMethodManager kbManager;
 	
@@ -135,16 +145,16 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 			if (!tabId.equals(chatId)) {
 				kbManager.hideSoftInputFromWindow(textEditor.getWindowToken(), 0);
 			} else {
-				buddies.get(0).unread = 0;
+				buddy.unread = 0;
 				try {
-					getEntryPoint().runtimeService.setUnread(buddies.get(0), null);
+					getEntryPoint().runtimeService.setUnread(buddy, null);
 				} catch (NullPointerException npe) {	
 					ServiceUtils.log(npe);
 				} catch (RemoteException e) {
 					getEntryPoint().onRemoteCallFailed(e);
 				}
 				tabWidgetLayout.setScaledBitmap(icon);		
-				updateBuddyState(buddies.get(0));
+				updateBuddyState(buddy);
 				scroller.post(scrollToEnd);	
 			}
 		}
@@ -189,31 +199,37 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 		}
 		
 	};
+	private Runnable getOccupantsRunnable = new Runnable() {
+		
+		@Override
+		public void run() {
+			try {				
+				fillGroupChatView(getEntryPoint().runtimeService.getChatRoomOccupants(getServiceId(), buddy.protocolUid));
+			} catch (NullPointerException npe) {	
+				ServiceUtils.log(npe);
+			} catch (RemoteException e1) {
+				getEntryPoint().onRemoteCallFailed(e1);
+			}
+		}
+	};
 
-	public ConversationsView(final EntryPoint entryPoint, List<Buddy> buddies, AccountView account) {
+	public ConversationsView(final EntryPoint entryPoint, Buddy buddy, AccountView account) {
 		super(entryPoint);
 		
-		this.buddies = buddies;
-		this.account = account;
-		updated(account);
+		this.buddy = buddy;
+		updated(account, false);
 
 		kbManager = (InputMethodManager) getEntryPoint().getSystemService(Context.INPUT_METHOD_SERVICE);
 		entryPoint.mainScreen.addOnTabChangeListener(tabChangeListener);
 
-		LayoutInflater inflate = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		LayoutInflater inflate = LayoutInflater.from(getContext());
 		inflate.inflate(R.layout.conversation, this);
 		setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 		setGravity(Gravity.BOTTOM);
 		
 		tabWidgetLayout = new TabWidgetLayout(entryPoint);
 
-		if (buddies.size() == 1) {
-			tabWidgetLayout.getTabName().setText(buddies.get(0).getName());
-		} else {
-			tabWidgetLayout.getTabIcon().setImageResource(R.drawable.accounts);
-			tabWidgetLayout.getTabName().setText("Group chat");
-		}
-
+		tabWidgetLayout.getTabName().setText(buddy.getName());
 		sendBtn = (ImageButton) findViewById(R.id.convsendbtn);
 		smileyBtn = (ImageButton) findViewById(R.id.convsmileybtn);
 
@@ -222,7 +238,7 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 		statusText = (StatusTextView) findViewById(R.id.statustext);
 		
 		textEditor = (EditText) findViewById(R.id.convtext);
-		participantsView = (ListView) findViewById(R.id.buddiesScrollView);
+		participantsView = (ExpandableListView) findViewById(R.id.buddiesScrollView);
 
 		historyView = (LinearLayout) findViewById(R.id.historyScrollView);
 		scroller = (ScrollView) findViewById(R.id.scroller);
@@ -310,30 +326,74 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 			}
 		});
 
-		if (buddies.size() == 1) {
-			participantsView.setVisibility(View.GONE);
-			chatId = ConversationsView.class.getSimpleName() + " " + buddies.get(0).serviceId + " " + buddies.get(0).protocolUid;
-			requestIcon();
-		} else {
-			chatId = "multichat ";
-		}
-		
+		chatId = ConversationsView.class.getSimpleName() + " " + buddy.serviceId + " " + buddy.protocolUid;
+		requestIcon();
 		printDateMode = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_chat_date));
 
-		// TODO fix for multichat
-		if (buddies.size() == 1) {
-			checkoutHistory();
-			updateBuddyState(buddies.get(0));
-		}
-
+		checkGroupChatView();
+		checkoutHistory();
+		updateBuddyState(buddy);
+		
 		visualStyleUpdated();		
+	}
+
+	private void checkGroupChatView() {
+		if (buddy.visibility == Buddy.VIS_GROUPCHAT && buddy.status != Buddy.ST_OFFLINE){
+			handler.post(getOccupantsRunnable);
+		} else {
+			participantsView.setVisibility(View.GONE);
+		}
+	}
+
+	public void fillGroupChatView(MultiChatRoomOccupants occupants) {
+		String showIconsStr = null;
+		try {
+			showIconsStr = getEntryPoint().runtimeService.getAccountView(occupants.serviceId).options.getString(getEntryPoint().getResources().getString(R.string.key_show_icons));
+		} catch (NullPointerException npe) {	
+			ServiceUtils.log(npe);
+		} catch (RemoteException e) {
+			getEntryPoint().onRemoteCallFailed(e);
+		} catch (NotFoundException e1) {
+			ServiceUtils.log(e1);
+		}
+		boolean showIcons  = showIconsStr != null ? Boolean.parseBoolean(showIconsStr) : true;		
+		
+		participantsView.setVisibility(View.VISIBLE);
+		
+		RelativeLayout.LayoutParams layout;
+		if (showIcons){
+			layout = new RelativeLayout.LayoutParams(ContactListGridItem.itemSize, LayoutParams.FILL_PARENT);
+		} else {
+			layout = new RelativeLayout.LayoutParams((int) ((getEntryPoint().metrics.widthPixels / 4) + (getEntryPoint().metrics.density)), LayoutParams.FILL_PARENT);
+		}
+		
+		layout.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+		layout.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+		layout.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+		participantsView.setLayoutParams(layout);
+		
+		if (participantsAdapter == null){
+			participantsAdapter = new ConversationsViewParticipantsAdapter(getEntryPoint(), occupants, showIcons);
+			participantsView.setAdapter(participantsAdapter); 
+			participantsView.setGroupIndicator(getResources().getDrawable(R.drawable.dummy));
+			participantsView.setDividerHeight(0);			
+		} else {
+			participantsAdapter.refreshOccupants(occupants);
+		}
+		
+		for (int i=0; i<occupants.groups.size(); i++){
+			BuddyGroup gr = occupants.groups.get(i);
+			if (gr.buddyList.size() > 0){
+				participantsView.setSelectedChild(i, 0, true);	
+			}
+		}	
 	}
 
 	private synchronized void sendTypingNotification() {
 		try {
 				sendTypingGo = false;
 				executor.schedule(freeToSendTypingRunable, 2, TimeUnit.SECONDS);
-				getEntryPoint().runtimeService.sendTyping(account.serviceId, buddies.get(0).protocolUid);
+				getEntryPoint().runtimeService.sendTyping(buddy.serviceId, buddy.protocolUid);
 			} catch (NullPointerException npe) {	
 				ServiceUtils.log(npe);
 			} catch (RemoteException e1) {
@@ -346,7 +406,7 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 		if (text == null || text.length() < 1)
 			return;
 
-		if (account.getConnectionState() != AccountService.STATE_CONNECTED) {
+		if (accountConnectionState != AccountService.STATE_CONNECTED) {
 			Toast.makeText(getEntryPoint(), "Please enter network first", Toast.LENGTH_SHORT).show();
 			return;
 		}
@@ -354,34 +414,28 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 		new Thread("Send message") {
 			@Override
 			public void run() {
-				if (buddies.size() == 1) {
-					try {
-						Buddy buddy = buddies.get(0);
-
-						TextMessage message = new TextMessage(buddy.ownerUid);
-						message.to = buddy.protocolUid;
-						message.time = new Date();
-						message.text = text;
-						message.messageId = idGenerator.nextInt();
-						getEntryPoint().runtimeService.sendMessage(message, buddy.serviceId);
-						
-						messages.add(HistorySaver.formatMessageForHistory(message, buddy, getResources().getString(R.string.label_me)));
-						handler.post(messageSentCallback);
-					} catch (NullPointerException npe) {	
-						ServiceUtils.log(npe);
-					} catch (Exception e1) {
-						Toast.makeText(getEntryPoint(), "Error sending message " + e1.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-						ServiceUtils.log(e1);
-					}
-				} else {
-					// TODO multichat
+				try {
+					TextMessage message = new TextMessage(buddy.ownerUid);
+					message.to = buddy.protocolUid;
+					message.time = new Date();
+					message.text = text;
+					message.messageId = idGenerator.nextInt();
+					getEntryPoint().runtimeService.sendMessage(message, buddy.serviceId);
+					
+					messages.add(HistorySaver.formatMessageForHistory(message, buddy, getResources().getString(R.string.label_me)));
+					handler.post(messageSentCallback);
+				} catch (NullPointerException npe) {	
+					ServiceUtils.log(npe);
+				} catch (Exception e1) {
+					Toast.makeText(getEntryPoint(), "Error sending message " + e1.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+					ServiceUtils.log(e1);
 				}
 			}
 		}.start();
 	}
 
 	private void checkoutHistory() {
-		ServiceMessage waitMsg = new ServiceMessage(buddies.get(0).protocolUid);
+		ServiceMessage waitMsg = new ServiceMessage(buddy.protocolUid);
 		waitMsg.text = getResources().getString(R.string.label_wait);
 		final View waitView = getListItem(waitMsg);
 		historyView.addView(waitView);
@@ -389,7 +443,7 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 		new Thread("Get history") {
 			@Override
 			public void run() {
-				messages = buddies.get(0).getLastHistory(getEntryPoint(), false);					
+				messages = buddy.getLastHistory(getEntryPoint(), false);					
 				handler.post(refreshHistoryCallback);
 			}
 		}.start();
@@ -399,17 +453,15 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 
 	@Override
 	public void messageReceived(TextMessage message, boolean tabActive) {
-		if (buddies.size() == 1) {
-			if (buddies.get(0).protocolUid.equals(message.from) || buddies.get(0).protocolUid.equals(message.to)) {
-				removeTyping();
-				historyView.addView(getListItem(message));
-				if (tabActive){
-					scroller.post(scrollToEnd);	
-				} else {
-					//if (!getEntryPoint().getTabHost().getCurrentTabTag().equals(ContactList.class.getSimpleName()+" "+getServiceId())){
-						tabWidgetLayout.getTabIcon().setImageResource(R.drawable.message_medium);
-					//}
-				}
+		if (buddy.protocolUid.equals(message.from) || buddy.protocolUid.equals(message.to)) {
+			removeTyping();
+			historyView.addView(getListItem(message));
+			if (tabActive){
+				scroller.post(scrollToEnd);	
+			} else {
+				//if (!getEntryPoint().getTabHost().getCurrentTabTag().equals(ContactList.class.getSimpleName()+" "+getServiceId())){
+					tabWidgetLayout.getTabIcon().setImageResource(R.drawable.message_medium);
+				//}
 			}
 		}
 	}
@@ -438,17 +490,29 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 			ServiceUtils.log(npe);
 		} 
 
-		if (buddies.size() == 1) {
-			MenuItem askXStatusItem = menu.findItem(R.id.menuitem_askxstatus);
-			if (buddies.get(0).xstatus > -1 && buddies.get(0).serviceName.equalsIgnoreCase(getResources().getString(R.string.icq_service_name))) {
-				askXStatusItem.setIcon(ServiceUtils.getXStatusArray32(getContext(), account.protocolName).getDrawable(buddies.get(0).xstatus));
-				askXStatusItem.setVisible(true);
-			} else {
-				askXStatusItem.setIcon(R.drawable.xstatus_none);
-				askXStatusItem.setVisible(false);
-			}
-			MenuItem sendFileItem = menu.findItem(R.id.menuitem_send_file);
-			sendFileItem.setVisible(buddies.get(0).canFileShare);
+		MenuItem askXStatusItem = menu.findItem(R.id.menuitem_askxstatus);
+		if (buddy.xstatus > -1 && buddy.serviceName.equalsIgnoreCase(getResources().getString(R.string.icq_service_name))) {
+			askXStatusItem.setIcon(ServiceUtils.getXStatusArray32(getContext(), buddy.serviceName).getDrawable(buddy.xstatus));
+			askXStatusItem.setVisible(true);
+		} else {
+			askXStatusItem.setIcon(R.drawable.xstatus_none);
+			askXStatusItem.setVisible(false);
+		}
+		MenuItem sendFileItem = menu.findItem(R.id.menuitem_send_file);
+		sendFileItem.setVisible(buddy.status != Buddy.ST_OFFLINE && buddy.canFileShare);
+		
+		MenuItem joinChatItem = menu.findItem(R.id.menuitem_join_chat);
+		MenuItem leaveChatItem = menu.findItem(R.id.menuitem_leave_chat);
+		MenuItem participantsItem = menu.findItem(R.id.menuitem_participants);
+		if (accountConnectionState == AccountService.STATE_CONNECTED && buddy.visibility == Buddy.VIS_GROUPCHAT){
+			joinChatItem.setVisible(buddy.status == Buddy.ST_OFFLINE);
+			leaveChatItem.setVisible(buddy.status != Buddy.ST_OFFLINE);
+			participantsItem.setVisible(buddy.status != Buddy.ST_OFFLINE);
+			participantsItem.setTitle(participantsView.getVisibility() == View.VISIBLE ? R.string.label_hide_participants : R.string.label_show_participants);
+		} else {
+			joinChatItem.setVisible(false);
+			leaveChatItem.setVisible(false);
+			participantsItem.setVisible(false);
 		}
 
 		LocationManager lm = (LocationManager) getEntryPoint().getSystemService(Context.LOCATION_SERVICE);
@@ -468,7 +532,7 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 			returnToBuddyList();
 			break;
 		case R.id.menuitem_send_file:
-			ViewUtils.showSendFileDialog(getEntryPoint(), buddies.get(0));
+			ViewUtils.showSendFileDialog(getEntryPoint(), buddy);
 			break;
 		case R.id.menuitem_send_location:
 			new LocationLoader().getAndSendLocation();
@@ -477,16 +541,37 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 			ViewUtils.showTabChangeMenu(getEntryPoint());
 			break;
 		case R.id.menuitem_history:
-			getEntryPoint().addHistoryTab(buddies.get(0));
+			getEntryPoint().addHistoryTab(buddy);
 			break;
 		case R.id.menuitem_askxstatus:
 			try {
-				getEntryPoint().runtimeService.askForXStatus(buddies.get(0));
+				getEntryPoint().runtimeService.askForXStatus(buddy);
 			} catch (NullPointerException npe) {	
 				ServiceUtils.log(npe);
 			} catch (RemoteException e) {
 				getEntryPoint().onRemoteCallFailed(e);
 			}
+			break;
+		case R.id.menuitem_join_chat:
+			try {
+				getEntryPoint().runtimeService.joinExistingChat(buddy.serviceId, buddy.protocolUid);
+			} catch (NullPointerException npe) {	
+				ServiceUtils.log(npe);
+			} catch (RemoteException e) {
+				getEntryPoint().onRemoteCallFailed(e);
+			}
+			break;
+		case R.id.menuitem_leave_chat:
+			try {
+				getEntryPoint().runtimeService.leaveChat(buddy.serviceId, buddy.protocolUid);
+			} catch (NullPointerException npe) {	
+				ServiceUtils.log(npe);
+			} catch (RemoteException e) {
+				getEntryPoint().onRemoteCallFailed(e);
+			}
+			break;
+		case R.id.menuitem_participants:
+			participantsView.setVisibility(participantsView.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
 			break;
 		}
 		return false;
@@ -505,7 +590,7 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 
 	private void returnToBuddyList() {
 		kbManager.hideSoftInputFromWindow(textEditor.getWindowToken(), 0);
-		getEntryPoint().mainScreen.checkAndSetCurrentTabByTag(ContactList.class.getSimpleName() + " " + account.serviceId);
+		getEntryPoint().mainScreen.checkAndSetCurrentTabByTag(ContactList.class.getSimpleName() + " " + buddy.serviceId);
 	}
 
 	@Override
@@ -515,14 +600,13 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 
 	@Override
 	public void updateBuddyState(final Buddy buddy) {
-		if (buddies.size() == 1) {
-			if (!buddies.get(0).protocolUid.equals(buddy.protocolUid)) {
-				return;
-			} else {
-				buddies.get(0).merge(buddy);
-			}
+		if (!this.buddy.protocolUid.equals(buddy.protocolUid)) {
+			return;
+		} else {
+			this.buddy.merge(buddy);
 		}
 		
+		tabWidgetLayout.getTabName().setText(buddy.getName());
 		statusIcon.setImageResource(ServiceUtils.getStatusResIdByBuddyTiny(getContext(), buddy));
 
 		switch (buddy.status) {
@@ -584,18 +668,22 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 					(buddy.xstatusName != null && buddy.xstatusName.length()>0 ? (buddy.xstatusName + " :") : "") + 
 					(buddy.xstatusDescription != null && buddy.xstatusDescription.length()>0 ? (" " + buddy.xstatusDescription) : ""));
 		} 
+		
+		if (accountConnectionState == AccountService.STATE_DISCONNECTED || buddy.visibility != Buddy.VIS_GROUPCHAT || buddy.status == Buddy.ST_OFFLINE){
+			participantsView.setVisibility(View.GONE);
+		} else {
+			checkGroupChatView();
+		}
 	}
 	
 	private void requestIcon(){
-		if (buddies.size() == 1){
-			new Thread("Chat icon request"){
-				@Override
-				public void run(){
-					icon = buddies.get(0).getIcon(getEntryPoint());
-					handler.post(bitmapGot);									
-				}
-			}.start();
-		}
+		new Thread("Chat icon request"){
+			@Override
+			public void run(){
+				icon = buddy.getIcon(getEntryPoint());
+				handler.post(bitmapGot);									
+			}
+		}.start();
 	}
 
 	class LocationLoader implements LocationListener {
@@ -658,13 +746,13 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 	}
 
 	@Override
-	public int getServiceId() {
-		return account.serviceId;
+	public byte getServiceId() {
+		return buddy.serviceId;
 	}
 
 	@Override
-	public void updated(AccountView account) {
-		this.account.options = account.options;
+	public void updated(AccountView account, boolean refreshContacts) {
+		accountConnectionState = account.getConnectionState();
 		sendTyping = Boolean.parseBoolean((String) account.options.get(getContext().getString(R.string.key_send_typing)));
 	}
 
@@ -673,13 +761,10 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 	}
 
 	@Override
-	public void stateChanged(AccountView account) {
-		this.account.merge(account);
-		if (this.account.getConnectionState() == AccountService.STATE_DISCONNECTED){
-			for (Buddy bu :buddies){
-				bu.status = Buddy.ST_OFFLINE;
-				updateBuddyState(bu);
-			}
+	public void stateChanged(AccountView account, boolean refreshContacts) {
+		if ((accountConnectionState = account.getConnectionState()) == AccountService.STATE_DISCONNECTED){
+			buddy.status = Buddy.ST_OFFLINE;
+			updateBuddyState(buddy);
 		}
 	}
 
@@ -767,10 +852,10 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 			}		
 		if (message instanceof ServiceMessage){ //TODO 
 			TextView tv = new TextView(getContext());
-				tv.setTextColor(0xff000000+textColor);
+				tv.setTextColor(0xff00ff00);
 				tv.setGravity(Gravity.CENTER);
 				tv.setLayoutParams(new ListView.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT, 1));
-			
+			tv.setText(message.text);
 			return tv;
 		}
 		
@@ -831,7 +916,11 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 
 	@Override
 	public void bitmap(String uid) {
-		requestIcon();		
+		if (uid.equals(buddy.protocolUid)){
+			requestIcon();	
+		} else if (participantsAdapter != null){
+			participantsAdapter.bitmap(uid);
+		}
 	}
 
 	public void messageAck(long messageId, int level) {
@@ -867,4 +956,12 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 
 	@Override
 	public void configChanged() {}
+
+	@Override
+	public void serviceMessageReceived(ServiceMessage message) {
+		if (message.serviceId == getServiceId() && buddy.visibility == Buddy.VIS_GROUPCHAT){
+			historyView.addView(getListItem(message));
+			scroller.post(scrollToEnd);	
+		}
+	}
 }

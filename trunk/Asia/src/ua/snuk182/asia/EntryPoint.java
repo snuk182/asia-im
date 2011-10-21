@@ -7,6 +7,8 @@ import ua.snuk182.asia.core.dataentity.AccountView;
 import ua.snuk182.asia.core.dataentity.Buddy;
 import ua.snuk182.asia.core.dataentity.BuddyGroup;
 import ua.snuk182.asia.core.dataentity.FileMessage;
+import ua.snuk182.asia.core.dataentity.MultiChatRoom;
+import ua.snuk182.asia.core.dataentity.MultiChatRoomOccupants;
 import ua.snuk182.asia.core.dataentity.PersonalInfo;
 import ua.snuk182.asia.core.dataentity.ServiceMessage;
 import ua.snuk182.asia.core.dataentity.TabInfo;
@@ -20,6 +22,7 @@ import ua.snuk182.asia.view.IMainScreen;
 import ua.snuk182.asia.view.ViewUtils;
 import ua.snuk182.asia.view.cl.ContactList;
 import ua.snuk182.asia.view.conversations.ConversationsView;
+import ua.snuk182.asia.view.groupchats.GroupChatsView;
 import ua.snuk182.asia.view.mainscreen.SmartphoneScreen;
 import ua.snuk182.asia.view.mainscreen.TabletScreen;
 import ua.snuk182.asia.view.more.AccountManagerView;
@@ -66,10 +69,12 @@ public class EntryPoint extends ActivityGroup {
 	
 	private Bundle appOptions;
 	
-	public int bgColor = 0xff7f7f80;
+	public static int bgColor = 0xff7f7f80;
 	public DisplayMetrics metrics = new DisplayMetrics();
 	
 	public boolean dontDrawSmileys = false;
+	
+	public BitmapDrawable wallpaper = null;
 	
 	private Bundle savedState;
 	private ServiceConnection serviceConnection = new ServiceConnection(){
@@ -149,7 +154,8 @@ public class EntryPoint extends ActivityGroup {
 				setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
 			}
 			
-			dontDrawSmileys = Boolean.parseBoolean(getApplicationOptions().getString(getResources().getString(R.string.key_dont_draw_smileys)));
+			String dontDrawSmileysStr = getApplicationOptions().getString(getResources().getString(R.string.key_dont_draw_smileys));
+			dontDrawSmileys = dontDrawSmileysStr!=null ? Boolean.parseBoolean(dontDrawSmileysStr) : false;
 			
 			updateBackground();	
 			
@@ -161,13 +167,13 @@ public class EntryPoint extends ActivityGroup {
 	@Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig); 
-        mainScreen.configChanged();
-		getMetrics();
+        getMetrics();
         threadMsgHandler.post(new Runnable(){
 
 			@Override
 			public void run() {
-				updateBackground();
+				mainScreen.configChanged();
+				//updateBackground();
 			}
         	
         });
@@ -183,23 +189,23 @@ public class EntryPoint extends ActivityGroup {
 			ServiceUtils.log(npe);
 		}
 		if (bgType == null || bgType.equals("wallpaper")){
-			bgColor = BGCOLOR_WALLPAPER;
-			Bitmap original = ((BitmapDrawable)getWallpaper()).getBitmap();	
-			BitmapDrawable wallpaper = new BitmapDrawable(original);
-			//wallpaper.setGravity(Gravity.CENTER);
-			
-			if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
-				wallpaper.setGravity(Gravity.CENTER_HORIZONTAL|Gravity.FILL_VERTICAL);
-			} else {
-				wallpaper.setGravity(Gravity.CENTER_HORIZONTAL|Gravity.TOP);
+			try {
+				bgColor = BGCOLOR_WALLPAPER;
+				Bitmap original = ViewUtils.scaleBitmap(((BitmapDrawable)getWallpaper()).getBitmap(), 
+						(metrics.heightPixels > metrics.widthPixels) ? metrics.heightPixels : metrics.widthPixels, 
+								true);	
+				wallpaper = new BitmapDrawable(getResources(), original);
+				wallpaper.setGravity(Gravity.CENTER);
+				
+				mainScreen.setBackgroundDrawable(wallpaper);
+			} catch (Exception e) {
+				bgColor = 0xff000000;
+				mainScreen.setBackgroundColor(bgColor);		
 			}
-			mainScreen.setBackgroundDrawable(wallpaper);
 		}else {
 			try {
 				bgColor = (int) Long.parseLong(bgType);
-				mainScreen.setBackgroundColor(bgColor);
-				
-											
+				mainScreen.setBackgroundColor(bgColor);											
 			} catch (NumberFormatException e) {				
 				ServiceUtils.log(e);
 			}
@@ -222,39 +228,36 @@ public class EntryPoint extends ActivityGroup {
     	
     	savedState = savedInstanceState;
     	getMetrics();
-    	toggleSplashscreen(true);
+    	toggleWaitscreen(true);
         
     	threadMsgHandler.post(startRunnable);	
     }
     
-    private void toggleSplashscreen(final boolean show) {
+    public void toggleWaitscreen(final boolean show) {
     	
-    	/*threadMsgHandler.post(new Runnable(){
-
-			@Override
-			public void run() {
-				if (progressDialog!=null){
-					if (show){
-						progressDialog.show();
-					} else {
-						progressDialog.hide();
-					}
-				} else {
-					if (show){
-						progressDialog = ProgressDialog.show(EntryPoint.this, "", getResources().getString(R.string.label_wait), true);
-						progressDialog.setIndeterminateDrawable(getResources().getDrawable(R.drawable.logo_96px));
-						progressDialog.setCancelable(true);
-					}
-				}
+    	if (show){
+    		try {
+				progressDialog = ProgressDialog.show(EntryPoint.this, "", getResources().getString(R.string.label_wait), true);
+				progressDialog.setIndeterminateDrawable(getResources().getDrawable(R.drawable.logo_96px));
+				progressDialog.setCancelable(true);
+			} catch (Exception e) {
+				//TODO may be Window Leaked
+				ServiceUtils.log(e);
 			}
-    		
-    	});*/
+    	} else {
+    		if (progressDialog != null){
+    			progressDialog.hide();
+    			progressDialog = null;
+    		}
+    	}
     	
-    	if (progressDialog!=null){
+    	/*if (progressDialog!=null){
 			if (show){
 				progressDialog.show();
 			} else {
 				progressDialog.hide();
+				
+				progressDialog = null;
 			}
 		} else {
 			if (show){
@@ -267,7 +270,7 @@ public class EntryPoint extends ActivityGroup {
 					ServiceUtils.log(e);
 				}
 			}
-		}
+		}*/
 	}
 
 	private void getRuntimeService() {
@@ -378,7 +381,7 @@ public class EntryPoint extends ActivityGroup {
 		} catch (AsiaCoreException e) {
 			ServiceUtils.log(e);
 		} 		
-		toggleSplashscreen(false);
+		toggleWaitscreen(false);
 	}
 
 	public void addAccountEditorTab(AccountView account){
@@ -406,10 +409,7 @@ public class EntryPoint extends ActivityGroup {
     	
     	try {
     		AccountView account = runtimeService.getAccountView(buddy.serviceId);
-			ArrayList<Buddy> buddyList = new ArrayList<Buddy>(1);
-	    	buddyList.add(buddy);
-	    	TabInfo info;
-			info = TabInfoFactory.createConversation(this, account, buddyList);
+			TabInfo info = TabInfoFactory.createConversation(this, account, buddy);
 			mainScreen.addTab(info, true);
     	} catch (NullPointerException npe) {	
 			ServiceUtils.log(npe);
@@ -417,8 +417,7 @@ public class EntryPoint extends ActivityGroup {
 			ServiceUtils.log(e);
 		} catch (RemoteException e) {
 			onRemoteCallFailed(e);
-		}
-    	
+		}    	
     }
     
     public void addHistoryTab(Buddy buddy){
@@ -443,7 +442,16 @@ public class EntryPoint extends ActivityGroup {
     	mainScreen.addTab(tab, true);
     }
     
-    
+    public void addMyGroupChatsTab(AccountView account){
+    	String tag = GroupChatsView.class.getSimpleName()+" "+account.serviceId;    	
+    	   
+    	if (mainScreen.checkAndSetCurrentTabByTag(tag)){
+    		return;
+    	}
+    	
+    	TabInfo tab = TabInfoFactory.createGroupChatsTab(this, account);
+    	mainScreen.addTab(tab, true);
+    }
     
     public void removeAccount(AccountView account){
     	mainScreen.removeAccount(account);
@@ -451,15 +459,8 @@ public class EntryPoint extends ActivityGroup {
 
 	private final IRuntimeServiceCallback serviceCallback = new IRuntimeServiceCallback.Stub() {
 		
-		private void accountStateChanged(AccountView account){
-			mainScreen.accountStateChanged(account);
-			
-			/*if (!(getTabHost().getCurrentView() instanceof IHasAccount) || ((IHasAccount)getTabHost().getCurrentView()).getServiceId()!=account.protocolServiceId){
-				try {
-					notificationToast(account.ownName+getResources().getString(R.string.label_offline));
-				} catch (Exception e) {
-				}
-			}*/
+		private void accountStateChanged(AccountView account, boolean refreshContacts){
+			mainScreen.accountStateChanged(account, refreshContacts);
 		}
 		
 
@@ -469,7 +470,7 @@ public class EntryPoint extends ActivityGroup {
 
 				@Override
 				public void run() {
-					accountStateChanged(account);		
+					accountStateChanged(account, false);		
 				}
 				
 			});
@@ -494,7 +495,7 @@ public class EntryPoint extends ActivityGroup {
 
 				@Override
 				public void run() {
-					mainScreen.accountUpdated(account);		
+					mainScreen.accountUpdated(account, true);		
 				}
 				
 			});		
@@ -532,7 +533,7 @@ public class EntryPoint extends ActivityGroup {
 
 				@Override
 				public void run() {
-					mainScreen.accountUpdated(account);		
+					mainScreen.accountUpdated(account, false);		
 				}
 				
 			});				
@@ -545,17 +546,11 @@ public class EntryPoint extends ActivityGroup {
 				@Override
 				public void run() {
 					if (msg == null) return;
-					//Context context = getTabHost().getCurrentView().getContext();
-					if (msg.type.equals(ServiceMessage.TYPE_AUTHREQUEST)){
-						
-						ViewUtils.showAuthRequestDialog(msg, EntryPoint.this);
-						
-						/*if (context instanceof IHasAccount && ((IHasAccount)context).getServiceId() == msg.serviceId && context instanceof IHasMessages){
-							((IHasMessages)context).serviceMessageReceived(msg);
-						} else {
-							runtimeService.setServiceMessageUnread(msg.serviceId, true, msg);
-						}*/
-					}	
+					if (msg.type.equals(ServiceMessage.TYPE_AUTHREQUEST)){						
+						ViewUtils.showAuthRequestDialog(msg, EntryPoint.this);						
+					} else {
+						mainScreen.serviceMessage(msg);
+					}
 				}
 				
 			});
@@ -666,7 +661,7 @@ public class EntryPoint extends ActivityGroup {
 
 				@Override
 				public void run() {
-					accountStateChanged(account);
+					accountStateChanged(account, true);
 				}
 				
 			});
@@ -690,7 +685,7 @@ public class EntryPoint extends ActivityGroup {
 		public void accountAdded(final AccountView account) throws RemoteException {
 			TabInfo tab = addAccountTab(account);		
 			tab.content.visualStyleUpdated();
-			tab.tabWidgetLayout.color(bgColor);
+			tab.tabWidgetLayout.color();
 			/*threadMsgHandler.post(new Runnable(){
 
 				@Override
@@ -709,7 +704,7 @@ public class EntryPoint extends ActivityGroup {
 
 				@Override
 				public void run() {
-					accountStateChanged(account);		
+					accountStateChanged(account, false);		
 				}
 				
 			});
@@ -796,6 +791,32 @@ public class EntryPoint extends ActivityGroup {
 				}
 				
 			});	
+		}
+
+
+		@Override
+		public void availableChatsList(final byte serviceId, final List<MultiChatRoom> chats) throws RemoteException {
+			threadMsgHandler.post(new Runnable(){
+
+				@Override
+				public void run() {
+					mainScreen.availableChatsList(serviceId, chats);	
+				}
+				
+			});	
+		}
+
+
+		@Override
+		public void chatRoomOccupants(final byte serviceId, final String chatId, final MultiChatRoomOccupants occupants) throws RemoteException {
+			threadMsgHandler.post(new Runnable(){
+
+				@Override
+				public void run() {
+					mainScreen.chatRoomOccupants(serviceId, chatId, occupants);	
+				}
+				
+			});	
 		}		
 	};
 	private Runnable endActivityRunnable = new Runnable(){
@@ -857,14 +878,19 @@ public class EntryPoint extends ActivityGroup {
 		} else {
 			getRuntimeService();
 		}
+		mainScreen.onStart();
 	}
 	
 	@Override
 	public void onSaveInstanceState(Bundle bundle){
-		bundle.putParcelableArrayList(SAVEDSTATE_TABS, mainScreen.getTabs());
-		bundle.putInt(SAVEDSTATE_SELECTED_ACC, mainScreen.getCurrentAccountsTab());
-		bundle.putInt(SAVEDSTATE_SELECTED_CHAT, mainScreen.getCurrentChatsTab());
-		bundle.putParcelable(SAVEDSTATE_SERVICE_INTENT, serviceIntent);
+		try {
+			bundle.putParcelableArrayList(SAVEDSTATE_TABS, mainScreen.getTabs());
+			bundle.putInt(SAVEDSTATE_SELECTED_ACC, mainScreen.getCurrentAccountsTab());
+			bundle.putInt(SAVEDSTATE_SELECTED_CHAT, mainScreen.getCurrentChatsTab());
+			bundle.putParcelable(SAVEDSTATE_SERVICE_INTENT, serviceIntent);
+		} catch (Exception e) {
+			ServiceUtils.log(e);
+		}
 	}
 	
 	@Override
@@ -937,7 +963,7 @@ public class EntryPoint extends ActivityGroup {
 	public void setXStatus(AccountView account) {
 		try {
 			runtimeService.setXStatus(account);
-			mainScreen.accountStateChanged(account);
+			mainScreen.accountStateChanged(account, false);
 			/*for (TabInfo tab: tabs){
 				if ((tab.content instanceof IHasAccount) && ((IHasAccount)tab.content).getServiceId()==account.serviceId){
 					((IHasAccount)tab.content).stateChanged(account);
