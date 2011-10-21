@@ -8,6 +8,9 @@ public class PersonalInfo implements Parcelable{
 	
 	public String protocolUid;
 	public Bundle properties;
+	public static final String INFO_CHAT_DESCRIPTION = "Description";
+	public static final String INFO_CHAT_OCCUPANTS = "Occupants";
+	public static final String INFO_CHAT_SUBJECT = "Subject";
 	
 	public static final String INFO_NICK = "nick";	
 	public static final String INFO_FIRST_NAME = "first-name";

@@ -2,7 +2,7 @@
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
 	<ImageView android:id="@android:id/icon" android:src="@drawable/contact_32px"
 		android:layout_width="wrap_content" android:layout_height="wrap_content" 
-		android:scaleType="fitXY"/>
+		android:layout_gravity="center" android:scaleType="centerInside"/>
 
 	<TextView android:id="@android:id/title" android:text="noname"
 		android:layout_width="wrap_content" android:layout_height="wrap_content"

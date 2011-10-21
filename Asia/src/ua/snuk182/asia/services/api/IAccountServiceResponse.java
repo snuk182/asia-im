@@ -23,7 +23,7 @@ public interface IAccountServiceResponse {
 	public static final short RES_ACCOUNTUPDATED = 17;
 	public static final short RES_SAVETOSTORAGE = 18;
 	public static final short RES_GETFROMSTORAGE = 19;
-	public static final short RES_LOG = 20;
+	//public static final short RES_LOG = 20;
 	public static final short RES_AUTHREQUEST = 21;
 	public static final short RES_SEARCHRESULT = 22;
 	public static final short RES_BUDDYMODIFIED = 23;
@@ -37,7 +37,9 @@ public interface IAccountServiceResponse {
 	public static final short RES_ACCOUNTADDED = 31;
 	public static final short RES_MESSAGEACK = 32;
 	public static final short RES_TYPING = 33;
+	public static final short RES_AVAILABLE_CHATS = 34;
+	public static final short RES_CHAT_PARTICIPANTS = 35;
+	public static final short RES_SERVICEMESSAGE = 36;
 	
-	public static final String SHARED_PREFERENCES = "ProtocolSharedPrefs";
-	
+	public static final String SHARED_PREFERENCES = "ProtocolSharedPrefs";		
 }

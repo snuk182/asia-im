@@ -1,6 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string name="version">0.5.5.5b</string>
+	<string name="version">0.7b</string>
+	
+	<string name="label_create_groupchat">Create group chat</string>
+	<string name="label_connect_to_chat">Connect to chat</string>
+	<string name="label_refresh_chat_list">Refresh chats list</string>
+	<string name="label_joinedchats">Joined chats</string>
+	<string name="label_chat_name">Chat name</string>
+	<string name="label_nickname">Nickname</string>
+	<string name="label_chat_id">Chat ID (letters, numbers, dash, and underscore only)</string>
+	<string name="label_pwd_protected">Protect with password</string>
+	<string name="label_password">Password</string>
+	<string name="label_get_available_chats">Get available</string>
+	<string name="label_chat_options">Chat options</string>
+	<string name="label_hide_participants">Hide participants</string>
+	<string name="label_show_participants">Show participants</string>
+	<string name="label_chat_enter_manually">Enter manually</string>
+	
+	<string name="label_name">Name</string>
 	
 	<string name="label_view_type">App view type (needs restart)</string>
 	<string name="label_view_type_plain">Plain</string>
@@ -99,8 +116,6 @@
 	<string name="label_sound_type">"Sound notifications"</string>
 	<string name="label_statusbar_type">"Status bar notifications"</string>
 
-	<string name="label_sort_lists">"Sort data alphabetically"</string>
-
 	<string name="label_contact_menu">"Contact menu"</string>
 	<string name="label_im_here">"I'm here - "</string>
 	<string name="label_group_menu">"Group menu"</string>
@@ -141,6 +156,7 @@
 	<string name="label_unread_group">"Unread"</string>
 	<string name="label_online_group">"Online"</string>
 	<string name="label_offline_group">"Offline"</string>
+	<string name="label_chats_group">"Group chats"</string>
 	<string name="label_not_in_list_group">"Not in list"</string>
 	<string name="label_connect">"Connect"</string>
 	<string name="label_disconnect">"Disconnect"</string>
@@ -154,7 +170,6 @@
 	<string name="label_pick_status">"Pick a status"</string>
 	<string name="label_disconnected">"Disconnected"</string>
 	<string name="label_buddy_details">"Buddy details"</string>
-	<string name="label_close_chat">"Close chat"</string>
 	<string name="label_return_to_buddylist">"Return to buddy list"</string>
 	<string name="label_edit">"Edit "</string>
 	<string name="label_remove">"Remove "</string>
@@ -223,4 +238,6 @@
 	
 	<string name="menu_value_add_group">"Add new group..."</string>
 	<string name="menu_value_delete_group">"Delete group"</string>
+	<string name="menu_value_join_chat">Join chat</string>
+	<string name="menu_value_leave_chat">Leave chat</string>
 </resources>

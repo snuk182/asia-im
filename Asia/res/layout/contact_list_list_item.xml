@@ -6,8 +6,9 @@
 		android:layout_width="wrap_content" android:layout_height="wrap_content"
 		android:layout_alignParentTop="true" android:layout_alignParentLeft="true"
 		android:layout_alignParentBottom="true" android:src="@drawable/icq_offline_medium" />
-	<ImageView android:id="@+id/iconlayout" android:layout_width="wrap_content"
-		android:layout_height="wrap_content" android:layout_alignParentTop="true"
+	<ua.snuk182.asia.view.more.BuddyImage android:id="@+id/iconlayout" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" 
+		android:layout_alignParentTop="true"
 		android:layout_alignParentRight="true"
 		android:layout_alignParentBottom="true" android:src="@drawable/contact_32px" />
 	<TextView android:id="@+id/usernamelabel"

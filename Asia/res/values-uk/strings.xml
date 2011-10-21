@@ -82,6 +82,7 @@
     <string name="label_unread_group">"Непрочитані"</string>
     <string name="label_online_group">"В мережі"</string>
     <string name="label_offline_group">"Не в мережі"</string>
+    <string name="label_chats_group">"Чати"</string>
     <string name="label_not_in_list_group">"Невідомі"</string>
     <string name="label_connect">"Підключитись"</string>
     <string name="label_disconnect">"Відключитись"</string>
@@ -95,7 +96,6 @@
     <string name="label_pick_status">"Виберіть статус"</string>
     <string name="label_disconnected">"Від'єднався"</string>
     <string name="label_buddy_details">"Інфо контакта"</string>
-    <string name="label_close_chat">"Закрити чат"</string>
     <string name="label_return_to_buddylist">"До списку контактів"</string>
     <string name="label_edit">"Виправити "</string>
     <string name="label_remove">"Видалити "</string>
@@ -195,8 +195,6 @@
 	<string name="label_text_size">Розмір шрифту в чаті</string>
 	<string name="label_cl_item_size">Розмір контакта в списку</string>
 	
-	<string name="label_sort_lists">"Сортувати за алфавітом"</string>
-	
 	<string name="menu_value_copy">Копіювати</string>
 	<string name="menu_value_add_to_copied">Додати до копії</string>
 	<string name="menu_value_copy_all">Копіювати все</string>
@@ -217,4 +215,22 @@
 	<string name="menu_value_delete_group">"Видалити групу"</string>
 	
 	<string name="label_too_many_accounts">Забагато облікових записів!</string>
+	<string name="menu_value_join_chat">Ввійти до чату</string>
+	<string name="menu_value_leave_chat">Вийти з чату</string>
+	
+	<string name="label_hide_participants">Сховати читачів</string>
+	<string name="label_show_participants">Показати читачів</string>
+	
+	<string name="label_create_groupchat">Створити новий чат</string>
+	<string name="label_connect_to_chat">Ввійти до чату</string>
+	<string name="label_refresh_chat_list">Поновити список</string>
+	<string name="label_joinedchats">Чати</string>
+	<string name="label_chat_name">"Ім'я чату"</string>
+	<string name="label_nickname">Ваш нік у чаті</string>
+	<string name="label_chat_id">ID чату (лише літери, цифри, тире та нижня риска)</string>
+	<string name="label_pwd_protected">Потрібен пароль</string>
+	<string name="label_password">Пароль</string>
+	<string name="label_get_available_chats">Отримати доступні чати</string>
+	<string name="label_chat_options">Опції чату</string>
+	<string name="label_chat_enter_manually">Ввести вручну</string>
 </resources>

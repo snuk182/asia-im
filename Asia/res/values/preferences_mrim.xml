@@ -13,6 +13,9 @@
 		<item>2042</item>
 	</string-array>
 	
+	<string-array name="mrim_contact_menu_names">
+	</string-array>
+	
 	<string-array name="mrim_status_icons">
 		<item>@drawable/mrim_online_medium</item>
 		<item>@drawable/mrim_away_medium</item>

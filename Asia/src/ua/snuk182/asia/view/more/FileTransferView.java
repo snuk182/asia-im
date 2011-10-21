@@ -19,7 +19,7 @@ import android.widget.ScrollView;
 
 public class FileTransferView extends ScrollView implements ITabContent, IHasFileTransfer{
 	
-	private int serviceId = -1;
+	private byte serviceId = -1;
 	
 	private final TabWidgetLayout tabWidgetLayout;
 	private final LinearLayout layout;
@@ -46,17 +46,17 @@ public class FileTransferView extends ScrollView implements ITabContent, IHasFil
 	}
 
 	@Override
-	public int getServiceId() {
+	public byte getServiceId() {
 		return serviceId;
 	}
 
 	@Override
-	public void stateChanged(AccountView account) {
+	public void stateChanged(AccountView account, boolean refreshContacts) {
 				
 	}
 
 	@Override
-	public void updated(AccountView account) {
+	public void updated(AccountView account, boolean refreshContacts) {
 				
 	}
 

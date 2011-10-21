@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import ua.snuk182.asia.R;
-import ua.snuk182.asia.core.dataentity.AccountView;
 import ua.snuk182.asia.core.dataentity.Buddy;
 import ua.snuk182.asia.core.dataentity.TextMessage;
+import ua.snuk182.asia.services.ServiceUtils;
 import ua.snuk182.asia.services.api.AccountService;
 import ua.snuk182.asia.services.api.IAccountServiceResponse;
 import ua.snuk182.asia.services.api.ProtocolException;
@@ -22,7 +22,6 @@ import ua.snuk182.asia.services.mrim.inner.dataentity.MrimGroup;
 import ua.snuk182.asia.services.mrim.inner.dataentity.MrimMessage;
 import ua.snuk182.asia.services.mrim.inner.dataentity.MrimOnlineInfo;
 import android.content.Context;
-import android.content.res.TypedArray;
 
 public class MrimService extends AccountService {
 	
@@ -136,7 +135,8 @@ public class MrimService extends AccountService {
 			try{
 				switch (action) {
 				case MrimServiceResponse.RES_LOG:
-					return serviceResponse.respond(IAccountServiceResponse.RES_LOG, getServiceId(), args[0]);
+					ServiceUtils.log((String)args[0]);
+					break;
 				case MrimServiceResponse.RES_CONNECTED:
 					serviceResponse.respond(IAccountServiceResponse.RES_CONNECTED, getServiceId());
 					sendKeepalive();
@@ -250,8 +250,6 @@ public class MrimService extends AccountService {
 	
 	private MrimServiceInternal internal = new MrimServiceInternal(mrimResponse);
 
-	public static byte[] statusValues = new byte[]{ Buddy.ST_ONLINE, Buddy.ST_AWAY, Buddy.ST_OTHER, Buddy.ST_FREE4CHAT, Buddy.ST_INVISIBLE};
-
 	public MrimService(Context context, IAccountServiceResponse serviceResponse, byte serviceId) {
 		super(context, serviceResponse, serviceId);
 		
@@ -304,248 +302,9 @@ public class MrimService extends AccountService {
 	
 	
 
-	public static int getStatusResIdByAccountTiny(AccountView account, boolean withoutConnectionState) {
-		if (!withoutConnectionState){
-			switch(account.getConnectionState()){
-			case AccountService.STATE_DISCONNECTED:
-				return R.drawable.mrim_offline_tiny;
-			case AccountService.STATE_CONNECTING:
-				return R.drawable.mrim_connecting_tiny;
-			}
-		}
-		
-		return getStatusResIdByStatusIdTiny(account.status);
-	}
-
-	public static final int getStatusResIdByAccountMedium(AccountView account, boolean withoutConnectionState){
-		if (!withoutConnectionState){
-			switch(account.getConnectionState()){
-			case AccountService.STATE_DISCONNECTED:
-				return R.drawable.mrim_offline_medium;
-			case AccountService.STATE_CONNECTING:
-				return R.drawable.mrim_connecting_medium;
-			}
-		}
-		
-		return getStatusResIdByStatusIdMedium(account.status);
-	}
-
-	public static final int getStatusResIdByAccountSmall(AccountView account, boolean withoutConnectionState){
-		if (!withoutConnectionState){
-			switch(account.getConnectionState()){
-			case AccountService.STATE_DISCONNECTED:
-				return R.drawable.mrim_offline_small;
-			case AccountService.STATE_CONNECTING:
-				return R.drawable.mrim_connecting_small;
-			}
-		}
-		
-		return getStatusResIdByStatusIdSmall(account.status);
-	}
-	
-	/*public static int getStatusResIdByStatusId(int statusId, int size) {
-		if (size <= 16){
-			return getStatusResIdByStatusId16(statusId);
-		} else if (size <= 32){
-			return getStatusResIdByStatusId32(statusId);
-		} else if (size <= 48){
-			return getStatusResIdByStatusId48(statusId);
-		} else if (size <= 64){
-			return getStatusResIdByStatusId64(statusId);
-		} else {
-			return getStatusResIdByStatusId80(statusId);
-		}
-	}*/
-	
-	public static int getStatusResIdByStatusIdBigger(int statusId) {
-		int statusResId;
-		
-		switch(statusId){
-		case Buddy.ST_ONLINE:
-			statusResId = R.drawable.mrim_online_bigger;
-			break;
-		case Buddy.ST_AWAY:
-			statusResId = R.drawable.mrim_away_bigger;
-			break;
-		case Buddy.ST_OTHER:
-			statusResId = R.drawable.mrim_undetermined_bigger;
-			break;
-		case Buddy.ST_INVISIBLE:
-			statusResId = R.drawable.mrim_invisible_bigger;
-			break;
-		default:
-			statusResId = R.drawable.mrim_offline_bigger;
-			break;
-		case Buddy.ST_FREE4CHAT:
-			statusResId = R.drawable.mrim_free4chat_bigger;
-			break;
-		}
-		return statusResId;
-	}
-
-	public static int getStatusResIdByStatusIdBig(int statusId) {
-		int statusResId;
-		
-		switch(statusId){
-		case Buddy.ST_ONLINE:
-			statusResId = R.drawable.mrim_online_big;
-			break;
-		case Buddy.ST_AWAY:
-			statusResId = R.drawable.mrim_away_big;
-			break;
-		case Buddy.ST_OTHER:
-			statusResId = R.drawable.mrim_undetermined_big;
-			break;
-		case Buddy.ST_INVISIBLE:
-			statusResId = R.drawable.mrim_invisible_big;
-			break;
-		default:
-			statusResId = R.drawable.mrim_offline_big;
-			break;
-		case Buddy.ST_FREE4CHAT:
-			statusResId = R.drawable.mrim_free4chat_big;
-			break;
-		}
-		return statusResId;
-	}
-
-	/*private static int getStatusResIdByStatusId64(int statusId) {
-		int statusResId;
-		
-		switch(statusId){
-		case Buddy.ST_ONLINE:
-			statusResId = R.drawable.mrim_online_64;
-			break;
-		case Buddy.ST_AWAY:
-			statusResId = R.drawable.mrim_away_64;
-			break;
-		case Buddy.ST_OTHER:
-			statusResId = R.drawable.mrim_undetermined_64;
-			break;
-		case Buddy.ST_INVISIBLE:
-			statusResId = R.drawable.mrim_invisible_64;
-			break;
-		case Buddy.ST_FREE4CHAT:
-			statusResId = R.drawable.mrim_free4chat_64;
-			break;
-		default:
-			statusResId = R.drawable.mrim_offline_64;
-			break;
-		}
-		return statusResId;
-	}*/
-
-	public static int getStatusResIdByStatusIdSmall(int statusId) {
-		int statusResId;
-		
-		switch(statusId){
-		case Buddy.ST_ONLINE:
-			statusResId = R.drawable.mrim_online_small;
-			break;
-		case Buddy.ST_AWAY:
-			statusResId = R.drawable.mrim_away_small;
-			break;
-		case Buddy.ST_OTHER:
-			statusResId = R.drawable.mrim_undetermined_small;
-			break;
-		case Buddy.ST_INVISIBLE:
-			statusResId = R.drawable.mrim_invisible_small;
-			break;
-		case Buddy.ST_FREE4CHAT:
-			statusResId = R.drawable.mrim_free4chat_small;
-			break;
-		default:
-			statusResId = R.drawable.mrim_offline_small;
-			break;
-		}
-		
-		return statusResId;
-	}
-
-	public static int getStatusResIdByStatusIdMedium(int statusId) {
-		int statusResId;
-		
-		switch(statusId){
-		case Buddy.ST_ONLINE:
-			statusResId = R.drawable.mrim_online_medium;
-			break;
-		case Buddy.ST_AWAY:
-			statusResId = R.drawable.mrim_away_medium;
-			break;
-		case Buddy.ST_OTHER:
-			statusResId = R.drawable.mrim_undetermined_medium;
-			break;
-		case Buddy.ST_INVISIBLE:
-			statusResId = R.drawable.mrim_invisible_medium;
-			break;
-		case Buddy.ST_FREE4CHAT:
-			statusResId = R.drawable.mrim_free4chat_medium;
-			break;
-		default:
-			statusResId = R.drawable.mrim_offline_medium;
-			break;
-		}
-		
-		return statusResId;
-	}
-
-	public static int getStatusResIdByStatusIdTiny(int statusId) {
-		int statusResId;
-		
-		switch(statusId){
-		case Buddy.ST_ONLINE:
-			statusResId = R.drawable.mrim_online_tiny;
-			break;
-		case Buddy.ST_AWAY:
-			statusResId = R.drawable.mrim_away_tiny;
-			break;
-		case Buddy.ST_OTHER:
-			statusResId = R.drawable.mrim_undetermined_tiny;
-			break;
-		case Buddy.ST_INVISIBLE:
-			statusResId = R.drawable.mrim_invisible_tiny;
-			break;
-		case Buddy.ST_FREE4CHAT:
-			statusResId = R.drawable.mrim_free4chat_tiny;
-			break;
-		default:
-			statusResId = R.drawable.mrim_offline_tiny;
-			break;
-		}
-		
-		return statusResId;
-	}
-
-	/*public static int getStatusResIdByAccount(AccountView account, int size, boolean withoutConnectionState) {
-		
-		if (size <= 16){
-			return getStatusResIdByAccount16(account, withoutConnectionState);
-		} else if (size <= 32){
-			return getStatusResIdByAccount32(account, withoutConnectionState);
-		} else {
-			return getStatusResIdByAccount48(account, withoutConnectionState);
-		}
-	}*/
-	
-	public static int getMenuResIdByAccount(AccountView account) {
-		return R.menu.mrim_cl_menu;
-	}	
-	
-	public static final String[] getStatusListNames(Context context){
-		return context.getResources().getStringArray(R.array.mrim_status_strings);
-	}
-	
-	public static final byte getStatusValueByCount(int count){
-		return statusValues[count];
-	}
-
 	@Override
 	protected void timeoutDisconnect() {
 		internal.getRunnableService().disconnect();		
-	}
-
-	public static TypedArray getStatusResIds(Context context) {
-		return context.getResources().obtainTypedArray(R.array.mrim_status_icons);
 	}
 
 }

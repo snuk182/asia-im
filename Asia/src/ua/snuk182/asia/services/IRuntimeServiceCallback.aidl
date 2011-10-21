@@ -7,6 +7,8 @@ import ua.snuk182.asia.core.dataentity.Buddy;
 import ua.snuk182.asia.core.dataentity.BuddyGroup;
 import ua.snuk182.asia.core.dataentity.AccountView;
 import ua.snuk182.asia.core.dataentity.PersonalInfo;
+import ua.snuk182.asia.core.dataentity.MultiChatRoom;
+import ua.snuk182.asia.core.dataentity.MultiChatRoomOccupants;
 
 interface IRuntimeServiceCallback{
 	/*
@@ -69,4 +71,7 @@ interface IRuntimeServiceCallback{
 	void messageAck(in Buddy buddy, long messageId, int level);
 	void personalInfo(in Buddy buddy, in PersonalInfo info);
 	void typing(byte serviceId, String buddyUid);
+	
+	void availableChatsList(byte serviceId, in List<MultiChatRoom> chats);
+	void chatRoomOccupants(byte serviceId, String chatId, in MultiChatRoomOccupants occupants);
 }

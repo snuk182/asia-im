@@ -111,10 +111,11 @@ public class HistoryView extends ListView implements ITabContent, IHasMessages {
 
 	@Override
 	public void messageReceived(TextMessage message, boolean activeTab) {
-		messages.add(message);
-		((HistoryViewAdapter) getAdapter()).notifyDataSetChanged();
-		setSelection(messages.size() - 1);
-
+		if (message.from.equals(buddy.protocolUid)){
+			messages.add(message);
+			((HistoryViewAdapter) getAdapter()).notifyDataSetChanged();
+			setSelection(messages.size() - 1);
+		}
 	}
 
 	@Override

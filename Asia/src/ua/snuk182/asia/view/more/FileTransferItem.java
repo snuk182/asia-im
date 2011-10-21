@@ -7,7 +7,6 @@ import ua.snuk182.asia.core.dataentity.Buddy;
 import ua.snuk182.asia.services.ServiceUtils;
 import ua.snuk182.asia.view.cl.grid.ContactListGridItem;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources.NotFoundException;
@@ -40,7 +39,7 @@ public class FileTransferItem extends RelativeLayout {
 		this.messageId = messageId;
 		this.filePath = filename;
 		
-		LayoutInflater inflate = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		LayoutInflater inflate = LayoutInflater.from(getContext());
 		inflate.inflate(R.layout.filetransfer_view_item, this);
 		
 		setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, (int) (83*ftView.getEntryPoint().metrics.density)));
@@ -169,7 +168,7 @@ public class FileTransferItem extends RelativeLayout {
 
 						@Override
 						public void onClick(View v) {
-							String extension = MimeTypeMap.getFileExtensionFromUrl(filePath);
+							String extension = filePath.substring(filePath.lastIndexOf(".")+1);
 							String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
 							Intent intent = new Intent(Intent.ACTION_VIEW);
 							intent.setDataAndType(Uri.parse("file://" + filePath), mime);

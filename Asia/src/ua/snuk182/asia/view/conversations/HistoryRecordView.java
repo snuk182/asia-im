@@ -3,6 +3,7 @@ package ua.snuk182.asia.view.conversations;
 import java.util.Arrays;
 
 import ua.snuk182.asia.R;
+import ua.snuk182.asia.services.ServiceConstants;
 import ua.snuk182.asia.services.ServiceUtils;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -26,6 +27,7 @@ public class HistoryRecordView extends TextView {
 		setLayoutParams(layout);
 		setPadding(2, 0, 2, 0);
 		setTextSize(textSize);
+		setBackgroundResource(R.drawable.history_record_indicator);
 		MovementMethod mm = getMovementMethod();
         if (!(mm instanceof LinkMovementMethod))
         {
@@ -59,94 +61,16 @@ public class HistoryRecordView extends TextView {
 			
 			if (text.indexOf(getContext().getString(R.string.label_me))==0){
 				spannable.setSpan(new ForegroundColorSpan(0xff00a5ff), startIndex, endIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-			}else {
+			} else if (text.indexOf(ServiceConstants.SERVICE_MESSAGE_PREFIX)==0) {
+				spannable.setSpan(new ForegroundColorSpan(0xff00ff00), startIndex, endIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+			} else {
 				spannable.setSpan(new ForegroundColorSpan(0xffff0000), startIndex, endIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 			}
 			
-			if (text.indexOf("http://")>-1){
-				int pos = endIndex;
-				
-				while(pos>-1 && pos<text.length()){		
-					pos = text.indexOf("http://", pos);
-					
-					if (pos>-1){
-						int spaceEndPos = text.indexOf(" ", pos);
-						int endPos = spaceEndPos>-1? spaceEndPos : text.length();
-						
-						int nlEndPos = text.indexOf("\n", pos);
-						
-						if (nlEndPos > pos && nlEndPos < endPos){
-							endPos = nlEndPos;
-						}
-						
-						String url = text.substring(pos, endPos);
-						URLSpan urlSpan = new URLSpan(url);
-						spannable.setSpan(urlSpan, pos, endPos, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-						byte[] replace = new byte[endPos-pos];
-						Arrays.fill(replace, (byte) '_');
-						text = text.replace(url, new String(replace));
-						pos = ++endPos;
-					} else {
-						break;
-					}					
-				}				
-			}
-			
-			if (text.indexOf("ftp://")>-1){
-				int pos = endIndex;
-				
-				while(pos>-1 && pos<text.length()){		
-					pos = text.indexOf("ftp://", pos);				
-					if (pos>-1){
-						int spaceEndPos = text.indexOf(" ", pos);
-						int endPos = spaceEndPos>-1? spaceEndPos : text.length();
-						
-						int nlEndPos = text.indexOf("\n", pos);
-						
-						if (nlEndPos > -1 && nlEndPos < endPos){
-							endPos = nlEndPos;
-						}
-						String url = text.substring(pos, endPos);
-						URLSpan urlSpan = new URLSpan(url);
-						spannable.setSpan(urlSpan, pos, endPos, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-						byte[] replace = new byte[endPos-pos];
-						Arrays.fill(replace, (byte) '_');
-						text = text.replace(url, new String(replace));
-						pos = ++endPos;
-						
-					} else {
-						break;
-					}					
-				}				
-			}
-			
-			if (text.indexOf("https://")>-1){
-				int pos = endIndex;
-				
-				while(pos>-1 && pos<text.length()){		
-					pos = text.indexOf("https://", pos);			
-					if (pos>-1){
-						int spaceEndPos = text.indexOf(" ", pos);
-						int endPos = spaceEndPos>-1? spaceEndPos : text.length();
-						
-						int nlEndPos = text.indexOf("\n", pos);
-						
-						if (nlEndPos > -1 && nlEndPos < endPos){
-							endPos = nlEndPos;
-						}
-						String url = text.substring(pos, endPos);
-						URLSpan urlSpan = new URLSpan(url);
-						spannable.setSpan(urlSpan, pos, endPos, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-						byte[] replace = new byte[endPos-pos];
-						Arrays.fill(replace, (byte) '_');
-						text = text.replace(url, new String(replace));
-						pos = ++endPos;
-						
-					} else {
-						break;
-					}					
-				}				
-			}
+			spanUrl("ftp", spannable, text, endIndex);
+			spanUrl("http", spannable, text, endIndex);
+			spanUrl("https", spannable, text, endIndex);
+			spanUrl("market", spannable, text, endIndex);
 			
 			if (dontDrawSmileys){
 				return;
@@ -184,6 +108,37 @@ public class HistoryRecordView extends TextView {
 			
 			smileyNames.recycle();
 			smileyValues.recycle();
+		}
+	}
+	
+	private void spanUrl(String protocol, Spannable spannable, String text, int endIndex){
+		if (text.indexOf(protocol+"://")>-1){
+			int pos = endIndex;
+			
+			while(pos>-1 && pos<text.length()){		
+				pos = text.indexOf(protocol+"://", pos);
+				
+				if (pos>-1){
+					int spaceEndPos = text.indexOf(" ", pos);
+					int endPos = spaceEndPos>-1? spaceEndPos : text.length();
+					
+					int nlEndPos = text.indexOf("\n", pos);
+					
+					if (nlEndPos > pos && nlEndPos < endPos){
+						endPos = nlEndPos;
+					}
+					
+					String url = text.substring(pos, endPos);
+					URLSpan urlSpan = new URLSpan(url);
+					spannable.setSpan(urlSpan, pos, endPos, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+					byte[] replace = new byte[endPos-pos];
+					Arrays.fill(replace, (byte) '_');
+					text = text.replace(url, new String(replace));
+					pos = ++endPos;
+				} else {
+					break;
+				}					
+			}				
 		}
 	}
 

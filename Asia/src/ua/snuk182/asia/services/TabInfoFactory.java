@@ -1,8 +1,5 @@
 package ua.snuk182.asia.services;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import ua.snuk182.asia.EntryPoint;
 import ua.snuk182.asia.R;
 import ua.snuk182.asia.Splashscreen;
@@ -12,6 +9,7 @@ import ua.snuk182.asia.core.dataentity.PersonalInfo;
 import ua.snuk182.asia.core.dataentity.TabInfo;
 import ua.snuk182.asia.view.cl.ContactList;
 import ua.snuk182.asia.view.conversations.ConversationsView;
+import ua.snuk182.asia.view.groupchats.GroupChatsView;
 import ua.snuk182.asia.view.more.AccountManagerView;
 import ua.snuk182.asia.view.more.AsiaCoreException;
 import ua.snuk182.asia.view.more.FileTransferView;
@@ -37,11 +35,8 @@ public final class TabInfoFactory {
 		return tab;
 	}
 
-	public static final TabInfo createConversation(EntryPoint entryPoint, AccountView account, List<Buddy> buddies) throws AsiaCoreException {
-		if (buddies == null || buddies.size() < 1) {
-			throw new AsiaCoreException("Buddies array is invalid");
-		}
-		ConversationsView view = new ConversationsView(entryPoint, buddies, account);
+	public static final TabInfo createConversation(EntryPoint entryPoint, AccountView account, Buddy buddy) throws AsiaCoreException {
+		ConversationsView view = new ConversationsView(entryPoint, buddy, account);
 		TabInfo tab = new TabInfo(view.chatId, view, entryPoint.mainScreen.getChatsTabHost());
 		return tab;
 	}
@@ -124,9 +119,8 @@ public final class TabInfoFactory {
 		if (tab.tag.indexOf(ConversationsView.class.getSimpleName()) > -1) {
 			String[] params = tab.tag.split(" ");
 			try {
-				List<Buddy> buddies = new ArrayList<Buddy>();
-				buddies.add(entryPoint.runtimeService.getBuddy(Byte.parseByte(params[1]), params[2]));
-				tab.content = new ConversationsView(entryPoint, buddies, entryPoint.runtimeService.getAccountView(Byte.parseByte(params[1])));
+				Buddy buddy = entryPoint.runtimeService.getBuddy(Byte.parseByte(params[1]), params[2]);
+				tab.content = new ConversationsView(entryPoint, buddy, entryPoint.runtimeService.getAccountView(Byte.parseByte(params[1])));
 			} catch (NullPointerException npe) {
 				throw new AsiaCoreException(npe.getMessage());
 			} catch (NumberFormatException e) {
@@ -209,6 +203,14 @@ public final class TabInfoFactory {
 		FileTransferView ftView = new FileTransferView(entryPoint, account);
 		String tag = FileTransferView.class.getSimpleName() + " " + serviceId;
 		TabInfo tab = new TabInfo(tag, ftView, entryPoint.mainScreen.getChatsTabHost());
+
+		return tab;
+	}
+
+	public static final TabInfo createGroupChatsTab(EntryPoint entryPoint, AccountView account) {
+		GroupChatsView view = new GroupChatsView(entryPoint, account);
+		String tag = GroupChatsView.class.getSimpleName() + " " + account.serviceId;
+		TabInfo tab = new TabInfo(tag, view, entryPoint.mainScreen.getChatsTabHost());
 
 		return tab;
 	}

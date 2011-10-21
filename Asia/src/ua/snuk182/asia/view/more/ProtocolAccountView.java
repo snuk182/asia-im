@@ -18,7 +18,7 @@ public class ProtocolAccountView extends LinearLayout {
 
 	public ProtocolAccountView(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		LayoutInflater inflate = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		LayoutInflater inflate = LayoutInflater.from(getContext());
 		inflate.inflate(R.layout.account_item, this); 
 		
 		accountTypeImg = (ImageView) findViewById(R.id.accountItemImage);

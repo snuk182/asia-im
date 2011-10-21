@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Map;
 
 import ua.snuk182.asia.R;
-import ua.snuk182.asia.core.dataentity.AccountView;
 import ua.snuk182.asia.core.dataentity.Buddy;
 import ua.snuk182.asia.core.dataentity.BuddyGroup;
 import ua.snuk182.asia.core.dataentity.FileMessage;
 import ua.snuk182.asia.core.dataentity.TextMessage;
+import ua.snuk182.asia.services.ServiceUtils;
 import ua.snuk182.asia.services.api.AccountService;
 import ua.snuk182.asia.services.api.IAccountServiceResponse;
 import ua.snuk182.asia.services.api.ProtocolException;
@@ -26,7 +26,6 @@ import ua.snuk182.asia.services.icq.inner.dataentity.ICQOnlineInfo;
 import ua.snuk182.asia.services.icq.inner.dataentity.ICQPersonalInfo;
 import ua.snuk182.asia.services.utils.Base64;
 import android.content.Context;
-import android.content.res.TypedArray;
 
 public class ICQService extends AccountService {
 	
@@ -35,8 +34,6 @@ public class ICQService extends AccountService {
 	private static final String LOGIN_HOST = "loginhost";
 	private static final String PASSWORD = "password";
 	private static final String UID = "uid";
-
-	public static byte[] statusValues = new byte[]{ Buddy.ST_ONLINE, Buddy.ST_AWAY, Buddy.ST_NA, Buddy.ST_BUSY, Buddy.ST_DND, Buddy.ST_FREE4CHAT, Buddy.ST_INVISIBLE, Buddy.ST_ANGRY, Buddy.ST_DEPRESS, Buddy.ST_DINNER, Buddy.ST_HOME, Buddy.ST_WORK };
 
 	private ICQServiceResponse icqResponse = new ICQServiceResponse(){
 
@@ -47,7 +44,8 @@ public class ICQService extends AccountService {
 			try{
 				switch (action) {
 				case ICQServiceResponse.RES_LOG:
-					return serviceResponse.respond(IAccountServiceResponse.RES_LOG, getServiceId(), args[0]);
+					ServiceUtils.log((String)args[0]);
+					break;
 				case ICQServiceResponse.RES_CONNECTED:
 					serviceResponse.respond(IAccountServiceResponse.RES_CONNECTED, getServiceId());
 					sendKeepalive();
@@ -329,367 +327,6 @@ public class ICQService extends AccountService {
 	
 	
 
-	public static int getStatusResIdByAccountTiny(AccountView account, boolean withoutConnectionState) {
-		if (!withoutConnectionState){
-			switch(account.getConnectionState()){
-			case AccountService.STATE_DISCONNECTED:
-				return R.drawable.icq_offline_tiny;
-			case AccountService.STATE_CONNECTING:
-				return R.drawable.icq_connecting_tiny;
-			}
-		}
-		
-		return getStatusResIdByStatusIdTiny(account.status);
-	}
-
-	public static final int getStatusResIdByAccountMedium(AccountView account, boolean withoutConnectionState){
-		if (!withoutConnectionState){
-			switch(account.getConnectionState()){
-			case AccountService.STATE_DISCONNECTED:
-				return R.drawable.icq_offline_medium;
-			case AccountService.STATE_CONNECTING:
-				return R.drawable.icq_connecting_medium;
-			}
-		}
-		
-		return getStatusResIdByStatusIdMedium(account.status);
-	}
-
-	public static final int getStatusResIdByAccountSmall(AccountView account, boolean withoutConnectionState){
-		if (!withoutConnectionState){
-			switch(account.getConnectionState()){
-			case AccountService.STATE_DISCONNECTED:
-				return R.drawable.icq_offline_small;
-			case AccountService.STATE_CONNECTING:
-				return R.drawable.icq_connecting_small;
-			}
-		}
-		
-		return getStatusResIdByStatusIdSmall(account.status);
-	}
-	
-	/*public static int getStatusResIdByStatusId(int statusId, int size) {
-		if (size <= 16){
-			return getStatusResIdByStatusId16(statusId);
-		} else if (size <= 32){
-			return getStatusResIdByStatusId32(statusId);
-		} else if (size <= 48){
-			return getStatusResIdByStatusId48(statusId);
-		} else if (size <= 64){
-			return getStatusResIdByStatusId64(statusId);
-		} else {
-			return getStatusResIdByStatusId80(statusId);
-		}
-	}*/
-
-	public static int getStatusResIdByStatusIdBig(int statusId) {
-		int statusResId;
-		
-		switch(statusId){
-		case Buddy.ST_ONLINE:
-			statusResId = R.drawable.icq_online_big;
-			break;
-		case Buddy.ST_FREE4CHAT:
-			statusResId = R.drawable.icq_free4chat_big;
-			break;
-		case Buddy.ST_AWAY:
-			statusResId = R.drawable.icq_away_big;
-			break;
-		case Buddy.ST_BUSY:
-			statusResId = R.drawable.icq_busy_big;
-			break;
-		case Buddy.ST_DND:
-			statusResId = R.drawable.icq_dnd_big;
-			break;
-		case Buddy.ST_INVISIBLE:
-			statusResId = R.drawable.icq_invisible_big;
-			break;
-		case Buddy.ST_NA:
-			statusResId = R.drawable.icq_na_big;
-			break;
-		case Buddy.ST_ANGRY:
-			statusResId = R.drawable.icq_angry_big;
-			break;
-		case Buddy.ST_DEPRESS:
-			statusResId = R.drawable.icq_depress_big;
-			break;
-		case Buddy.ST_DINNER:
-			statusResId = R.drawable.icq_dinner_big;
-			break;
-		case Buddy.ST_HOME:
-			statusResId = R.drawable.icq_home_big;
-			break;
-		case Buddy.ST_WORK:
-			statusResId = R.drawable.icq_work_big;
-			break;
-		default:
-			statusResId = R.drawable.icq_offline_big;
-			break;
-		}
-		return statusResId;
-	}
-	
-	public static int getStatusResIdByStatusIdBigger(int statusId) {
-		int statusResId;
-		
-		switch(statusId){
-		case Buddy.ST_ONLINE:
-			statusResId = R.drawable.icq_online_bigger;
-			break;
-		case Buddy.ST_FREE4CHAT:
-			statusResId = R.drawable.icq_free4chat_bigger;
-			break;
-		case Buddy.ST_AWAY:
-			statusResId = R.drawable.icq_away_bigger;
-			break;
-		case Buddy.ST_BUSY:
-			statusResId = R.drawable.icq_busy_bigger;
-			break;
-		case Buddy.ST_DND:
-			statusResId = R.drawable.icq_dnd_bigger;
-			break;
-		case Buddy.ST_INVISIBLE:
-			statusResId = R.drawable.icq_invisible_bigger;
-			break;
-		case Buddy.ST_NA:
-			statusResId = R.drawable.icq_na_bigger;
-			break;
-		case Buddy.ST_ANGRY:
-			statusResId = R.drawable.icq_angry_bigger;
-			break;
-		case Buddy.ST_DEPRESS:
-			statusResId = R.drawable.icq_depress_bigger;
-			break;
-		case Buddy.ST_DINNER:
-			statusResId = R.drawable.icq_dinner_bigger;
-			break;
-		case Buddy.ST_HOME:
-			statusResId = R.drawable.icq_home_bigger;
-			break;
-		case Buddy.ST_WORK:
-			statusResId = R.drawable.icq_work_bigger;
-			break;
-		default:
-			statusResId = R.drawable.icq_offline_bigger;
-			break;
-		}
-		return statusResId;
-	}
-
-	/*private static int getStatusResIdByStatusId64(int statusId) {
-		int statusResId;
-		
-		switch(statusId){
-		case Buddy.ST_ONLINE:
-			statusResId = R.drawable.icq_online_64;
-			break;
-		case Buddy.ST_FREE4CHAT:
-			statusResId = R.drawable.icq_free4chat_64;
-			break;
-		case Buddy.ST_AWAY:
-			statusResId = R.drawable.icq_away_64;
-			break;
-		case Buddy.ST_BUSY:
-			statusResId = R.drawable.icq_busy_64;
-			break;
-		case Buddy.ST_DND:
-			statusResId = R.drawable.icq_dnd_64;
-			break;
-		case Buddy.ST_INVISIBLE:
-			statusResId = R.drawable.icq_invisible_64;
-			break;
-		case Buddy.ST_NA:
-			statusResId = R.drawable.icq_na_64;
-			break;
-		case Buddy.ST_ANGRY:
-			statusResId = R.drawable.icq_angry_64;
-			break;
-		case Buddy.ST_DEPRESS:
-			statusResId = R.drawable.icq_depress_64;
-			break;
-		case Buddy.ST_DINNER:
-			statusResId = R.drawable.icq_dinner_64;
-			break;
-		case Buddy.ST_HOME:
-			statusResId = R.drawable.icq_home_64;
-			break;
-		case Buddy.ST_WORK:
-			statusResId = R.drawable.icq_work_64;
-			break;
-		default:
-			statusResId = R.drawable.icq_offline_64;
-			break;
-		}
-		return statusResId;
-	}*/
-
-	public static int getStatusResIdByStatusIdSmall(int statusId) {
-		int statusResId;
-		
-		switch(statusId){
-		case Buddy.ST_ONLINE:
-			statusResId = R.drawable.icq_online_small;
-			break;
-		case Buddy.ST_FREE4CHAT:
-			statusResId = R.drawable.icq_free4chat_small;
-			break;
-		case Buddy.ST_AWAY:
-			statusResId = R.drawable.icq_away_small;
-			break;
-		case Buddy.ST_BUSY:
-			statusResId = R.drawable.icq_busy_small;
-			break;
-		case Buddy.ST_DND:
-			statusResId = R.drawable.icq_dnd_small;
-			break;
-		case Buddy.ST_INVISIBLE:
-			statusResId = R.drawable.icq_invisible_small;
-			break;
-		case Buddy.ST_NA:
-			statusResId = R.drawable.icq_na_small;
-			break;
-		case Buddy.ST_ANGRY:
-			statusResId = R.drawable.icq_angry_small;
-			break;
-		case Buddy.ST_DEPRESS:
-			statusResId = R.drawable.icq_depress_small;
-			break;
-		case Buddy.ST_DINNER:
-			statusResId = R.drawable.icq_dinner_small;
-			break;
-		case Buddy.ST_HOME:
-			statusResId = R.drawable.icq_home_small;
-			break;
-		case Buddy.ST_WORK:
-			statusResId = R.drawable.icq_work_small;
-			break;
-		default:
-			statusResId = R.drawable.icq_offline_small;
-			break;
-		}
-		
-		return statusResId;
-	}
-
-	public static int getStatusResIdByStatusIdMedium(int statusId) {
-		int statusResId;
-		
-		switch(statusId){
-		case Buddy.ST_ONLINE:
-			statusResId = R.drawable.icq_online_medium;
-			break;
-		case Buddy.ST_FREE4CHAT:
-			statusResId = R.drawable.icq_free4chat_medium;
-			break;
-		case Buddy.ST_AWAY:
-			statusResId = R.drawable.icq_away_medium;
-			break;
-		case Buddy.ST_BUSY:
-			statusResId = R.drawable.icq_busy_medium;
-			break;
-		case Buddy.ST_DND:
-			statusResId = R.drawable.icq_dnd_medium;
-			break;
-		case Buddy.ST_INVISIBLE:
-			statusResId = R.drawable.icq_invisible_medium;
-			break;
-		case Buddy.ST_NA:
-			statusResId = R.drawable.icq_na_medium;
-			break;
-		case Buddy.ST_ANGRY:
-			statusResId = R.drawable.icq_angry_medium;
-			break;
-		case Buddy.ST_DEPRESS:
-			statusResId = R.drawable.icq_depress_medium;
-			break;
-		case Buddy.ST_DINNER:
-			statusResId = R.drawable.icq_dinner_medium;
-			break;
-		case Buddy.ST_HOME:
-			statusResId = R.drawable.icq_home_medium;
-			break;
-		case Buddy.ST_WORK:
-			statusResId = R.drawable.icq_work_medium;
-			break;
-		default:
-			statusResId = R.drawable.icq_offline_medium;
-			break;
-		}
-		
-		return statusResId;
-	}
-
-	public static int getStatusResIdByStatusIdTiny(int statusId) {
-		int statusResId;
-		
-		switch(statusId){
-		case Buddy.ST_ONLINE:
-			statusResId = R.drawable.icq_online_tiny;
-			break;
-		case Buddy.ST_FREE4CHAT:
-			statusResId = R.drawable.icq_free4chat_tiny;
-			break;
-		case Buddy.ST_AWAY:
-			statusResId = R.drawable.icq_away_tiny;
-			break;
-		case Buddy.ST_BUSY:
-			statusResId = R.drawable.icq_busy_tiny;
-			break;
-		case Buddy.ST_DND:
-			statusResId = R.drawable.icq_dnd_tiny;
-			break;
-		case Buddy.ST_INVISIBLE:
-			statusResId = R.drawable.icq_invisible_tiny;
-			break;
-		case Buddy.ST_NA:
-			statusResId = R.drawable.icq_na_tiny;
-			break;
-		case Buddy.ST_ANGRY:
-			statusResId = R.drawable.icq_angry_tiny;
-			break;
-		case Buddy.ST_DEPRESS:
-			statusResId = R.drawable.icq_depress_tiny;
-			break;
-		case Buddy.ST_DINNER:
-			statusResId = R.drawable.icq_dinner_tiny;
-			break;
-		case Buddy.ST_HOME:
-			statusResId = R.drawable.icq_home_tiny;
-			break;
-		case Buddy.ST_WORK:
-			statusResId = R.drawable.icq_work_tiny;
-			break;
-		default:
-			statusResId = R.drawable.icq_offline_tiny;
-			break;
-		}
-		
-		return statusResId;
-	}
-
-	/*public static int getStatusResIdByAccount(AccountView account, int size, boolean withoutConnectionState) {
-		
-		if (size <= 16){
-			return getStatusResIdByAccount16(account, withoutConnectionState);
-		} else if (size <= 32){
-			return getStatusResIdByAccount32(account, withoutConnectionState);
-		} else {
-			return getStatusResIdByAccount48(account, withoutConnectionState);
-		}
-	}*/
-	
-	public static int getMenuResIdByAccount(AccountView account) {
-		return R.menu.icq_cl_menu;
-	}	
-	
-	public static final String[] getStatusListNames(Context context){
-		return context.getResources().getStringArray(R.array.icq_status_strings);
-	}
-	
-	public static final byte getStatusValueByCount(int count){
-		return statusValues[count];
-	}
-
 	@Override
 	protected void timeoutDisconnect() {
 		internal.getRunnableService().disconnect();		
@@ -703,9 +340,5 @@ public class ICQService extends AccountService {
 	@Override
 	protected String getUserID() {
 		return internal.getUn();
-	}
-
-	public static TypedArray getStatusResIds(Context context) {
-		return context.getResources().obtainTypedArray(R.array.icq_status_icons);
 	}
 }

@@ -7,6 +7,7 @@ public class ServiceMessage extends Message implements Parcelable {
 	
 	public static final String TYPE_AUTHREQUEST = "Type.Authrequest";
 	public static final String TYPE_FILE = "Type.File";
+	public static final String TYPE_CHAT_MESSAGE = "Type.Chat";
 	
 	public String type;
 	

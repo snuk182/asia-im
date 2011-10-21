@@ -12,7 +12,6 @@ import ua.snuk182.asia.services.api.AccountService;
 import ua.snuk182.asia.view.IHasAccount;
 import ua.snuk182.asia.view.ITabContent;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.os.RemoteException;
 import android.text.InputFilter;
 import android.view.KeyEvent;
@@ -45,7 +44,7 @@ public class SearchUsersView extends LinearLayout implements ITabContent, IHasAc
 		this.entryPoint = entryPoint;
 		this.account = account;
 		
-		LayoutInflater inflate = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		LayoutInflater inflate = LayoutInflater.from(entryPoint);
 		inflate.inflate(R.layout.search_users, this);
 		setOrientation(VERTICAL);
 		setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT));
@@ -178,17 +177,17 @@ public class SearchUsersView extends LinearLayout implements ITabContent, IHasAc
 	}
 
 	@Override
-	public int getServiceId() {
+	public byte getServiceId() {
 		return account.serviceId;
 	}
 
 	@Override
-	public void stateChanged(AccountView account) {
+	public void stateChanged(AccountView account, boolean refreshContacts) {
 		this.account.merge(account);		
 	}
 
 	@Override
-	public void updated(AccountView account) {
+	public void updated(AccountView account, boolean refreshContacts) {
 		
 	}
 

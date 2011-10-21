@@ -4,8 +4,8 @@ import ua.snuk182.asia.core.dataentity.AccountView;
 
 public interface IHasAccount extends IHasBitmap {
 
-	public int getServiceId();
-	public void stateChanged(AccountView account);
-	public void updated(AccountView account);
+	public byte getServiceId();
+	public void stateChanged(AccountView account, boolean refreshContacts);
+	public void updated(AccountView account, boolean refreshContacts);
 	public void connectionState(int state);
 }

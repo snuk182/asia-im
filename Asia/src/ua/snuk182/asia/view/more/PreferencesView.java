@@ -6,6 +6,7 @@ import ua.snuk182.asia.core.dataentity.AccountView;
 import ua.snuk182.asia.services.ServiceConstants;
 import ua.snuk182.asia.services.ServiceUtils;
 import ua.snuk182.asia.view.ITabContent;
+import ua.snuk182.asia.view.cl.ContactList;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -103,8 +104,10 @@ public class PreferencesView extends PreferenceActivity implements ITabContent {
 
 		if (i == KeyEvent.KEYCODE_BACK) {
 			String tag = account!=null ? PreferencesView.class.getSimpleName()+" "+account.serviceId : PreferencesView.class.getSimpleName();
-			
 			getEntryPoint().mainScreen.removeTabByTag(tag);
+			if (account != null){
+				getEntryPoint().mainScreen.checkAndSetCurrentTabByTag(ContactList.class.getSimpleName() + " " + account.serviceId);
+			}
 			return true;
 		}
 

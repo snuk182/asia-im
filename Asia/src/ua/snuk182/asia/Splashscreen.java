@@ -6,7 +6,6 @@ package ua.snuk182.asia;
 import ua.snuk182.asia.services.ServiceUtils;
 import ua.snuk182.asia.view.ITabContent;
 import ua.snuk182.asia.view.more.TabWidgetLayout;
-import android.content.Context;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -23,7 +22,7 @@ public class Splashscreen extends RelativeLayout implements ITabContent{
 	public Splashscreen(EntryPoint entryPoint){
 		super(entryPoint);
 		
-		LayoutInflater inflate = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		LayoutInflater inflate = LayoutInflater.from(entryPoint);
 		inflate.inflate(R.layout.splashscreen, this);
 		
 		setGravity(Gravity.CENTER);

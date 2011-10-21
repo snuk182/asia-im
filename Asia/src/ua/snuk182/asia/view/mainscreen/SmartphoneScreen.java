@@ -7,7 +7,10 @@ import ua.snuk182.asia.EntryPoint;
 import ua.snuk182.asia.R;
 import ua.snuk182.asia.core.dataentity.AccountView;
 import ua.snuk182.asia.core.dataentity.Buddy;
+import ua.snuk182.asia.core.dataentity.MultiChatRoom;
+import ua.snuk182.asia.core.dataentity.MultiChatRoomOccupants;
 import ua.snuk182.asia.core.dataentity.PersonalInfo;
+import ua.snuk182.asia.core.dataentity.ServiceMessage;
 import ua.snuk182.asia.core.dataentity.TabInfo;
 import ua.snuk182.asia.core.dataentity.TextMessage;
 import ua.snuk182.asia.services.ServiceUtils;
@@ -16,13 +19,14 @@ import ua.snuk182.asia.view.IHasAccount;
 import ua.snuk182.asia.view.IHasBuddy;
 import ua.snuk182.asia.view.IHasFileTransfer;
 import ua.snuk182.asia.view.IHasMessages;
+import ua.snuk182.asia.view.IHasServiceMessages;
 import ua.snuk182.asia.view.IMainScreen;
 import ua.snuk182.asia.view.cl.ContactList;
 import ua.snuk182.asia.view.conversations.ConversationsView;
+import ua.snuk182.asia.view.groupchats.GroupChatsView;
 import ua.snuk182.asia.view.more.PersonalInfoView;
 import ua.snuk182.asia.view.more.PreferencesView;
 import ua.snuk182.asia.view.more.SearchUsersView;
-import android.content.Context;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.RemoteException;
@@ -69,7 +73,7 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 		
 		tabs =  new ArrayList<TabInfo>();
         
-		LayoutInflater inflate = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		LayoutInflater inflate = LayoutInflater.from(entryPoint);
 		inflate.inflate(R.layout.tab_layout, this);	
 		setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 		setup(entryPoint.getLocalActivityManager());
@@ -164,17 +168,26 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 	
 	@Override
 	public void visualStyleUpdated() {
-		if (checkShowTabs() && getEntryPoint().bgColor != EntryPoint.BGCOLOR_WALLPAPER){
+		/*if (checkShowTabs() && EntryPoint.bgColor != EntryPoint.BGCOLOR_WALLPAPER){
 			findViewById(R.id.divider).setVisibility(View.VISIBLE);
 			findViewById(R.id.divider).setBackgroundColor(0x60202020);
 		} else {
 			findViewById(R.id.divider).setVisibility(View.GONE);
+		}*/
+		checkShowTabs();
+		
+		if (EntryPoint.bgColor == 0xff7f7f80){
+			tabScroller.setBackgroundColor(0x0);
+		} else if (EntryPoint.bgColor < 0xff7f7f80){
+			tabScroller.setBackgroundColor(0xff808080);
+		} else {
+			tabScroller.setBackgroundColor(0xffd0d0d0);
 		}
 		
 		for (TabInfo tab:tabs){
 			if (tab.content != null){
 				tab.content.visualStyleUpdated();
-				tab.tabWidgetLayout.color(getEntryPoint().bgColor);
+				tab.tabWidgetLayout.color();
 			}
 		}
 		
@@ -236,7 +249,9 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
     			removeTabAt(i);
     			break;
     		}
-    	}   	
+    	}   
+    	
+    	setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
     }
     
 	private void removeTabAt(int pos){
@@ -270,19 +285,19 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 	}
 
 	@Override
-	public void accountStateChanged(AccountView account) {
+	public void accountStateChanged(AccountView account, boolean refreshContacts) {
 		for (TabInfo tab: tabs){
 			if ((tab.content instanceof IHasAccount) && ((IHasAccount)tab.content).getServiceId()==account.serviceId){
-				((IHasAccount)tab.content).stateChanged(account);
+				((IHasAccount)tab.content).stateChanged(account, refreshContacts);
 			}
 		}
 	}
 
 	@Override
-	public void accountUpdated(AccountView account) {
+	public void accountUpdated(AccountView account, boolean refreshContacts) {
 		for (TabInfo tab: tabs){
 			if ((tab.content instanceof IHasAccount) && ((IHasAccount)tab.content).getServiceId()==account.serviceId){
-				((IHasAccount)tab.content).updated(account);
+				((IHasAccount)tab.content).updated(account, refreshContacts);
 			}
 		}
 	}
@@ -516,5 +531,31 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 		setCurrentTab(tab);
 	}
 
-	
+	@Override
+	public void availableChatsList(byte serviceId, List<MultiChatRoom> chats) {
+		for (TabInfo tab: tabs){
+			if (tab.tag != null && tab.tag.equals(GroupChatsView.class.getSimpleName() + " " + serviceId)){
+				((GroupChatsView) tab.content).chatsList(chats);
+			}
+		}
+	}
+
+	@Override
+	public void chatRoomOccupants(byte serviceId, String chatId, MultiChatRoomOccupants occupants) {
+		for (TabInfo tab: tabs){
+			if (tab.tag != null && tab.tag.equals(ConversationsView.class.getSimpleName()+" "+serviceId+" "+chatId)){
+				((ConversationsView) tab.content).fillGroupChatView(occupants);
+			}
+		}
+	}
+
+	@Override
+	public void serviceMessage(ServiceMessage message) {
+		for (int i=0; i<tabs.size(); i++){
+			TabInfo tab = tabs.get(i);
+			if (tab.content != null && (tab.content instanceof IHasServiceMessages)){
+				((IHasServiceMessages)tab.content).serviceMessageReceived(message);					
+			}
+		}
+	}	
 }

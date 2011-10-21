@@ -1,8 +1,5 @@
 package ua.snuk182.asia.view.more;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 import ua.snuk182.asia.EntryPoint;
@@ -11,12 +8,11 @@ import ua.snuk182.asia.core.dataentity.Buddy;
 import ua.snuk182.asia.core.dataentity.PersonalInfo;
 import ua.snuk182.asia.services.ServiceUtils;
 import ua.snuk182.asia.view.ITabContent;
+import ua.snuk182.asia.view.ViewUtils;
 import ua.snuk182.asia.view.cl.ContactList;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.text.ClipboardManager;
-import android.text.Spannable;
-import android.text.style.ForegroundColorSpan;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -61,28 +57,10 @@ public class PersonalInfoView extends ScrollView implements ITabContent{
 		
 		visualStyleUpdated();
 		
-		TextView uidView = new TextView(getContext());
-		uidView.setText("UID: "+buddy.protocolUid, TextView.BufferType.EDITABLE);
-		colorView(uidView);
-		uidView.setOnLongClickListener(longClickListener);
-		layout.addView(uidView);
-		
 		updateInfo(info);
 	}
 	
-	private void colorView(TextView view){
-		Spannable s = view.getEditableText();
-		if (s == null){
-			return;
-		}
-		
-		if (view.getText().toString().indexOf("UID: ") > -1){
-			s.setSpan(new ForegroundColorSpan(0xffff0000), 0, view.getText().toString().indexOf(":"), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-		} else {
-			s.setSpan(new ForegroundColorSpan(0xff00a5ff), 0, view.getText().toString().indexOf(":"), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-		}
-		
-	}
+	
 
 	@Override
 	public int getMainMenuId() {
@@ -123,31 +101,7 @@ public class PersonalInfoView extends ScrollView implements ITabContent{
 	}
 
 	public void updateInfo(PersonalInfo info){
-		if (info == null || info.properties == null){
-			return;
-		}
-		
-		List<String> keys = new ArrayList<String>();
-		keys.addAll(info.properties.keySet());
-		
-		Collections.sort(keys);
-		
-		for (String key: keys){
-			if (info.properties.get(key).toString().equals("-1")){
-				continue;
-			}
-			
-			TextView iew = new TextView(getContext());
-			
-			if (key.equals(PersonalInfo.INFO_GENDER)){
-				info.properties.putString(key, ((Byte)info.properties.get(key)) == 1 ? getResources().getString(R.string.label_male) : getResources().getString(R.string.label_female));
-			}
-			
-			iew.setText(key+": "+info.properties.get(key), TextView.BufferType.EDITABLE);
-			colorView(iew);
-			iew.setOnLongClickListener(longClickListener);
-			layout.addView(iew);
-		}
+		ViewUtils.updatePersonalInfoLayout(info, layout, longClickListener);
 		
 		visualStyleUpdated();
 	}
