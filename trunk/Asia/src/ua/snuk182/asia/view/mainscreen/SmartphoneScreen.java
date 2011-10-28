@@ -133,7 +133,7 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 	
 	private boolean checkShowTabs() {
     	if (Build.VERSION.SDK_INT == 11){
-    		getTabWidget().setVisibility(View.GONE);
+    		findViewById(R.id.tabWidgetContainer).setVisibility(View.GONE);
     		return false;
     	}
     	String hideTabsStr;
@@ -142,16 +142,16 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 			if (hideTabsStr!=null){
 				boolean hideTabs = hideTabsStr.equals(getResources().getString(R.string.value_view_type_notabs));
 				if (hideTabs){
-					getTabWidget().setVisibility(View.GONE);
+					findViewById(R.id.tabWidgetContainer).setVisibility(View.GONE);
 				} else {
-					getTabWidget().setVisibility(View.VISIBLE);
+					findViewById(R.id.tabWidgetContainer).setVisibility(View.VISIBLE);
 				}
 				return hideTabs;
 			} else {
-				getTabWidget().setVisibility(View.VISIBLE);				
+				findViewById(R.id.tabWidgetContainer).setVisibility(View.VISIBLE);				
 			}		
 		} catch (NullPointerException npe) {		
-			getTabWidget().setVisibility(View.VISIBLE);	
+			findViewById(R.id.tabWidgetContainer).setVisibility(View.VISIBLE);	
 		}
 		return true;
 	}

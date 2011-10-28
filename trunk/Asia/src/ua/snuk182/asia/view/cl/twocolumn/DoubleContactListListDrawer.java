@@ -42,7 +42,8 @@ public class DoubleContactListListDrawer extends ScrollView implements IContactL
 	private boolean showIcons = true;
 	
 	private boolean clInited = false;
-
+	private int oldWidth = 0; 
+	
 	private final Runnable updateViewRunnable = new Runnable() {
 		
 		@Override
@@ -216,11 +217,12 @@ public class DoubleContactListListDrawer extends ScrollView implements IContactL
 		final int width = getWidth();
 		//boolean diff = getWidth() != width;
 		super.onLayout(changed, left, top, right, bottom);
-		if (changed) {
+		if ((width-oldWidth) != 0) {
 			getEntryPoint().threadMsgHandler.post(new Runnable(){
 
 				@Override
 				public void run() {
+					oldWidth = width;
 					if (clInited && DoubleContactListGroupItem.itemSize > 0){
 						int newItemSize = width/2;
 						if (DoubleContactListGroupItem.itemSize != newItemSize){
