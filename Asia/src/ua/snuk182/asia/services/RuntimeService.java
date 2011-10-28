@@ -349,8 +349,8 @@ public class RuntimeService extends Service {
 				break;
 			case IAccountServiceResponse.RES_BUDDYSTATECHANGED:
 				final OnlineInfo info = (OnlineInfo) args[0];
-				final Buddy oldBuddy = account.getBuddyByProtocolUid(info.protocolUid);
-				if (oldBuddy == null) {
+				Buddy buddy = account.getBuddyByProtocolUid(info.protocolUid);
+				if (buddy == null) {
 					// TODO wtf
 					break;
 				}
@@ -362,7 +362,7 @@ public class RuntimeService extends Service {
 				} catch (Exception e3) {
 				}
 
-				if (!msgOnlyValue && oldBuddy.status == Buddy.ST_OFFLINE && info.userStatus != Buddy.ST_OFFLINE) {
+				if (!msgOnlyValue && buddy.status == Buddy.ST_OFFLINE && info.userStatus != Buddy.ST_OFFLINE) {
 					String soundNotification = appOptions.getString(getApplicationContext().getResources().getString(R.string.key_sound_type));
 					if (soundNotification == null) {
 						soundNotification = getApplicationContext().getResources().getString(R.string.value_sound_type_profile);
@@ -377,12 +377,8 @@ public class RuntimeService extends Service {
 					}
 				}
 
-				ServiceUtils.mergeBuddyWithOnlineInfo(oldBuddy, info);
-
-				/*if (oldBuddy.icon == null) {
-					storage.getBitmapFromLocalFile(oldBuddy.getOwnerAccountId() + " " + oldBuddy.protocolUid);
-				}*/
-
+				ServiceUtils.mergeBuddyWithOnlineInfo(buddy, info);
+				
 				String loadIconsStr = account.options.getString(getResources().getString(R.string.key_load_icons));
 				if (loadIconsStr == null){
 					loadIcons = true;
@@ -395,20 +391,20 @@ public class RuntimeService extends Service {
 							 * (oldBuddy.iconHash!=null &&
 							 * !oldBuddy.iconHash.equals(info.iconHash)))
 							 */) {
+					final String buddyUid = buddy.protocolUid;
+					ServiceUtils.log("icon request "+buddy.getFilename());
 					new Thread("Runtime icon request") {
 						@Override
 						public void run() {
-							ServiceUtils.log("icon request "+oldBuddy.getFilename());
-							requestIcon(serviceId, oldBuddy.protocolUid);
+							requestIcon(serviceId, buddyUid);
 						}
 					}.start();
 				}
 
-				if (account.getConnectionState() != AccountService.STATE_CONNECTED && info.userStatus != Buddy.ST_OFFLINE)
-					break;
+				//if (account.getConnectionState() != AccountService.STATE_CONNECTED && info.userStatus != Buddy.ST_OFFLINE) break;
 
 				try {
-					uiCallback.buddyStateChanged(oldBuddy);
+					uiCallback.buddyStateChanged(buddy);
 				} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e2) {
 					ServiceUtils.log(e2);
 				}
@@ -467,7 +463,7 @@ public class RuntimeService extends Service {
 						ServiceUtils.log(e);
 					}
 				} else {
-					final Buddy buddy = account.getBuddyByProtocolUid(pinfo.protocolUid);
+					buddy = account.getBuddyByProtocolUid(pinfo.protocolUid);
 					if (buddy.getName().equals(buddy.protocolUid)) {
 						String nick = pinfo.properties.getString(PersonalInfo.INFO_NICK);
 						if (nick != null) {
@@ -602,7 +598,7 @@ public class RuntimeService extends Service {
 					notificator.notifyFileProgress((Long)args[0], (String)args[1], (Long)args[2], (Long)args[3], (Boolean)args[4], (String)args[5]);
 				}
 				
-				Buddy buddy = account.getBuddyByProtocolUid((String) args[6]);
+				buddy = account.getBuddyByProtocolUid((String) args[6]);
 				
 				try {
 					uiCallback.fileProgress((Long)args[0], buddy, (String)args[1], (Long)args[2], (Long)args[3], (Boolean)args[4], (String)args[5]);

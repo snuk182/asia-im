@@ -39,6 +39,8 @@ public class ContactListListDrawer extends ScrollView implements IContactListDra
 	private boolean showIcons = true;
 
 	private boolean clInited = false;
+	private int oldWidth = 0;
+	
 	private final Runnable updateViewRunnable = new Runnable() {
 		
 		@Override
@@ -204,12 +206,15 @@ public class ContactListListDrawer extends ScrollView implements IContactListDra
 
 	@Override
 	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+		final int width = getWidth();
+		
 		super.onLayout(changed, left, top, right, bottom);
-		if (changed) {
+		if ((width-oldWidth) != 0) {
 			getEntryPoint().threadMsgHandler.post(new Runnable() {
 
 				@Override
 				public void run() {
+					oldWidth = width;
 					if (clInited) {
 						for (ContactListListGroupItem group : groups) {
 							group.refresh();

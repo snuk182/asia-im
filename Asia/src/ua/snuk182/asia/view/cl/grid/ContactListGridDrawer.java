@@ -42,7 +42,8 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 	protected ContactList parent;
 	
 	private boolean clInited = false;
-
+	private int oldWidth = 0;
+	
 	private final Runnable updateViewRunnable = new Runnable() {
 		
 		@Override
@@ -225,11 +226,12 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 		//System.out.println("exist "+width);
 		//boolean diff = getWidth() != width;
 		super.onLayout(changed, left, top, right, bottom);
-		if (changed) {
-			getEntryPoint().threadMsgHandler.post(new Runnable(){
-
+		if ((width-oldWidth) != 0) {
+			getEntryPoint().threadMsgHandler.post(new Runnable() {
+				
 				@Override
 				public void run() {
+					oldWidth = width;
 					if (clInited && COLUMN_COUNT > 0){
 						int newColumnCount = width / ContactListGridItem.itemSize;
 						if (COLUMN_COUNT != newColumnCount){
@@ -242,9 +244,8 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 						updateView();
 					}
 				}
-				
 			});
-		}
+		}		
 	}
 
 	@Override

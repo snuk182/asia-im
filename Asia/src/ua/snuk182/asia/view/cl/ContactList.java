@@ -24,7 +24,6 @@ import ua.snuk182.asia.view.more.TabWidgetLayout;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
-import android.os.Handler;
 import android.os.RemoteException;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -67,8 +66,6 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 		
 	};
 	
-	private final Handler handler = new Handler();
-
 	private Runnable visualStyleUpdatedRunnable = new Runnable() {
 		
 		@Override
@@ -96,6 +93,13 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 					ServiceUtils.log(e);
 				}
 			}
+		}
+	};
+	private Runnable checkCachedBuddyStatesRunnable = new Runnable() {		
+		
+		@Override
+		public void run() {
+			checkBuddyStateCache();
 		}
 	};
 
@@ -364,16 +368,11 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 			@Override
 			public void run(){
 				icon = account.getIcon(getEntryPoint());
-				handler.post(bitmapGot);								
+				getEntryPoint().threadMsgHandler.post(bitmapGot);								
 			}
 		}.start();		
 	}
 
-	/*@Override
-	public void onFocusChange(View v, boolean hasFocus) {
-		contactList.getChildAt(0).requestFocus();			
-	}
-	*/
 	@Override
 	public void messageReceived(TextMessage message, boolean activeTab){
 		if (message==null || message.from==null) return;
@@ -386,36 +385,37 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 	
 	@Override
 	public void updateBuddyState(final Buddy buddy){
+		account.editBuddy(buddy, true);
+		
+		synchronized (buddiesStateChangedCache){
+			buddiesStateChangedCache.add(0, buddy);
+		}
+		
 		if (clReady){
-			handler.post(new Runnable() {
+			getEntryPoint().threadMsgHandler.post(new Runnable() {
 				
 				@Override
 				public void run() {
-					contactList.updateBuddyState(buddy);
-					
 					checkBuddyStateCache();
 					
 					if (contactList.hasUnreadMessages()){
 						tabWidgetLayout.getTabIcon().setImageResource(R.drawable.message_medium);
 					} else {
 						tabWidgetLayout.getTabIcon().setImageResource(ServiceUtils.getStatusResIdByAccountMedium(getContext(), account, false));
-					}
+					}					
 				}
 			});
-		} else {
-			synchronized (buddiesStateChangedCache){
-				buddiesStateChangedCache.add(buddy);
-			}
-		}
+		} 
 	}
 
-	private void checkBuddyStateCache() {
-		synchronized (buddiesStateChangedCache) {
-			while (buddiesStateChangedCache.size() > 0){
+	public void checkBuddyStateCache() {
+		while (buddiesStateChangedCache.size() > 0){
+			synchronized (buddiesStateChangedCache) {
 				for (int i=buddiesStateChangedCache.size()-1; i>=0; i--){
 					contactList.updateBuddyState(buddiesStateChangedCache.remove(i));
 				}
 			}
+			//invalidate();
 		}
 	}
 
@@ -471,7 +471,7 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 
 	@Override
 	public void stateChanged(final AccountView account, final boolean refreshContacts) {
-		handler.post(new Runnable() {
+		getEntryPoint().threadMsgHandler.post(new Runnable() {
 			
 			@Override
 			public void run() {
@@ -495,7 +495,7 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 
 	@Override
 	public void visualStyleUpdated() {
-		handler.post(visualStyleUpdatedRunnable );		
+		getEntryPoint().threadMsgHandler.post(visualStyleUpdatedRunnable);		
 	}
 	
 	@Override
@@ -541,7 +541,7 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 		if (clReady){
 			tabWidgetLayout.getTabIcon().setImageResource(ServiceUtils.getStatusResIdByAccountMedium(getContext(), account, false));
 			tabWidgetLayout.getTabName().setText(account.getSafeName());
-			checkBuddyStateCache();
+			getEntryPoint().threadMsgHandler.post(checkCachedBuddyStatesRunnable );
 		} else {
 			tabWidgetLayout.getTabIcon().setImageResource(R.drawable.logo_32px);
 			tabWidgetLayout.getTabName().setText(R.string.label_wait);
