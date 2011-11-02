@@ -352,6 +352,11 @@ public class MainProcessor extends AbstractFlapProcessor {
 				info.userStatus = ICQConstants.STATUS_OFFLINE;
 			}
 			
+			if (snac.getServiceId()==ICQConstants.SNAC_FAMILY_BUDDYLISTMGMT
+					&& snac.subtypeId==ICQConstants.SNAC_BUDDYLISTMGMT_USERONLINE && info.userStatus == ICQConstants.STATUS_OFFLINE){
+				info.userStatus = ICQConstants.STATUS_ONLINE;
+			}
+			
 			if (snac.getServiceId()==ICQConstants.SNAC_FAMILY_BUDDYLISTMGMT){
 				service.getBuddyList().buddyInfos.add(info);
 			}

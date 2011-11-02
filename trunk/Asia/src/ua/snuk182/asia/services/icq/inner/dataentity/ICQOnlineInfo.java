@@ -39,7 +39,7 @@ public class ICQOnlineInfo implements Serializable {
 	public ICQIconData iconData;
 	public String name;
 	public byte[] qipStatus;
-	public byte extendedStatusId;
+	public byte extendedStatusId = -1;
 	
 	public ICQOnlineInfo() {
 	}
