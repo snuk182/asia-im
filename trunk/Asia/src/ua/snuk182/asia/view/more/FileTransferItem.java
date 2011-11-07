@@ -168,8 +168,10 @@ public class FileTransferItem extends RelativeLayout {
 
 						@Override
 						public void onClick(View v) {
-							String extension = filePath.substring(filePath.lastIndexOf(".")+1);
-							String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+							MimeTypeMap mimeMap = MimeTypeMap.getSingleton();
+							//String extension = filePath.substring(filePath.lastIndexOf(".")+1);
+							String extension = MimeTypeMap.getFileExtensionFromUrl(filePath);
+							String mime = mimeMap.getMimeTypeFromExtension(extension);
 							Intent intent = new Intent(Intent.ACTION_VIEW);
 							intent.setDataAndType(Uri.parse("file://" + filePath), mime);
 							try {

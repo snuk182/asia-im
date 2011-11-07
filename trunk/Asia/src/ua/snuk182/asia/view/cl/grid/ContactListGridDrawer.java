@@ -234,12 +234,12 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 					oldWidth = width;
 					if (clInited && COLUMN_COUNT > 0){
 						int newColumnCount = width / ContactListGridItem.itemSize;
-						if (COLUMN_COUNT != newColumnCount){
+						//if (COLUMN_COUNT != newColumnCount){
 							COLUMN_COUNT = newColumnCount;
 							for (ContactListGridGroupItem group : groups) {
 								group.refresh(COLUMN_COUNT);
 							}
-						} 
+						//} 
 					} else {
 						updateView();
 					}

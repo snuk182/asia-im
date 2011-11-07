@@ -39,6 +39,9 @@ import ua.snuk182.asia.services.icq.inner.dataentity.TLV;
 import android.os.Environment;
 
 public class FileTransferEngine {
+	
+	private static final int SERVER_SOCKET_TIMEOUT = 600000;
+
 	private static final String proxyUrl = "ars.oscar.aol.com";
 
 	private final Map<Long, FileRunnableService> activeTransfers = new HashMap<Long, FileRunnableService>();
@@ -111,8 +114,8 @@ public class FileTransferEngine {
 		}
 		frs.connectionState = FileRunnableService.CONNSTATE_FILE_HEADER;
 		
-		ServerSocket socket = createLocalSocket(frs);
-		message.externalPort = socket.getLocalPort();
+		frs.server = createLocalSocket(frs);
+		message.externalPort = frs.server.getLocalPort();
 		message.rvIp = ProtocolUtils.getIPString(service.getInternalIp());
 		message.rvMessageType = 0;
 		sendFileTransferRequest(message, files);
@@ -142,6 +145,14 @@ public class FileTransferEngine {
 				activeTransfers.put(ProtocolUtils.bytes2LongBE(message.messageId, 0), runnable);
 			} else {
 				service.log("ft: existing runnable for "+message.receiverId);
+				if (runnable.server != null){
+					try {
+						runnable.server.close();
+						runnable.server = null;
+					} catch (IOException e) {
+						service.log(e);
+					}
+				}
 				runnable.socket = socket;
 				runnable.connectionState = FileRunnableService.CONNSTATE_FILE_HEADER;
 				runnable.target = FileRunnableService.TARGET_PEER;
@@ -205,6 +216,14 @@ public class FileTransferEngine {
 				runnable = new FileRunnableService(socket, FileRunnableService.TARGET_PROXY, message);
 				activeTransfers.put(ProtocolUtils.bytes2LongBE(message.messageId, 0), runnable);
 			} else {
+				if (runnable.server != null){
+					try {
+						runnable.server.close();
+						runnable.server = null;
+					} catch (IOException e) {
+						service.log(e);
+					}
+				}
 				runnable.socket = socket;
 				runnable.connectionState = FileRunnableService.CONNSTATE_HANDSHAKE;
 				runnable.target = FileRunnableService.TARGET_PROXY;
@@ -255,6 +274,7 @@ public class FileTransferEngine {
 		public static final int TARGET_PEER = 0;
 		public static final int TARGET_PROXY = 1;
 
+		ServerSocket server = null;
 		Socket socket;
 		int connectionState = CONNSTATE_CONNECTED;
 		int target;
@@ -821,6 +841,10 @@ public class FileTransferEngine {
 				socket.close();
 				ftMessages.remove(message);
 				activeTransfers.remove(ProtocolUtils.bytes2LongBE(message.messageId, 0));
+				if (server != null){
+					server.close();
+					server = null;					
+				}
 			} catch (IOException e) {
 			}
 		}
@@ -1342,7 +1366,7 @@ public class FileTransferEngine {
 			@Override
 			public void run() {
 				try {
-					server.setSoTimeout(60000);
+					server.setSoTimeout(SERVER_SOCKET_TIMEOUT);
 					Socket socket = server.accept();
 
 					frs.socket = socket;

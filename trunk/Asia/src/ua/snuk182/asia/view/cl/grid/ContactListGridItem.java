@@ -128,7 +128,7 @@ public class ContactListGridItem extends RelativeLayout implements ContactListIt
 		}
 		
 		//setGravity(Gravity.CENTER);					
-		setPadding(2,2,2,2);
+		setPadding(2,1,2,1);
 		       
 		name.setText(buddy.getName());
 		name.setTextSize(textSize);
@@ -216,7 +216,7 @@ public class ContactListGridItem extends RelativeLayout implements ContactListIt
 			new Thread("CL grid item icon request"){
 				@Override
 				public void run(){
-					icon = buddy.getIcon(getEntryPoint());
+					icon = Buddy.getIcon(getEntryPoint(), buddy.getFilename());
 					getEntryPoint().threadMsgHandler.post(iconGot);
 				}
 			}.start();

@@ -484,7 +484,9 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 	
 	@Override
 	public boolean onKeyDown(int i, KeyEvent event){
-		if (getSelectedTab().content.onKeyDown(i, event)){
+		if (getSelectedTab() == null
+				|| getSelectedTab().content == null
+				|| getSelectedTab().content.onKeyDown(i, event)){
 			return true;
 		} else {
 			return super.onKeyDown(i, event);

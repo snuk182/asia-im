@@ -716,7 +716,7 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
 	@Override
 	public boolean onKeyDown(int i, KeyEvent event){
 		if (tabHostChat.getCurrentTabTag().indexOf(PreferencesView.class.getSimpleName()) > -1){
-			return tabsAccount.get(tabHostAccount.getCurrentTab()).content.onKeyDown(i, event);
+			return tabsChat.get(tabHostChat.getCurrentTab()).content.onKeyDown(i, event);
 		}
 		
 		if (tabsAccount.get(tabHostAccount.getCurrentTab()).content.onKeyDown(i, event)){

@@ -269,7 +269,7 @@ public class ContactListListItem extends RelativeLayout implements ContactListIt
 			new Thread("CL list item icon request"){
 				@Override
 				public void run(){
-					icon = buddy.getIcon(getEntryPoint());
+					icon = Buddy.getIcon(getEntryPoint(), buddy.getFilename());
 					getEntryPoint().threadMsgHandler.post(iconGot);
 				}
 			}.start();

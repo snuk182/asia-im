@@ -15,12 +15,11 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class ContactListGridGroupItem extends LinearLayout implements OnClickListener, OnFocusChangeListener {
+public class ContactListGridGroupItem extends LinearLayout implements OnClickListener {
 
 	private static final String SPACE = "  ";
 	private TextView subGroupNameText;
@@ -54,21 +53,11 @@ public class ContactListGridGroupItem extends LinearLayout implements OnClickLis
 		setTag(tag);
 		subGroupNameText.setText(SPACE + name);
 		
-		//setBackgroundResource(R.drawable.cl_item);
+		setBackgroundResource(R.drawable.history_record_indicator);
 		setOnClickListener(this);
-		setOnFocusChangeListener(this);
 	}
 	
-	@Override
-	public void onFocusChange(View v, boolean hasFocus) {
-		if (hasFocus){
-			//setSelected(true);
-			setBackgroundColor(0xddff7f00);
-		} else {
-			setBackgroundColor(0x00ffffff);
-			//setSelected(false);
-		}
-	}
+	
 
 	void refresh() {
 		if (refreshContents) {
@@ -125,7 +114,7 @@ public class ContactListGridGroupItem extends LinearLayout implements OnClickLis
 				buddyRows.add(row);
 				row.setOrientation(LinearLayout.HORIZONTAL);
 				
-				row.setPadding(8, 8, 8, 8);
+				row.setPadding(8, 2, 8, 2);
 
 				row.setFocusable(false);
 				
@@ -242,16 +231,16 @@ public class ContactListGridGroupItem extends LinearLayout implements OnClickLis
 		float textSize;
 		switch(size){
 		case 75:
-			textSize = 24 * getEntryPoint().metrics.density;
+			textSize = 20 * getEntryPoint().metrics.density;
 			break;
 		case 96:
-			textSize = 31 * getEntryPoint().metrics.density;
+			textSize = 26 * getEntryPoint().metrics.density;
 			break;
 		case 62:
-			textSize = 18 * getEntryPoint().metrics.density;
+			textSize = 14 * getEntryPoint().metrics.density;
 			break;
 		default:
-			textSize = 13 * getEntryPoint().metrics.density;
+			textSize = 9 * getEntryPoint().metrics.density;
 			break;
 		}
 		subGroupNameText.setTextSize(textSize);

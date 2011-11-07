@@ -225,13 +225,13 @@ public class DoubleContactListListDrawer extends ScrollView implements IContactL
 					oldWidth = width;
 					if (clInited && DoubleContactListGroupItem.itemSize > 0){
 						int newItemSize = width/2;
-						if (DoubleContactListGroupItem.itemSize != newItemSize){
+						//if (DoubleContactListGroupItem.itemSize != newItemSize){
 							DoubleContactListGroupItem.itemSize = newItemSize;
 							for (DoubleContactListGroupItem group : groups) {
 								group.setRefreshContents(false);
 								group.refresh(true);
 							}
-						} 
+						//} 
 					} else {
 						updateView();
 					}

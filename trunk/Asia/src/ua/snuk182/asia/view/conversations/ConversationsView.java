@@ -18,7 +18,7 @@ import ua.snuk182.asia.core.dataentity.TextMessage;
 import ua.snuk182.asia.services.HistorySaver;
 import ua.snuk182.asia.services.ServiceUtils;
 import ua.snuk182.asia.services.api.AccountService;
-import ua.snuk182.asia.services.plus.ImageGridAdapter;
+import ua.snuk182.asia.services.plus.ImageOrTextGridAdapter;
 import ua.snuk182.asia.view.IHasBuddy;
 import ua.snuk182.asia.view.IHasMessages;
 import ua.snuk182.asia.view.IHasServiceMessages;
@@ -105,7 +105,7 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 	
 	private static final Random idGenerator = new Random();
 	private final Handler handler = new Handler();
-	private final ImageGridAdapter smileAdapter;
+	private ImageOrTextGridAdapter smileAdapter;
 	
 	private ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(4);
 	
@@ -282,8 +282,6 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 			}
 		});
 		
-		smileAdapter = new ImageGridAdapter(entryPoint, getResources().obtainTypedArray(R.array.smiley_pick_values), (int) (60*getEntryPoint().metrics.density));
-
 		sendBtn.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -292,6 +290,16 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 			}
 		});
 
+		chatId = ConversationsView.class.getSimpleName() + " " + buddy.serviceId + " " + buddy.protocolUid;
+		requestIcon();
+		printDateMode = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_chat_date));
+
+		checkGroupChatView();
+		checkoutHistory();
+		updateBuddyState(buddy);
+		
+		visualStyleUpdated();	
+		
 		smileyBtn.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -302,7 +310,14 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 				grid.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 				grid.setBackgroundColor(0xd0000000);
 				
-				int numColumns = (int)(((getEntryPoint().metrics.widthPixels-60) / smileAdapter.size) * getEntryPoint().metrics.density) ;
+				int numColumns = 5;
+				
+				if (entryPoint.dontDrawSmileys){
+					numColumns = (int)((getEntryPoint().metrics.widthPixels-60) / (80 * getEntryPoint().metrics.density));
+				} else {
+					numColumns = (int)(((getEntryPoint().metrics.widthPixels-60) / smileAdapter.size) * getEntryPoint().metrics.density);
+				}
+				
 				grid.setNumColumns(numColumns);
 				grid.setAdapter(smileAdapter);
 				grid.setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
@@ -325,16 +340,6 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 				dialog.show();
 			}
 		});
-
-		chatId = ConversationsView.class.getSimpleName() + " " + buddy.serviceId + " " + buddy.protocolUid;
-		requestIcon();
-		printDateMode = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_chat_date));
-
-		checkGroupChatView();
-		checkoutHistory();
-		updateBuddyState(buddy);
-		
-		visualStyleUpdated();		
 	}
 
 	private void checkGroupChatView() {
@@ -680,7 +685,7 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 		new Thread("Chat icon request"){
 			@Override
 			public void run(){
-				icon = buddy.getIcon(getEntryPoint());
+				icon = Buddy.getIcon(getEntryPoint(), buddy.getFilename());
 				handler.post(bitmapGot);									
 			}
 		}.start();
@@ -828,6 +833,13 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 				((HistoryRecordView)v).setTextSize(this.textSize);
 			}
 		}
+		
+		if (getEntryPoint().dontDrawSmileys){
+			smileAdapter = new ImageOrTextGridAdapter(getEntryPoint(), getResources().obtainTypedArray(R.array.smiley_pick_names), (int) (60*getEntryPoint().metrics.density), TextView.class);
+		} else {
+			smileAdapter = new ImageOrTextGridAdapter(getEntryPoint(), getResources().obtainTypedArray(R.array.smiley_pick_values), (int) (60*getEntryPoint().metrics.density), ImageView.class);
+		}
+		
 	}
 	
 	private View getListItem(Message message){
