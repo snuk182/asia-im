@@ -223,10 +223,11 @@ public class Buddy implements Parcelable, Comparable<Buddy> {
 		return getOwnerAccountId()+" "+protocolUid;
 	}
 	
-	public Bitmap getIcon(Context context){
+	public static synchronized Bitmap getIcon(Context context, String filename){
+		
 		FileInputStream fis = null;
 		try {
-			fis = context.openFileInput(getFilename()+BUDDYICON_FILEEXT);
+			fis = context.openFileInput(filename+BUDDYICON_FILEEXT);
 		} catch (Exception e) {
 		}
 		

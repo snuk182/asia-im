@@ -19,6 +19,7 @@ public class StatusTextView extends TextView {
 	
 	public StatusTextView(Context context, AttributeSet attrs) {
 		super(context, attrs);
+		setBackgroundResource(R.drawable.history_record_indicator);
 		setOnLongClickListener(new OnLongClickListener() {
 
 			@Override

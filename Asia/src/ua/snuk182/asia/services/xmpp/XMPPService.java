@@ -692,6 +692,10 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 		if (loginHost == null || loginPort < 1 || un == null || pw == null) {
 			throw new ProtocolException("Error: no auth data");
 		}
+		
+		if (serviceName == null){
+			serviceName = loginHost;
+		}
 
 		String ping = sharedPreferences.get(AccountService.PING_TIMEOUT);
 		if (ping != null) {
