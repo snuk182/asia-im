@@ -926,9 +926,9 @@ public class EntryPoint extends ActivityGroup {
 			public void run(){
 				try {
 					runtimeService.prepareExit();
+					unbindService(serviceConnection);
 					serviceConnection = null;
-					/*unbindService(serviceConnection);
-					stopService(serviceIntent);	*/				
+					/*stopService(serviceIntent);	*/				
 				} catch (NullPointerException npe) {	
 					ServiceUtils.log(npe);
 				} catch (RemoteException e) {

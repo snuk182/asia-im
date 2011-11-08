@@ -1,6 +1,7 @@
 package ua.snuk182.asia.services;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
@@ -12,6 +13,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
+import org.xmlpull.v1.XmlPullParserException;
 
 import ua.snuk182.asia.R;
 import ua.snuk182.asia.core.dataentity.Account;
@@ -84,6 +87,9 @@ public class RuntimeService extends Service {
 	@Override
 	public void onCreate() {
 		super.onCreate();
+		
+		//android.os.Debug.waitForDebugger();
+		
 		protocolResponse = new ProtocolServiceResponse();
 		setForeground(true);
 		storage = new ServiceStoredPreferences(getApplicationContext());
@@ -464,6 +470,13 @@ public class RuntimeService extends Service {
 					}
 				} else {
 					buddy = account.getBuddyByProtocolUid(pinfo.protocolUid);
+					
+					//WTF
+					if (buddy == null){
+						log("no buddy "+pinfo.protocolUid+" found");
+						return null;
+					}
+					
 					if (buddy.getName().equals(buddy.protocolUid)) {
 						String nick = pinfo.properties.getString(PersonalInfo.INFO_NICK);
 						if (nick != null) {
@@ -1007,8 +1020,12 @@ public class RuntimeService extends Service {
 				}
 			}
 			notificator.cancel(account);
-			storage.removeAccount(account);
-			uiCallback.accountRemoved(account);
+			try {
+				storage.removeAccount(account);
+				uiCallback.accountRemoved(account);
+			} catch (Exception e) {
+				ServiceUtils.log(e);
+			}			
 		}
 
 		@Override
@@ -1636,7 +1653,11 @@ public class RuntimeService extends Service {
 
 	private void removePlayerStateListener(AccountView account) {
 		playerStateListener.removePlayerStateListener(account.serviceId);
-		restoreXStatus(getAccountInternal(account.serviceId));
+		try {
+			restoreXStatus(getAccountInternal(account.serviceId));
+		} catch (Exception e) {
+			ServiceUtils.log(e);
+		}
 	}
 
 	private void putPlayerStateListener(final AccountView account) {
@@ -1656,7 +1677,11 @@ public class RuntimeService extends Service {
 					}
 					break;
 				case IPlayerStateListener.STOPPED:
-					restoreXStatus(a);
+					try {
+						restoreXStatus(a);
+					} catch (Exception e) {
+						ServiceUtils.log(e);
+					}
 					break;
 				}
 				
@@ -1664,8 +1689,8 @@ public class RuntimeService extends Service {
 		});
 	}
 
-	private void restoreXStatus(Account account) {
-		AccountView oldAcc = storage.getAccount(account.accountView.getAccountId()+" "+account.accountView.getConnectionState(), account.accountView.serviceId);
+	private void restoreXStatus(Account account) throws XmlPullParserException, IOException {
+		AccountView oldAcc = storage.getAccount(account.accountView);
 		account.accountView.xStatus = oldAcc.xStatus;
 		account.accountView.xStatusName = oldAcc.xStatusName;
 		account.accountView.xStatusText = oldAcc.xStatusText;

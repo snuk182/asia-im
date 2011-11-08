@@ -27,7 +27,7 @@ public class AccountView implements Parcelable {
 	public static final byte VIS_TO_ALL = 1;
 	public static final byte VIS_INVISIBLE = 2;
 	
-	public byte serviceId;
+	public byte serviceId = -1;
 	//private String protocolId;
 	public String protocolName;
 	public String protocolUid;
@@ -109,8 +109,8 @@ public class AccountView implements Parcelable {
 	}
 
 	public AccountView(String protocolUid, String protocolName) {
-		this.protocolUid = protocolUid;
-		this.protocolName = protocolName;
+		this.protocolUid = protocolUid.trim();
+		this.protocolName = protocolName.trim();
 	}	
 
 	public Buddy getBuddyByProtocolUid(String uid){
