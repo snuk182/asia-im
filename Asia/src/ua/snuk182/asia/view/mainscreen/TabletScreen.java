@@ -719,9 +719,13 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
 			return tabsChat.get(tabHostChat.getCurrentTab()).content.onKeyDown(i, event);
 		}
 		
-		if (tabsAccount.get(tabHostAccount.getCurrentTab()).content.onKeyDown(i, event)){
-			return true;
-		} else {
+		try {
+			if (tabsAccount.get(tabHostAccount.getCurrentTab()).content.onKeyDown(i, event)){
+				return true;
+			} else {
+				return super.onKeyDown(i, event);
+			}
+		} catch (Exception e) {
 			return super.onKeyDown(i, event);
 		}
 	}

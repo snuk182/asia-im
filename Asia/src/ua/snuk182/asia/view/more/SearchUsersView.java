@@ -60,12 +60,14 @@ public class SearchUsersView extends LinearLayout implements ITabContent, IHasAc
 
 			@Override
 			public void onClick(View v) {
+				String uid = uinEditor.getText().toString().trim();
+				
 				if (account.getConnectionState() != AccountService.STATE_CONNECTED){
 					Toast.makeText(entryPoint, "connect network first", Toast.LENGTH_LONG).show();
 					return;
 				}
 				
-				if (uinEditor.getText() == null || uinEditor.getText().length() < 1) {
+				if (uid == null || uid.length() < 1) {
 					Toast.makeText(entryPoint, R.string.error_fill_uid, Toast.LENGTH_LONG).show();
 					return;
 				}
@@ -73,7 +75,7 @@ public class SearchUsersView extends LinearLayout implements ITabContent, IHasAc
 				try {
 					progressDialog = ProgressDialog.show(entryPoint, "", getResources().getString(R.string.label_wait), true);
 					progressDialog.setCancelable(true);
-					entryPoint.runtimeService.searchUsersByUid(account.serviceId, uinEditor.getText().toString());
+					entryPoint.runtimeService.searchUsersByUid(account.serviceId, uid);
 				} catch (NullPointerException npe) {
 					ServiceUtils.log(npe);
 				} catch (RemoteException e) {

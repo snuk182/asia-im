@@ -167,7 +167,7 @@ public class NewAccountView extends ScrollView implements ITabContent {
 			public void onClick(View v) {
 				removeMe();
 			}});
-		
+		visualStyleUpdated();
 	}
 	
 	private void removeMe(){
@@ -309,9 +309,7 @@ public class NewAccountView extends ScrollView implements ITabContent {
 	}
 
 	@Override
-	public void onStart() {
-		visualStyleUpdated();
-	}
+	public void onStart() {}
 
 	@Override
 	public void configChanged() {}
