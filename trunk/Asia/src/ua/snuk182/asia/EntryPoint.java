@@ -884,7 +884,16 @@ public class EntryPoint extends ActivityGroup {
 	@Override
 	public void onSaveInstanceState(Bundle bundle){
 		try {
-			bundle.putParcelableArrayList(SAVEDSTATE_TABS, mainScreen.getTabs());
+			ArrayList<TabInfo> tabs = mainScreen.getTabs();
+			for (int i=tabs.size()-1; i>=0; i--){
+				if (tabs.get(i).tag.indexOf(ContactList.class.getSimpleName())<0 &&
+						tabs.get(i).tag.indexOf(ConversationsView.class.getSimpleName())<0 &&
+						tabs.get(i).tag.indexOf(HistoryView.class.getSimpleName())<0){
+					tabs.remove(i);
+				}
+			}
+			
+			bundle.putParcelableArrayList(SAVEDSTATE_TABS, tabs);
 			bundle.putInt(SAVEDSTATE_SELECTED_ACC, mainScreen.getCurrentAccountsTab());
 			bundle.putInt(SAVEDSTATE_SELECTED_CHAT, mainScreen.getCurrentChatsTab());
 			bundle.putParcelable(SAVEDSTATE_SERVICE_INTENT, serviceIntent);
@@ -936,6 +945,7 @@ public class EntryPoint extends ActivityGroup {
 				}	
 			}
 		}.start();	
+		toggleWaitscreen(false);
 		finish();
 	}
 

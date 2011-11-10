@@ -56,12 +56,14 @@ public final class ServiceUtils {
 	}
 
 	public static void log(String string, AccountView account, boolean isError) {
+		if (isError){
+			Log.w("Asia"+((account!=null)?" "+account.getAccountId():""), string);
+		}
+		
 		if (logToFile){
-			if (isError){
-				Log.w("Asia"+((account!=null)?" "+account.getAccountId():""), string);
-			} else {
-				Log.i("Asia"+((account!=null)?" "+account.getAccountId():""), string);
-			}
+			if (!isError){
+				Log.d("Asia"+((account!=null)?" "+account.getAccountId():""), string);
+			} 
 			
 			String storageState = Environment.getExternalStorageState();
 			if (storageState.equals(Environment.MEDIA_MOUNTED)){
