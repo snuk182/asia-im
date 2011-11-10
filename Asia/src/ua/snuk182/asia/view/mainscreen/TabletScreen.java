@@ -408,7 +408,8 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
 	public void onDestroy() {
 		try {
 			for (int i=tabsChat.size()-1; i>=0; i--){
-				if (tabsChat.get(i).tag.indexOf(PersonalInfoView.class.getSimpleName())>-1){
+				if (tabsChat.get(i).tag.indexOf(ConversationsView.class.getSimpleName())<0 &&
+						tabsChat.get(i).tag.indexOf(HistoryView.class.getSimpleName())<0){
 					tabsChat.remove(i);
 				}
 			}
@@ -687,12 +688,16 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
 
 	@Override
 	public void setCurrentChatsTab(int tab) {
-		tabHostChat.setCurrentTab(tab);
+		if (tab < tabsChat.size()){
+			tabHostChat.setCurrentTab(tab);
+		}
 	}
 
 	@Override
 	public void setCurrentAccountsTab(int tab) {
-		tabHostAccount.setCurrentTab(tab);
+		if (tab < tabsAccount.size()){
+			tabHostAccount.setCurrentTab(tab);
+		}
 	}
 
 	@Override

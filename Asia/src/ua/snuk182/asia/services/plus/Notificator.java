@@ -64,14 +64,14 @@ public class Notificator {
 		Notification notification = new Notification(icon, tickerText, when);
 		notification.flags |= Notification.FLAG_AUTO_CANCEL;
 		if (blinkLed){
-			if (!checkAndRunNativeLed()){
+			//if (!checkAndRunNativeLed()){
 				notification.ledARGB = 0xff00ff00;
 				notification.ledOnMS = 400;
 				notification.ledOffMS = 400;
 
 				notification.flags |= Notification.FLAG_SHOW_LIGHTS;
 				//notification.defaults |= Notification.DEFAULT_LIGHTS;
-			}
+			//}
 		}
 		CharSequence contentTitle = buddy.getName();
 		CharSequence contentText = message.text.substring(message.text.indexOf("):") + 2);
@@ -125,14 +125,25 @@ public class Notificator {
 		Notification notification = getAccountNotification(account.serviceId);
 		if (notification == null) {
 			notification = new Notification(icon, null, when);
+			
+			notification.ledARGB = 0xff00ff00;
+			notification.ledOnMS = 400;
+			notification.ledOffMS = 400;
+
 			if (text != null) {
 				notification.tickerText = text;
+				notification.flags |= Notification.FLAG_SHOW_LIGHTS;				
+			} else {
+				notification.flags ^= Notification.FLAG_SHOW_LIGHTS;				
 			}
 			notification.flags = Notification.FLAG_NO_CLEAR;
 			accountNotifications.put(account.serviceId, notification);
 		} else {
 			if (text != null) {
 				notification.tickerText = text;
+				notification.flags |= Notification.FLAG_SHOW_LIGHTS;				
+			} else {
+				notification.flags ^= Notification.FLAG_SHOW_LIGHTS;				
 			}
 			notification.icon = icon;
 			notification.when = when;
@@ -284,6 +295,7 @@ public class Notificator {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private boolean checkAndRunNativeLed() {
 		if (ledBlinker == null) {
 			boolean isSE = true;

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string name="version">0.7.2.1</string>
+	<string name="version">0.7.3</string>
 	
 	<string name="label_create_groupchat">Create group chat</string>
 	<string name="label_connect_to_chat">Connect to chat</string>

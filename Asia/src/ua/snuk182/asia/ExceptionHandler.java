@@ -13,7 +13,8 @@ public class ExceptionHandler implements Thread.UncaughtExceptionHandler {
     @Override
     public void uncaughtException(Thread thread, Throwable throwable) {
         ServiceUtils.log(throwable);
-        if(oldHandler != null) 
-            oldHandler.uncaughtException(thread, throwable); 
+        if(oldHandler != null) {
+        	oldHandler.uncaughtException(thread, throwable); 
+        }            
     }
 }

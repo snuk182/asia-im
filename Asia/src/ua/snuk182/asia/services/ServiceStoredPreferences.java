@@ -131,7 +131,10 @@ public final class ServiceStoredPreferences {
 				saveAccountHeaders(accounts);
 				for (AccountView account : accounts) {
 					saveAccount(account);
-					context.deleteFile(account.getAccountId());
+					SharedPreferences ipreferences = context.getSharedPreferences(account.getAccountId(), 0);
+					SharedPreferences.Editor ieditor = ipreferences.edit();
+					ieditor.clear();
+					ieditor.commit();
 				}
 
 				SharedPreferences.Editor editor = preferences.edit();
@@ -484,12 +487,17 @@ public final class ServiceStoredPreferences {
 		for (int i = acco.size() - 1; i >= 0; i--) {
 			if (acco.get(i).protocolUid.equalsIgnoreCase(account.protocolUid)) {
 				acco.remove(i);
+				break;
 			}
 		}
 		saveAccountHeaders(acco);
 	}
-
+	
 	public void saveAccount(final AccountView account) {
+		saveAccount(account, false);
+	}
+
+	public void saveAccount(final AccountView account, final boolean saveHeaders) {
 		if (account == null) {
 			return;
 		}
@@ -512,7 +520,7 @@ public final class ServiceStoredPreferences {
 					serializer.attribute(XML_NAMESPACE, ATTR_LAST_UPDATE, Long.toString(account.lastUpdateTime));
 
 					serializer.startTag(XML_NAMESPACE, TAG_NAME);
-					serializer.text(account.ownName.trim());
+					serializer.text(account.getSafeName().trim());
 					serializer.endTag(XML_NAMESPACE, TAG_NAME);
 
 					serializer.startTag(XML_NAMESPACE, TAG_XSTATUS_NAME);
@@ -558,21 +566,23 @@ public final class ServiceStoredPreferences {
 					serializer.endTag(XML_NAMESPACE, TAG_ACCOUNT);
 					serializer.endDocument();
 
-					List<AccountView> accounts = getAccountHeaders();
+					if (saveHeaders){
+						List<AccountView> accounts = getAccountHeaders();
 
-					boolean found = false;
-					for (AccountView acco : accounts) {
-						if (acco.protocolUid.equalsIgnoreCase(account.protocolUid)) {
-							acco.merge(account);
-							found = true;
+						boolean found = false;
+						for (AccountView acco : accounts) {
+							if (acco.protocolUid.equalsIgnoreCase(account.protocolUid)) {
+								acco.merge(account);
+								found = true;
+							}
 						}
-					}
 
-					if (!found) {
-						accounts.add(account);
-					}
+						if (!found) {
+							accounts.add(account);
+						}
 
-					saveAccountHeaders(accounts);
+						saveAccountHeaders(accounts);
+					}
 				} catch (Exception e) {
 					ServiceUtils.log(e);
 				}

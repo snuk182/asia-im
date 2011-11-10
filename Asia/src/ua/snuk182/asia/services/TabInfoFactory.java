@@ -132,7 +132,7 @@ public final class TabInfoFactory {
 			host = entryPoint.mainScreen.getChatsTabHost();
 		}
 
-		if (tab.tag.indexOf(PreferencesView.class.getSimpleName()) > -1) {
+		/*if (tab.tag.indexOf(PreferencesView.class.getSimpleName()) > -1) {
 			String[] tagOpts = tab.tag.split(" ");
 			byte serviceId = -1;
 			if (tagOpts.length == 2) {
@@ -149,7 +149,7 @@ public final class TabInfoFactory {
 			}
 			
 			host = entryPoint.mainScreen.getChatsTabHost();
-		}
+		}*/
 		
 		if (tab.tag.indexOf(HistoryView.class.getSimpleName()) > -1) {
 			String[] params = tab.tag.split(" ");

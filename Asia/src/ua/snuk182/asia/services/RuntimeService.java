@@ -73,7 +73,23 @@ public class RuntimeService extends Service {
 	private PowerManager.WakeLock powerLock = null;
 	
 	private boolean finished = false;
-
+	
+	private final Thread exitThread = new Thread(){
+		
+		@Override
+		public void run(){
+			finished = true;
+			try {
+				serviceBinder.disconnectAll();
+			} catch (RemoteException e) {
+				ServiceUtils.log(e);
+			}
+			setForeground(false);
+			removeStatusbarNotification();
+			stopSelfResult(startId);
+		}
+	};
+	
 	@Override
 	public IBinder onBind(Intent intent) {
 		return serviceBinder;
@@ -908,7 +924,7 @@ public class RuntimeService extends Service {
 		public byte createAccount(AccountView account) throws RemoteException {
 			account.serviceId = (byte) accounts.size();
 			account.status = Buddy.ST_ONLINE;
-			storage.saveAccount(account);
+			storage.saveAccount(account, true);
 			accounts.add(new Account(getApplicationContext(), account, protocolResponse));
 			uiCallback.accountAdded(account);
 
@@ -1036,11 +1052,7 @@ public class RuntimeService extends Service {
 
 		@Override
 		public void prepareExit() throws RemoteException {
-			finished = true;
-			disconnectAll();
-			setForeground(false);
-			removeStatusbarNotification();
-			stopSelfResult(startId);
+			exitThread.start();
 		}
 
 		@Override

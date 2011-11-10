@@ -24,7 +24,7 @@ import ua.snuk182.asia.view.IMainScreen;
 import ua.snuk182.asia.view.cl.ContactList;
 import ua.snuk182.asia.view.conversations.ConversationsView;
 import ua.snuk182.asia.view.groupchats.GroupChatsView;
-import ua.snuk182.asia.view.more.PersonalInfoView;
+import ua.snuk182.asia.view.more.HistoryView;
 import ua.snuk182.asia.view.more.PreferencesView;
 import ua.snuk182.asia.view.more.SearchUsersView;
 import android.graphics.Rect;
@@ -405,7 +405,9 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 	public void onDestroy() {
 		try {
 			for (int i=tabs.size()-1; i>=0; i--){
-				if (tabs.get(i).tag.indexOf(PersonalInfoView.class.getSimpleName())>-1){
+				if (tabs.get(i).tag.indexOf(ContactList.class.getSimpleName())<0 &&
+						tabs.get(i).tag.indexOf(ConversationsView.class.getSimpleName())<0 &&
+						tabs.get(i).tag.indexOf(HistoryView.class.getSimpleName())<0){
 					tabs.remove(i);
 				}
 			}
@@ -527,12 +529,16 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 
 	@Override
 	public void setCurrentChatsTab(int tab) {
-		setCurrentTab(tab);
+		if (tab < getTabs().size()){
+			setCurrentTab(tab);
+		}
 	}
 
 	@Override
 	public void setCurrentAccountsTab(int tab) {
-		setCurrentTab(tab);
+		if (tab < tabs.size()){
+			setCurrentTab(tab);
+		}
 	}
 
 	@Override
