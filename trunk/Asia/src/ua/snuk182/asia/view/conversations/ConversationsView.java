@@ -776,10 +776,10 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 	@Override
 	public void visualStyleUpdated() {
 		String bgType;
-		String textSize;
+		int textSize;
 		try {
 			bgType = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_bg_type));
-			textSize = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_text_size));
+			textSize = Integer.parseInt(getEntryPoint().getApplicationOptions().getString((getResources().getString(R.string.key_text_size))));
 			try {
 				isImeFullScreen = Boolean.parseBoolean(getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_fullscreen_landscape_kb)));
 				int imeOpts = textEditor.getImeOptions();
@@ -795,9 +795,9 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 				sendWithEnter = Boolean.parseBoolean(getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_send_by_enter)));
 			} catch (Exception e) {
 			}
-		} catch (NullPointerException npe) {
+		} catch (Exception npe) {
 			bgType = null;
-			textSize = null;
+			textSize = 16;
 			ServiceUtils.log(npe);
 		} if (bgType == null || bgType.equals("wallpaper")) {
 			setBackgroundColor(0x60000000);
@@ -816,16 +816,8 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 			}
 		}
 
-		if (textSize == null || textSize.equals(getResources().getString(R.string.value_size_medium))) {
-			this.textSize = 16 * getEntryPoint().metrics.density;
-		} else if (textSize.equals(getResources().getString(R.string.value_size_big))) {
-			this.textSize = 20 * getEntryPoint().metrics.density;
-		} else if (textSize.equals(getResources().getString(R.string.value_size_small))) {
-			this.textSize = 12 * getEntryPoint().metrics.density;
-		} else {
-			this.textSize = 8 * getEntryPoint().metrics.density;
-		}
-		
+		this.textSize = textSize * getEntryPoint().metrics.density;
+			
 		for (int i=0; i<historyView.getChildCount(); i++){
 			View v = historyView.getChildAt(i);
 			if (v instanceof HistoryRecordView){

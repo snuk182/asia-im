@@ -142,13 +142,13 @@ public class HistoryView extends ListView implements ITabContent, IHasMessages {
 		HistoryViewAdapter historyAdapter = (HistoryViewAdapter) getAdapter();
 		
 		String bgType;
-		String textSize;
+		int textSize;
 		try {
 			bgType = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_bg_type));
-			textSize = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_text_size));
-		} catch (NullPointerException npe) {	
+			textSize = Integer.parseInt(getEntryPoint().getApplicationOptions().getString((getResources().getString(R.string.key_text_size))));
+		} catch (Exception npe) {	
 			bgType = null;
-			textSize = null;
+			textSize = 16;
 			ServiceUtils.log(npe);
 		} 
 		if (bgType == null || bgType.equals("wallpaper")) {
@@ -170,15 +170,7 @@ public class HistoryView extends ListView implements ITabContent, IHasMessages {
 		DisplayMetrics metrics = new DisplayMetrics();
 		display.getMetrics(metrics);
 
-		if (textSize == null || textSize.equals(getResources().getString(R.string.value_size_medium))) {
-			historyAdapter.setTextSize(16 * metrics.density);
-		} else if (textSize.equals(getResources().getString(R.string.value_size_big))) {
-			historyAdapter.setTextSize(20 * metrics.density);
-		} else if (textSize.equals(getResources().getString(R.string.value_size_small))) {
-			historyAdapter.setTextSize(12 * metrics.density);
-		} else {
-			historyAdapter.setTextSize(8 * metrics.density);
-		}				
+		historyAdapter.setTextSize(textSize * metrics.density);
 	}
 	
 	public EntryPoint getEntryPoint(){
