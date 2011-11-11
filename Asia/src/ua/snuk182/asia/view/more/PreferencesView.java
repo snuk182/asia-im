@@ -7,6 +7,7 @@ import ua.snuk182.asia.services.ServiceConstants;
 import ua.snuk182.asia.services.ServiceUtils;
 import ua.snuk182.asia.view.ITabContent;
 import ua.snuk182.asia.view.cl.ContactList;
+import ua.snuk182.asia.view.more.widgets.SeekBarPreference;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -70,16 +71,19 @@ public class PreferencesView extends PreferenceActivity implements ITabContent {
 						return true;
 					}
 				});
-				Object value = options.get(pref.getKey());
+				String value = (String) options.get(pref.getKey());
 				if (value!=null){
 					if (pref instanceof CheckBoxPreference){
-						((CheckBoxPreference)pref).setChecked(Boolean.parseBoolean((String) value));
+						((CheckBoxPreference)pref).setChecked(Boolean.parseBoolean(value));
 					}
 					if (pref instanceof EditTextPreference){
-						((EditTextPreference)pref).setText((String) value);
+						((EditTextPreference)pref).setText(value);
 					}
 					if (pref instanceof ListPreference){
-						((ListPreference)pref).setValue((String) value);
+						((ListPreference)pref).setValue( value);
+					}
+					if (pref instanceof SeekBarPreference){
+						((SeekBarPreference)pref).setValue(value);
 					}
 				}
 			}

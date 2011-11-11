@@ -712,6 +712,8 @@ public final class ServiceStoredPreferences {
 			eventType = parser.next();
 		}
 
+		account.options = getOptions(account, context);
+		
 		return account;
 	}
 

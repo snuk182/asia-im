@@ -134,7 +134,9 @@ public class Notificator {
 				notification.tickerText = text;
 				notification.flags |= Notification.FLAG_SHOW_LIGHTS;				
 			} else {
-				notification.flags ^= Notification.FLAG_SHOW_LIGHTS;				
+				if ((notification.flags & Notification.FLAG_SHOW_LIGHTS) > 0){
+					notification.flags ^= Notification.FLAG_SHOW_LIGHTS;
+				}				
 			}
 			notification.flags = Notification.FLAG_NO_CLEAR;
 			accountNotifications.put(account.serviceId, notification);
@@ -143,7 +145,9 @@ public class Notificator {
 				notification.tickerText = text;
 				notification.flags |= Notification.FLAG_SHOW_LIGHTS;				
 			} else {
-				notification.flags ^= Notification.FLAG_SHOW_LIGHTS;				
+				if ((notification.flags & Notification.FLAG_SHOW_LIGHTS) > 0){
+					notification.flags ^= Notification.FLAG_SHOW_LIGHTS;
+				}			
 			}
 			notification.icon = icon;
 			notification.when = when;

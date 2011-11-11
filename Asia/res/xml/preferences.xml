@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen
   xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:asia="http://ua.snuk182.asia/res"
   android:persistent="false">
   <PreferenceCategory android:title="@string/label_common_prefs" android:key="@string/key_pref_common" android:persistent="false">
   	<ListPreference android:persistent="false" android:title="@string/label_view_type" android:entries="@array/view_type_names" android:entryValues="@array/view_type_values" android:key="@string/key_view_type" android:defaultValue="@string/value_view_type_plain" />
@@ -11,7 +12,15 @@
   	<ListPreference android:persistent="false" android:title="@string/label_statusbar_type" android:key="@string/key_statusbar_type" android:entries="@array/list_statusbar_type_names" android:entryValues="@array/list_statusbar_type_values" android:defaultValue="@string/value_statusbar_type_messages"/>
   	<ListPreference android:persistent="false" android:title="@string/label_chat_date" android:key="@string/key_chat_date" android:entries="@array/list_chat_date_names" android:entryValues="@array/list_chat_date_values" android:defaultValue="@string/value_chat_date_full"/>
   	<ListPreference android:persistent="false" android:title="@string/label_cl_item_size" android:key="@string/key_cl_item_size" android:entries="@array/list_size_names" android:entryValues="@array/list_size_values" android:defaultValue="@string/value_size_medium"/>
-  	<ListPreference android:persistent="false" android:title="@string/label_text_size" android:key="@string/key_text_size" android:entries="@array/list_size_names" android:entryValues="@array/list_size_values" android:defaultValue="@string/value_size_medium"/>
+  	
+  	<ua.snuk182.asia.view.more.widgets.SeekBarPreference android:key="@string/key_text_size"
+        android:persistent="false"
+        android:title="@string/label_text_size"
+        android:defaultValue="16"
+        asia:min="1"
+        android:max="40"
+        />
+  	
   	<CheckBoxPreference android:persistent="false" android:title="@string/label_log_to_file" android:key="@string/key_log_to_file" android:defaultValue="false" />
   	<CheckBoxPreference android:persistent="false" android:title="@string/label_send_by_enter" android:key="@string/key_send_by_enter" android:defaultValue="true"/>
   	<CheckBoxPreference android:persistent="false" android:title="@string/label_autoconnect" android:key="@string/key_autoconnect" android:defaultValue="false"/>
