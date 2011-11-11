@@ -674,6 +674,14 @@ public final class ServiceStoredPreferences {
 						if (account != null) {
 							account.ownName = parser.nextText();
 						}
+					} else if (name.equalsIgnoreCase(TAG_XSTATUS_NAME)) {
+						if (account != null) {
+							account.xStatusName = parser.nextText();
+						}
+					} else if (name.equalsIgnoreCase(TAG_XSTATUS_TEXT)) {
+						if (account != null) {
+							account.xStatusText = parser.nextText();
+						}
 					} else if (name.equalsIgnoreCase(TAG_BUDDY_NAME)) {
 						if (buddy != null) {
 							buddy.name = parser.nextText();

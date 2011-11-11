@@ -193,7 +193,10 @@
 	<string name="label_service_addr">"Service address"</string>
 	<string name="label_service_port">"Service port"</string>
 	<string name="label_history">History</string>
-	<string name="label_common_prefs">Common preferences</string>
+	<string name="label_appearance_prefs">Appearance</string>
+	<string name="label_notification_prefs">Notification</string>
+	<string name="label_chat_prefs">Chat</string>
+	<string name="label_misc_prefs">Miscellaneous</string>
 	<string name="label_account_prefs">Account preferences</string>
 	<string name="label_you_must_enter_uid">"You must enter UID"</string>
 	<string name="label_list_type">"Contact list type"</string>

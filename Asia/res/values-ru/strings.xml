@@ -117,7 +117,10 @@
     <string name="label_service_addr">"Адрес сервиса"</string>
     <string name="label_service_port">"Порт сервиса"</string>
     <string name="label_history">"История"</string>
-    <string name="label_common_prefs">"Общие настройки"</string>
+    <string name="label_appearance_prefs">Внешний вид</string>
+	<string name="label_notification_prefs">Уведомления</string>
+	<string name="label_chat_prefs">Чат</string>
+	<string name="label_misc_prefs">Разное</string>
     <string name="label_account_prefs">"Настройки учетной записи"</string>
     <string name="label_you_must_enter_uid">"Вы должны ввести свой UID"</string>
     <string name="label_list_type">"Тип списка контактов"</string>

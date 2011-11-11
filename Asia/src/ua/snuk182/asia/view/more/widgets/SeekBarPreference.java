@@ -58,6 +58,8 @@ public class SeekBarPreference extends DialogPreference implements SeekBar.OnSee
 
 		if (shouldPersist())
 			mValue = parseValue(getPersistedString(mDefault));
+		else 
+			mValue = Integer.parseInt(mDefault);
 
 		mSeekBar.setMax(mMax);
 		mSeekBar.setProgress(mValue-mMin);
