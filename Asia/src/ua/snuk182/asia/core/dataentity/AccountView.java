@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +41,7 @@ public class AccountView implements Parcelable {
 	private List<Buddy> buddyList = Collections.synchronizedList(new ArrayList<Buddy>());
 	private List<BuddyGroup> buddyGroupList = Collections.synchronizedList(new ArrayList<BuddyGroup>());
 	private Map<String, Byte> unreadsMap = new HashMap<String, Byte>();
+	private List<Buddy> undeletable;
 	public Bundle options = new Bundle();
 	private short connectionState = AccountService.STATE_DISCONNECTED;
 	public long lastUpdateTime = new Date().getTime();
@@ -171,8 +173,6 @@ public class AccountView implements Parcelable {
 					}
 					if (buddy.groupId != newBuddy.groupId) {
 						buddy.groupId = newBuddy.groupId;
-						removeBuddyByUid(buddy);
-						addBuddyToList(buddy);
 					}
 					return buddy;
 				}
@@ -203,7 +203,8 @@ public class AccountView implements Parcelable {
 		this.lastUpdateTime = new Date().getTime();
 	}
 
-	public void removeAllBuddies(List<Buddy> args, boolean keepNotInList) {
+	public void removeAllBuddies(boolean keepNotInList) {
+		undeletable = new LinkedList<Buddy>();
 		synchronized (buddyList) {
 			for (int i = buddyList.size() - 1; i >= 0; i--) {
 				Buddy bu = buddyList.get(i);
@@ -211,17 +212,11 @@ public class AccountView implements Parcelable {
 					unreadsMap.put(bu.protocolUid, bu.unread);
 				}
 				if ((bu.groupId == AccountService.NOT_IN_LIST_GROUP_ID && keepNotInList) || bu.visibility == Buddy.VIS_GROUPCHAT) {
-					continue;
-				}
-				buddyList.remove(i);				
+					undeletable.add(bu);
+				}						
 			}
-			for (int i = buddyList.size() - 1; i >= 0; i--) { // if not-in-listed is in new list
-				for (Buddy bu : args) {
-					if (buddyList.get(i).protocolUid.equals(bu.protocolUid)) {
-						buddyList.remove(i);
-					}
-				}
-			}
+			
+			buddyList.clear();
 		}
 	}
 
@@ -370,6 +365,9 @@ public class AccountView implements Parcelable {
 	public void setBuddyList(List<Buddy> buddyList, RuntimeService runtimeService, boolean getIcons) {
 		synchronized (buddyList) {
 			this.buddyList.addAll(buddyList);
+			if (undeletable != null){
+				this.buddyList.addAll(undeletable);
+			}
 		}
 		for (Iterator<String> unreads = unreadsMap.keySet().iterator(); unreads.hasNext();){
 			String unreadKey = unreads.next();
@@ -379,6 +377,7 @@ public class AccountView implements Parcelable {
 				}
 			}
 		}
+		undeletable = null;
 		unreadsMap.clear();
 		if (getIcons){
 			for (Buddy b:buddyList){

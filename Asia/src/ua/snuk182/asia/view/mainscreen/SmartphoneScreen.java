@@ -44,7 +44,7 @@ import android.widget.TabHost;
 
 public class SmartphoneScreen extends TabHost implements IMainScreen {
 	
-	public final ArrayList<TabInfo> tabs;
+	private final ArrayList<TabInfo> tabs;
 	
 	private HorizontalScrollView tabScroller;
 	
@@ -198,12 +198,7 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 
 	@Override
 	public void addTab(TabInfo info, boolean setAsCurrent){
-		if (info==null) return;
-		
-		boolean exists = getTabByTag(info.tag) != null;
-		if (exists){
-			return;
-		}
+		if (info==null || getTabByTag(info.tag) != null) return;		
 		
 		tabs.add(info);
 		if (info.tabWidgetLayout!= null && info.tabWidgetLayout.getParent() != null){
@@ -219,8 +214,8 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 
 	@Override
 	public void onStart() {
-		if (tabs.size() > 0 && tabs.get(getCurrentTab()).content != null){
-			tabs.get(getCurrentTab()).content.onStart();
+		if (tabs.size() > 0 && getSelectedTab().content != null){
+			getSelectedTab().content.onStart();
 		}
 	}
 	
@@ -439,6 +434,9 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 	}
 	
 	private TabInfo getSelectedTab(){
+		if (getCurrentTab() >= tabs.size()){
+			ServiceUtils.log(getCurrentTabTag()+" has no tabinfo!!");
+		}
 		return tabs.get(getCurrentTab());
 	}
 	

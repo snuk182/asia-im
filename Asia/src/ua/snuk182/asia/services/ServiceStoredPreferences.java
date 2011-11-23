@@ -1,5 +1,6 @@
 package ua.snuk182.asia.services;
 
+import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -509,7 +510,7 @@ public final class ServiceStoredPreferences {
 
 				XmlSerializer serializer = Xml.newSerializer();
 				try {
-					serializer.setOutput(context.openFileOutput(account.getFilename() + PREFERENCES_FILEEXT, 0), XML_ENCODING);
+					serializer.setOutput(new BufferedOutputStream(context.openFileOutput(account.getFilename() + PREFERENCES_FILEEXT, 0)), XML_ENCODING);
 					serializer.startDocument(XML_ENCODING, true);
 					serializer.startTag(XML_NAMESPACE, TAG_ACCOUNT);
 					serializer.attribute(XML_NAMESPACE, ATTR_PROTOCOL_NAME, account.protocolName.trim());
@@ -592,7 +593,7 @@ public final class ServiceStoredPreferences {
 
 	private void saveAccountHeaders(List<AccountView> accounts) throws IllegalArgumentException, IllegalStateException, FileNotFoundException, IOException {
 		XmlSerializer serializer = Xml.newSerializer();
-		serializer.setOutput(context.openFileOutput(XMLPARAMS_TOTAL, 0), XML_ENCODING);
+		serializer.setOutput(new BufferedOutputStream(context.openFileOutput(XMLPARAMS_TOTAL, 0)), XML_ENCODING);
 		serializer.startDocument(XML_ENCODING, true);
 
 		serializer.startTag(XML_NAMESPACE, TAG_ACCOUNTS);
