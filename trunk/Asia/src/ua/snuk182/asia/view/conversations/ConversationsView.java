@@ -143,7 +143,9 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 		@Override
 		public void onTabChanged(String tabId) {
 			if (!tabId.equals(chatId)) {
-				kbManager.hideSoftInputFromWindow(textEditor.getWindowToken(), 0);
+				if (kbManager != null){
+					kbManager.hideSoftInputFromWindow(textEditor.getWindowToken(), 0);
+				}
 			} else {
 				buddy.unread = 0;
 				try {

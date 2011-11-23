@@ -321,7 +321,7 @@ public class RuntimeService extends Service {
 				
 				// account.editBuddy(buddy, true);
 
-				if (!args[1].equals(account.protocolUid)){
+				if (!args[1].equals(account.protocolUid) && args[2] != null){
 					final Buddy buddy = account.getBuddyByProtocolUid((String) args[1]);
 					buddy.iconHash = (String) args[2];					
 				}
@@ -354,7 +354,7 @@ public class RuntimeService extends Service {
 					loadIcons = true;
 				}
 
-				account.removeAllBuddies((List<Buddy>) args[0], saveNotInList != null && saveNotInList);
+				account.removeAllBuddies(saveNotInList);
 				account.setBuddyGroupList((List<BuddyGroup>) args[1]);
 				account.setBuddyList((List<Buddy>) args[0], RuntimeService.this, loadIcons);
 				try {
