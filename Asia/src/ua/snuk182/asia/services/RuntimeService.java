@@ -347,10 +347,11 @@ public class RuntimeService extends Service {
 			case IAccountServiceResponse.RES_CLUPDATED:
 				Boolean saveNotInList = Boolean.parseBoolean(account.options.getString(getApplicationContext().getResources().getString(R.string.key_notinlist_save)));
 				
+				String loadIconsStr = account.options.getString(getResources().getString(R.string.key_load_icons));
 				boolean loadIcons;
-				try {
-					loadIcons = Boolean.parseBoolean(account.options.getString(getResources().getString(R.string.key_load_icons)));
-				} catch (Exception e1) {
+				if (loadIconsStr != null) {
+					loadIcons = Boolean.parseBoolean(loadIconsStr);
+				} else {
 					loadIcons = true;
 				}
 
@@ -401,7 +402,7 @@ public class RuntimeService extends Service {
 
 				ServiceUtils.mergeBuddyWithOnlineInfo(buddy, info);
 				
-				String loadIconsStr = account.options.getString(getResources().getString(R.string.key_load_icons));
+				loadIconsStr = account.options.getString(getResources().getString(R.string.key_load_icons));
 				if (loadIconsStr == null){
 					loadIcons = true;
 				} else {
