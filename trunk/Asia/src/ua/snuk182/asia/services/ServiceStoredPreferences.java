@@ -573,7 +573,7 @@ public final class ServiceStoredPreferences {
 						boolean found = false;
 						for (AccountView acco : accounts) {
 							if (acco.protocolUid.equalsIgnoreCase(account.protocolUid)) {
-								acco.merge(account);
+								//acco.merge(account);
 								found = true;
 							}
 						}
