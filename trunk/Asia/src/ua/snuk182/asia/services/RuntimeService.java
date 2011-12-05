@@ -1703,10 +1703,8 @@ public class RuntimeService extends Service {
 	}
 
 	private void restoreXStatus(Account account) throws XmlPullParserException, IOException {
-		AccountView oldAcc = storage.getAccount(account.accountView);
-		account.accountView.xStatus = oldAcc.xStatus;
-		account.accountView.xStatusName = oldAcc.xStatusName;
-		account.accountView.xStatusText = oldAcc.xStatusText;
+		storage.getAccount(account.accountView, false);
+		
 		try {
 			setXStatusInternal(account);
 		} catch (RemoteException e) {

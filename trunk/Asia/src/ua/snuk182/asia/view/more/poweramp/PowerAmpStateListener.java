@@ -24,13 +24,15 @@ public class PowerAmpStateListener {
 			boolean paused = true;
 			
 			int status = intent.getIntExtra(PowerAMPiAPI.STATUS, -1);
-			int playerState = IPlayerStateListener.STOPPED;
+			int playerState = IPlayerStateListener.NONE;
 			
 			switch(status) {
 				case PowerAMPiAPI.Status.TRACK_PLAYING:
 					paused = intent.getBooleanExtra(PowerAMPiAPI.PAUSED, false);
 					if (!paused){
 						playerState = IPlayerStateListener.STARTED;
+					} else {
+						playerState = IPlayerStateListener.STOPPED;
 					}
 					break;
 		
