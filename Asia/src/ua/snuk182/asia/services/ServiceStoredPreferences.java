@@ -148,7 +148,7 @@ public final class ServiceStoredPreferences {
 			try {
 				accounts = getAccountHeaders();
 				for (AccountView account : accounts) {
-					getAccount(account);
+					getAccount(account, true);
 				}
 			} catch (Exception e) {
 				ServiceUtils.log(e);
@@ -646,7 +646,7 @@ public final class ServiceStoredPreferences {
 		return accounts;
 	}
 
-	public AccountView getAccount(AccountView account) throws XmlPullParserException, IOException {
+	public AccountView getAccount(AccountView account, boolean getBuddies) throws XmlPullParserException, IOException {
 		if (account == null) {
 			return null;
 		}
@@ -691,7 +691,7 @@ public final class ServiceStoredPreferences {
 						if (group != null) {
 							group.name = parser.nextText();
 						}
-					} else if (name.equalsIgnoreCase(TAG_BUDDY)) {
+					} else if (name.equalsIgnoreCase(TAG_BUDDY) && getBuddies) {
 						buddy = new Buddy(parser.getAttributeValue(XML_NAMESPACE, ATTR_PROTOCOL_UID), account);
 
 						buddy.groupId = Integer.parseInt(parser.getAttributeValue(XML_NAMESPACE, ATTR_GROUP_ID));
@@ -699,7 +699,7 @@ public final class ServiceStoredPreferences {
 						buddy.unread = Byte.parseByte(parser.getAttributeValue(XML_NAMESPACE, ATTR_UNREAD));
 						buddy.visibility = Byte.parseByte(parser.getAttributeValue(XML_NAMESPACE, ATTR_VISIBILITY));
 
-					} else if (name.equalsIgnoreCase(TAG_GROUP)) {
+					} else if (name.equalsIgnoreCase(TAG_GROUP) && getBuddies) {
 						group = new BuddyGroup(Integer.parseInt(parser.getAttributeValue(XML_NAMESPACE, ATTR_ID)), account.protocolUid, account.serviceId);
 						group.isCollapsed = Boolean.parseBoolean(parser.getAttributeValue(XML_NAMESPACE, ATTR_COLLAPSED));
 					}
@@ -708,11 +708,15 @@ public final class ServiceStoredPreferences {
 			case XmlPullParser.END_TAG:
 				name = parser.getName();
 				if (name.equalsIgnoreCase(TAG_BUDDY)) {
-					account.getBuddyList().add(buddy);
-					buddy = null;
+					if (buddy != null){
+						account.getBuddyList().add(buddy);
+						buddy = null;
+					}
 				} else if (name.equalsIgnoreCase(TAG_GROUP)) {
-					account.getBuddyGroupList().add(group);
-					group = null;
+					if (group != null){
+						account.getBuddyGroupList().add(group);
+						group = null;
+					}
 				} else if (name.equalsIgnoreCase(TAG_ACCOUNT)) {
 					done = true;
 				}
