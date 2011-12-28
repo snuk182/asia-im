@@ -98,11 +98,13 @@ public class EntryPoint extends ActivityGroup {
 
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
-			runtimeService = null;    
+			/*runtimeService = null;    
 			serviceIntent = null;
 			if (serviceConnection != null){
 				getRuntimeService();
-			}
+			}*/
+			
+			finish();
 		}
 	};
 	
@@ -191,12 +193,16 @@ public class EntryPoint extends ActivityGroup {
 		if (bgType == null || bgType.equals("wallpaper")){
 			try {
 				bgColor = BGCOLOR_WALLPAPER;
-				Bitmap original = ViewUtils.scaleBitmap(((BitmapDrawable)getWallpaper()).getBitmap(), 
-						(metrics.heightPixels > metrics.widthPixels) ? metrics.heightPixels : metrics.widthPixels, 
+				int heightPx = (int) (metrics.heightPixels * metrics.density);
+				int widthPx = (int) (metrics.widthPixels * metrics.density);
+				
+				Bitmap original = ViewUtils.scaleBitmap(((BitmapDrawable)getWallpaper()).getBitmap(),   
+						(heightPx > widthPx) ? heightPx : widthPx, 
 								true);	
 				wallpaper = new BitmapDrawable(getResources(), original);
 				wallpaper.setGravity(Gravity.CENTER);
-				
+				wallpaper.setFilterBitmap(false);
+				wallpaper.setDither(false);
 				mainScreen.setBackgroundDrawable(wallpaper);
 			} catch (Exception e) {
 				bgColor = 0xff000000;

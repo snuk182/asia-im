@@ -57,8 +57,6 @@ public class ContactListGridGroupItem extends LinearLayout implements OnClickLis
 		setOnClickListener(this);
 	}
 	
-	
-
 	void refresh() {
 		if (refreshContents) {
 			refresh(0);

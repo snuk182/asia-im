@@ -51,6 +51,8 @@ public class ContactListListItem extends RelativeLayout implements ContactListIt
 					picSize -= 10;
 				}
 				BitmapDrawable bd = new BitmapDrawable(ViewUtils.scaleBitmap(icon, (int) ((picSize) * getEntryPoint().metrics.density), false));
+				bd.setFilterBitmap(false);
+				bd.setDither(false);
 				bd.setGravity(Gravity.CENTER);
 				picLayout.setBuddyImage(bd);
 			} else {

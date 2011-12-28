@@ -14,5 +14,6 @@
 </PreferenceCategory>
   <PreferenceCategory android:title="@string/mrim_service_name" android:persistent="false">
   	<CheckBoxPreference android:persistent="false" android:title="@string/label_poweramp_playing_to_status" android:key="@string/key_poweramp_playing_to_status" android:defaultValue="false"/>
+  	<CheckBoxPreference android:title="@string/label_androidmusic_playing_to_status" android:key="@string/key_androidmusic_playing_to_status" android:defaultValue="false"/>
   </PreferenceCategory>  
 </PreferenceScreen>
