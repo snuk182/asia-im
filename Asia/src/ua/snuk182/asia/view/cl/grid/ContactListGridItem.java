@@ -50,6 +50,8 @@ public class ContactListGridItem extends RelativeLayout implements ContactListIt
 					picSize -= 15;
 				}
 				BitmapDrawable bd = new BitmapDrawable(ViewUtils.scaleBitmap(icon, (int) ((picSize) * getEntryPoint().metrics.density), false));
+				bd.setFilterBitmap(false);
+				bd.setDither(false);
 				bd.setGravity(Gravity.CENTER);
 				buddyImage.setBuddyImage(bd);
 			} else {

@@ -44,6 +44,8 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 	private boolean clInited = false;
 	private int oldWidth = 0;
 	
+	//paging
+	
 	private final Runnable updateViewRunnable = new Runnable() {
 		
 		@Override

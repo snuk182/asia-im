@@ -176,6 +176,12 @@ public final class ServiceStoredPreferences {
 
 		return protocols;
 	}
+	
+	public void saveAccounts(List<Account> accounts) {
+		for (Account account : accounts) {
+			saveAccount(account.accountView, false);
+		}		
+	}
 
 	public void saveServiceState(List<Account> accounts) {
 		List<AccountView> accountViews = new LinkedList<AccountView>();

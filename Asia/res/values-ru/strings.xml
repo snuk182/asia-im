@@ -19,6 +19,7 @@
 	
 	<string name="label_secure_login">Безопасный вход</string>
 	<string name="label_poweramp_playing_to_status">"Сейчас играет..." из PowerAMP</string>
+	<string name="label_androidmusic_playing_to_status">"Сейчас играет..." из Музыкального проигрывателя</string>
 	
 	<string name="label_export">Экспорт на карту памяти"</string>
 	

@@ -19,11 +19,11 @@ import ua.snuk182.asia.core.dataentity.Buddy;
 import ua.snuk182.asia.core.dataentity.TextMessage;
 import android.content.Context;
 import android.os.Environment;
-import android.util.Log;
 
 public final class HistorySaver {
-	public static final String MARK_IN = ">->";
-	public static final String MARK_OUT = "<-<";
+	private static final int DEFAULT_SKIP_AMOUNT = 1500;
+	private static final String MARK_IN = ">->";
+	private static final String MARK_OUT = "<-<";
 	
 	private static final String SUFFIX = ".history";
 	private static final String RECORD_DIVIDER = "--------------------------------------";
@@ -115,19 +115,23 @@ public final class HistorySaver {
 		
 		long fileSize = context.getFileStreamPath(buddy.getOwnerAccountId()+" "+buddy.protocolUid+SUFFIX).length();
 		
+		getHistoryInternal(context, output, fis, getAll, fileSize, DEFAULT_SKIP_AMOUNT, (byte) 4);
+		
+		return output;
+	}
+	
+	private void getHistoryInternal(Context context, List<TextMessage> output, FileInputStream fis, boolean getAll, long fileSize, long skipAmount, byte desiredMessageCount) {
 		if (fis == null || fileSize<8){
-			return output;
+			return;
 		}
 		
-		if (fileSize>1500 && !getAll){
+		if (fileSize>skipAmount && !getAll){
 			try {
-				long co = fis.skip(fileSize-1500);
-				Log.d("Asia", co+"");
+				fis.skip(fileSize-skipAmount);
 			} catch (IOException e) {	
 				e.printStackTrace();
 			}
 		}
-		//char[] buf = new char[1000];
 		String strLine = "";
 		StringBuilder sb = new StringBuilder();
 		BufferedReader br = new BufferedReader(new InputStreamReader(new DataInputStream(fis)));
@@ -135,15 +139,6 @@ public final class HistorySaver {
 			 while ((strLine = br.readLine()) != null){
 				 sb.append(strLine);
 			 }
-			/*while (true){
-				int read = br.read(buf);
-				if (read>-1){
-					sb.append(buf, 0, read);
-				} else {
-					break;
-				}
-				
-			}*/ 
 		} catch (IOException e) {	
 			e.printStackTrace();
 		}
@@ -179,7 +174,9 @@ public final class HistorySaver {
 			}
 		}
 		
-		return output;
+		if (output.size() < desiredMessageCount && fileSize>skipAmount){
+			getHistoryInternal(context, output, fis, getAll, fileSize, skipAmount+DEFAULT_SKIP_AMOUNT, desiredMessageCount);
+		}
 	}
 	
 	public void saveHistoryRecord(TextMessage message, Context context){

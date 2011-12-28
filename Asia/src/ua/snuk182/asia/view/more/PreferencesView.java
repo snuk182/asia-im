@@ -78,12 +78,15 @@ public class PreferencesView extends PreferenceActivity implements ITabContent {
 					}
 					if (pref instanceof EditTextPreference){
 						((EditTextPreference)pref).setText(value);
+						pref.setSummary(value);
 					}
 					if (pref instanceof ListPreference){
 						((ListPreference)pref).setValue( value);
+						pref.setSummary(((ListPreference)pref).getEntry());
 					}
 					if (pref instanceof SeekBarPreference){
 						((SeekBarPreference)pref).setValue(value);
+						pref.setSummary(value);
 					}
 				}
 			}
@@ -102,7 +105,7 @@ public class PreferencesView extends PreferenceActivity implements ITabContent {
 			}
 		});
 	}
-	
+
 	@Override
 	public boolean onKeyDown(int i, KeyEvent event) {
 

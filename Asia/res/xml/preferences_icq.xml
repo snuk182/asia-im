@@ -16,5 +16,6 @@
   <PreferenceCategory android:title="@string/icq_service_name">
   	<CheckBoxPreference android:title="@string/label_secure_login" android:key="@string/key_secure_login" android:defaultValue="false"/>
   	<CheckBoxPreference android:title="@string/label_poweramp_playing_to_status" android:key="@string/key_poweramp_playing_to_status" android:defaultValue="false"/>
+  	<CheckBoxPreference android:title="@string/label_androidmusic_playing_to_status" android:key="@string/key_androidmusic_playing_to_status" android:defaultValue="false"/>
   </PreferenceCategory>
 </PreferenceScreen>

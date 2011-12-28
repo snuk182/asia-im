@@ -34,8 +34,10 @@ import ua.snuk182.asia.services.api.IAccountServiceResponse;
 import ua.snuk182.asia.services.api.ProtocolException;
 import ua.snuk182.asia.services.plus.Notificator;
 import ua.snuk182.asia.view.more.AsiaCoreException;
-import ua.snuk182.asia.view.more.poweramp.IPlayerStateListener;
-import ua.snuk182.asia.view.more.poweramp.PowerAmpStateListener;
+import ua.snuk182.asia.view.more.musiccontrol.AbstractPlayerStateListener;
+import ua.snuk182.asia.view.more.musiccontrol.IPlayerStateListener;
+import ua.snuk182.asia.view.more.musiccontrol.androidmusic.AndroidMusicServiceStateListener;
+import ua.snuk182.asia.view.more.musiccontrol.poweramp.PowerAmpStateListener;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -65,7 +67,7 @@ public class RuntimeService extends Service {
 	private boolean isAppVisible = true;
 	private Handler handler = new Handler();
 	private Bundle appOptions;
-	private PowerAmpStateListener playerStateListener;
+	private Map<String, AbstractPlayerStateListener> playerStateListeners = new HashMap<String, AbstractPlayerStateListener>();
 	
 	private int startId;
 	
@@ -144,8 +146,6 @@ public class RuntimeService extends Service {
 			}
 		}.start();
 		
-		playerStateListener = new PowerAmpStateListener(this);
-		
 		String autoconnect = appOptions.getString(getResources().getString(R.string.key_autoconnect));
 		for (Account a: accounts){
 			if (a.accountView.getConnectionState() != AccountService.STATE_DISCONNECTED || (autoconnect!=null && autoconnect.indexOf("true") > -1)){
@@ -156,14 +156,41 @@ public class RuntimeService extends Service {
 					ServiceUtils.log(e);
 				}
 			}
-			String playerStatus = a.accountView.options.getString(getResources().getString(R.string.key_poweramp_playing_to_status));
-			if (playerStatus != null && playerStatus.equalsIgnoreCase("true")){
-				putPlayerStateListener(a.accountView);
+			
+			String powerampPlayerStatusKey = getResources().getString(R.string.key_poweramp_playing_to_status);
+			String playerStatus = a.accountView.options.getString(powerampPlayerStatusKey);
+			if (Boolean.parseBoolean(playerStatus)){				
+				putPlayerStateListener(getPlayerStateListener(powerampPlayerStatusKey), a.accountView);
+			}
+			
+			String androidmusicPlayerStatusKey = getResources().getString(R.string.key_androidmusic_playing_to_status);
+			playerStatus = a.accountView.options.getString(androidmusicPlayerStatusKey);
+			if (Boolean.parseBoolean(playerStatus)){				
+				putPlayerStateListener(getPlayerStateListener(androidmusicPlayerStatusKey), a.accountView);
 			}
 		}
 	}
+	
+	private AbstractPlayerStateListener getPlayerStateListener(String key) {
+		AbstractPlayerStateListener listener = playerStateListeners.get(key);
+		if (listener == null){
+			if (key.equals(getResources().getString(R.string.key_poweramp_playing_to_status))){
+				listener = new PowerAmpStateListener(this);				
+			}
+			
+			if (key.equals(getResources().getString(R.string.key_androidmusic_playing_to_status))){
+				listener = new AndroidMusicServiceStateListener(this);				
+			}
+			
+			playerStateListeners.put(key, listener);
+		}
+		
+		return listener;
+	}
+
 	@Override
 	public void onLowMemory(){
+		storage.saveAccounts(accounts);
 		System.gc();
 		super.onLowMemory();
 	}
@@ -187,7 +214,7 @@ public class RuntimeService extends Service {
 			powerLock.release();
 			powerLock = null;
 		}
-		//storage.saveServiceState(accounts);
+		storage.saveAccounts(accounts);
 	}
 
 	public RuntimeService() {}
@@ -1067,13 +1094,24 @@ public class RuntimeService extends Service {
 				if (key.equals(getResources().getString(R.string.key_send_typing))) {
 					uiCallback.accountUpdated(account);
 				}
-				if (key.equals(getResources().getString(R.string.key_poweramp_playing_to_status))){
-					if (value.equalsIgnoreCase("true")){
-						putPlayerStateListener(account);
+				
+				String powerampKey = getResources().getString(R.string.key_poweramp_playing_to_status);
+				if (key.equals(powerampKey)){
+					if (Boolean.parseBoolean(value)){
+						putPlayerStateListener(getPlayerStateListener(powerampKey), account);
 					} else {
-						removePlayerStateListener(account);
+						removePlayerStateListener(getPlayerStateListener(powerampKey), account);
 					}
 				} 
+				
+				String musicKey = getResources().getString(R.string.key_androidmusic_playing_to_status);
+				if (key.equals(musicKey)){
+					if (Boolean.parseBoolean(value)){
+						putPlayerStateListener(getPlayerStateListener(musicKey), account);
+					} else {
+						removePlayerStateListener(getPlayerStateListener(musicKey), account);
+					}
+				}
 			} else {
 				account = null;
 				appOptions.putString(key, value);
@@ -1664,7 +1702,7 @@ public class RuntimeService extends Service {
 		return null;
 	}
 
-	private void removePlayerStateListener(AccountView account) {
+	private void removePlayerStateListener(AbstractPlayerStateListener playerStateListener, AccountView account) {
 		playerStateListener.removePlayerStateListener(account.serviceId);
 		try {
 			restoreXStatus(getAccountInternal(account.serviceId));
@@ -1673,7 +1711,7 @@ public class RuntimeService extends Service {
 		}
 	}
 
-	private void putPlayerStateListener(final AccountView account) {
+	private void putPlayerStateListener(AbstractPlayerStateListener playerStateListener, final AccountView account) {
 		playerStateListener.addPlayerStateListener(account.serviceId, new IPlayerStateListener() {
 			
 			@Override

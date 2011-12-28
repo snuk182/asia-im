@@ -21,6 +21,7 @@
 	
 	<string name="label_secure_login">Безпечний вхід</string>
 	<string name="label_poweramp_playing_to_status">"Зараз грає..." із PowerAMP</string>
+	<string name="label_androidmusic_playing_to_status">"Зараз грає..." з Музичного програвача</string>	
 	
 	<string name="label_dont_draw_smileys">Не малювати смайли</string>
 	
