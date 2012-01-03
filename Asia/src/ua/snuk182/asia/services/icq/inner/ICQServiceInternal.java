@@ -80,6 +80,8 @@ public class ICQServiceInternal {
 	public static final short REQ_GETFULLBUDDYINFO = 31;
 	public static final short REQ_SENDTYPING = 32;
 	public static final short REQ_VISIBILITY = 33;
+	
+	public static final short REQ_KEEPALIVE_CHECK = 34;	
 
 	private String loginHost = "login.icq.com";
 	private int loginPort = 800;
@@ -177,7 +179,7 @@ public class ICQServiceInternal {
 			flapSeqNumber = ProtocolUtils.getAtomicShort();
 			try {
 				//socket = new Socket();
-				socket.setSoTimeout(300000);
+				//socket.setSoTimeout(300000);
 				socket.connect(new InetSocketAddress(InetAddress.getByName(host), port));
 				connected = true;
 				getDataFromSocket();
@@ -531,6 +533,11 @@ public class ICQServiceInternal {
 	@SuppressWarnings("unchecked")
 	public Object request(short action, final Object... args) throws ICQException{
 		switch(action){
+		case REQ_KEEPALIVE_CHECK:
+			if (getCurrentState() == STATE_CONNECTED){
+				((MainProcessor)processor).checkServerConnection();
+			}
+			break;
 		case REQ_GETSHORTBUDDYINFO:
 			if (getCurrentState() == STATE_CONNECTED && args.length>0){
 				getPersonalInfoEngine().getShortPersonalMetainfo((String) args[0]);
