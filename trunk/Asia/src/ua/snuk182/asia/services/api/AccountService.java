@@ -1,13 +1,11 @@
 package ua.snuk182.asia.services.api;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import ua.snuk182.asia.core.dataentity.TextMessage;
 import ua.snuk182.asia.services.ServiceUtils;
 import ua.snuk182.asia.services.icq.inner.ICQServiceInternal;
 import android.content.Context;
@@ -78,7 +76,6 @@ public abstract class AccountService {
 	public static final short REQ_LEAVE_CHAT_ROOM = 37;
 	public static final short REQ_CHECK_GROUPCHATS_AVAILABLE = 38;
 	public static final short REQ_GET_CHAT_ROOM_OCCUPANTS = 39;
-
 	
 	public static final String ERR_HOST_NOT_FOUND = "host not found";
 	public static final int NOT_IN_LIST_GROUP_ID = -666;
@@ -156,14 +153,15 @@ public abstract class AccountService {
 		if (pingTimeout < 1){
 			return;
 		}
-		TextMessage msg = new TextMessage(getUserID());
+		/*TextMessage msg = new TextMessage(getUserID());
 		msg.to = getUserID();
 		msg.time = new Date();
-		msg.text = "";
+		msg.text = "";*/
 		log("bugoga attacks..."+getCurrentState());
 		try {
 			if (getCurrentState() == AccountService.STATE_CONNECTED){
-				request(REQ_SENDMESSAGE, msg);
+				//request(REQ_SENDMESSAGE, msg);
+				keepaliveRequest();
 				task = executor.schedule(timeoutRunnable, pingTimeout , TimeUnit.SECONDS);
 				keepaliveTimer.running = true;	
 				log("whoops..."+getUserID());
@@ -172,6 +170,8 @@ public abstract class AccountService {
 			log(e);
 		}
 	}
+	
+	protected abstract void keepaliveRequest();
 	
 	protected abstract String getUserID();
 	

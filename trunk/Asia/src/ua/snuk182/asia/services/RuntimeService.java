@@ -2,6 +2,8 @@ package ua.snuk182.asia.services;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
@@ -38,6 +40,8 @@ import ua.snuk182.asia.view.more.musiccontrol.AbstractPlayerStateListener;
 import ua.snuk182.asia.view.more.musiccontrol.IPlayerStateListener;
 import ua.snuk182.asia.view.more.musiccontrol.androidmusic.AndroidMusicServiceStateListener;
 import ua.snuk182.asia.view.more.musiccontrol.poweramp.PowerAmpStateListener;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -53,6 +57,7 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.widget.Toast;
 
 public class RuntimeService extends Service {
@@ -106,14 +111,37 @@ public class RuntimeService extends Service {
 	public void onCreate() {
 		super.onCreate();
 		
+		mNM = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+	    try {
+	        mStartForeground = getClass().getMethod("startForeground",
+	                mStartForegroundSignature);
+	        mStopForeground = getClass().getMethod("stopForeground",
+	                mStopForegroundSignature);
+	    } catch (Exception e) {
+	        // Running on an older platform.
+	        mStartForeground = mStopForeground = null;
+	    }
+	    try {
+	        mSetForeground = getClass().getMethod("setForeground",
+	                mSetForegroundSignature);
+	    } catch (Exception e) {
+	    	mSetForeground = null;
+	    }
 		//android.os.Debug.waitForDebugger();
-		
+		startForegroundCompat(R.string.label_wait, new Notification());
+	    
 		protocolResponse = new ProtocolServiceResponse();
-		setForeground(true);
+		//setForeground(true);
 		storage = new ServiceStoredPreferences(getApplicationContext());
 		notificator = new Notificator(getApplicationContext());
 
-		List<AccountView> acViews = storage.getAccounts();
+		List<AccountView> acViews;
+		try {
+			acViews = storage.getAccounts();
+		} catch (Exception e1) {
+			ServiceUtils.log(e1);
+			acViews = new ArrayList<AccountView>();
+		}
 		accounts.clear();
 		for (AccountView aView : acViews) {
 			Account a = new Account(getApplicationContext(), aView, protocolResponse);
@@ -201,6 +229,8 @@ public class RuntimeService extends Service {
 		wipe();
 		//accounts.clear();
 		super.onDestroy();
+		
+		stopForegroundCompat(R.string.label_wait);
 	}
 	
 	private void wipe(){
@@ -1861,5 +1891,70 @@ public class RuntimeService extends Service {
 		} else {
 			thread.run();
 		}
+	}
+	
+	private static final Class<?>[] mSetForegroundSignature = new Class[] {
+	    boolean.class};
+	private static final Class<?>[] mStartForegroundSignature = new Class[] {
+	    int.class, Notification.class};
+	private static final Class<?>[] mStopForegroundSignature = new Class[] {
+	    boolean.class};
+
+	private NotificationManager mNM;
+	private Method mSetForeground;
+	private Method mStartForeground;
+	private Method mStopForeground;
+	private Object[] mSetForegroundArgs = new Object[1];
+	private Object[] mStartForegroundArgs = new Object[2];
+	private Object[] mStopForegroundArgs = new Object[1];
+
+	void invokeMethod(Method method, Object[] args) {
+	    try {
+	        method.invoke(this, args);
+	    } catch (InvocationTargetException e) {
+	        // Should not happen.
+	        Log.w("ApiDemos", "Unable to invoke method", e);
+	    } catch (IllegalAccessException e) {
+	        // Should not happen.
+	        Log.w("ApiDemos", "Unable to invoke method", e);
+	    }
+	}
+
+	/**
+	 * This is a wrapper around the new startForeground method, using the older
+	 * APIs if it is not available.
+	 */
+	void startForegroundCompat(int id, Notification notification) {
+	    // If we have the new startForeground API, then use it.
+	    if (mStartForeground != null) {
+	        mStartForegroundArgs[0] = Integer.valueOf(id);
+	        mStartForegroundArgs[1] = notification;
+	        invokeMethod(mStartForeground, mStartForegroundArgs);
+	        return;
+	    }
+
+	    // Fall back on the old API.
+	    mSetForegroundArgs[0] = Boolean.TRUE;
+	    invokeMethod(mSetForeground, mSetForegroundArgs);
+	    mNM.notify(id, notification);
+	}
+
+	/**
+	 * This is a wrapper around the new stopForeground method, using the older
+	 * APIs if it is not available.
+	 */
+	void stopForegroundCompat(int id) {
+	    // If we have the new stopForeground API, then use it.
+	    if (mStopForeground != null) {
+	        mStopForegroundArgs[0] = Boolean.TRUE;
+	        invokeMethod(mStopForeground, mStopForegroundArgs);
+	        return;
+	    }
+
+	    // Fall back on the old API.  Note to cancel BEFORE changing the
+	    // foreground state, since we could be killed at that point.
+	    mNM.cancel(id);
+	    mSetForegroundArgs[0] = Boolean.FALSE;
+	    invokeMethod(mSetForeground, mSetForegroundArgs);
 	}
 }

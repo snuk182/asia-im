@@ -628,9 +628,9 @@ public class AuthenticationProcessor extends AbstractFlapProcessor {
 		int pos = 0;
 		System.arraycopy(ICQConstants.CLSID_UTF, 0, rawData, pos, 16);
 		pos+=16;
-		System.arraycopy(ICQConstants.CLSID_RTF, 0, rawData, pos, 16);
-		pos+=16;
 		System.arraycopy(ICQConstants.CLSID_DIRECT, 0, rawData, pos, 16);
+		pos+=16;
+		System.arraycopy(ICQConstants.CLSID_ICQUTF, 0, rawData, pos, 16);
 		pos+=16;
 		System.arraycopy(ICQConstants.CLSID_SRV_RELAY, 0, rawData, pos, 16);
 		pos+=16;

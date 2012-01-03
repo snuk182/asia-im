@@ -120,7 +120,7 @@ public final class ServiceStoredPreferences {
 		return map;
 	}
 
-	public List<AccountView> getAccounts() {
+	public List<AccountView> getAccounts() throws Exception {
 		List<AccountView> accounts;
 
 		SharedPreferences preferences = context.getSharedPreferences(SAVEDPARAMS_TOTAL, 0);
@@ -145,14 +145,13 @@ public final class ServiceStoredPreferences {
 				ServiceUtils.log(e);
 			}
 		} else {
-			try {
-				accounts = getAccountHeaders();
-				for (AccountView account : accounts) {
-					getAccount(account, true);
+			accounts = getAccountHeaders();
+			for (AccountView account : accounts) {
+				try {				
+					getAccount(account, true);					
+				} catch (Exception e) {
+					ServiceUtils.log(e, account);
 				}
-			} catch (Exception e) {
-				ServiceUtils.log(e);
-				accounts = new ArrayList<AccountView>();
 			}
 		}
 

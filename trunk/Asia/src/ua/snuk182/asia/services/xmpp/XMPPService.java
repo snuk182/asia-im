@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -80,6 +81,7 @@ import ua.snuk182.asia.core.dataentity.MultiChatRoomOccupants;
 import ua.snuk182.asia.core.dataentity.OnlineInfo;
 import ua.snuk182.asia.core.dataentity.PersonalInfo;
 import ua.snuk182.asia.core.dataentity.TextMessage;
+import ua.snuk182.asia.services.ServiceUtils;
 import ua.snuk182.asia.services.api.AccountService;
 import ua.snuk182.asia.services.api.IAccountServiceResponse;
 import ua.snuk182.asia.services.api.ProtocolException;
@@ -1090,6 +1092,19 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 			serviceResponse.respond(IAccountServiceResponse.RES_NOTIFICATION, getServiceId(), text);
 		} catch (ProtocolException e) {
 			log(e);
+		}
+	}
+
+	@Override
+	protected void keepaliveRequest() {
+		TextMessage msg = new TextMessage(getUserID());
+		msg.to = getUserID();
+		msg.time = new Date();
+		msg.text = "";
+		try {
+			request(REQ_SENDMESSAGE, msg);
+		} catch (ProtocolException e) {
+			ServiceUtils.log(e);
 		}
 	}
 }

@@ -2,6 +2,7 @@ package ua.snuk182.asia.services.mrim;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -305,6 +306,19 @@ public class MrimService extends AccountService {
 	@Override
 	protected void timeoutDisconnect() {
 		internal.getRunnableService().disconnect();		
+	}
+
+	@Override
+	protected void keepaliveRequest() {
+		TextMessage msg = new TextMessage(getUserID());
+		msg.to = getUserID();
+		msg.time = new Date();
+		msg.text = "";
+		try {
+			request(REQ_SENDMESSAGE, msg);
+		} catch (ProtocolException e) {
+			ServiceUtils.log(e);
+		}
 	}
 
 }

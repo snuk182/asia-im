@@ -167,6 +167,10 @@ public class MainProcessor extends AbstractFlapProcessor {
 					service.log(e);
 				}
 				break;
+			case ICQConstants.SNAC_LOCATION_ERROR:
+			case ICQConstants.SNAC_LOCATION_XZRES:
+				service.getServiceResponse().respond(ICQServiceResponse.RES_KEEPALIVE);
+				break;
 			}
 			break;
 		case ICQConstants.SNAC_FAMILY_BUDDYLISTMGMT:
@@ -654,4 +658,31 @@ public class MainProcessor extends AbstractFlapProcessor {
 
 	@Override
 	public void onDisconnect() {}
+
+	public void checkServerConnection() {
+		Flap flap = new Flap();
+		flap.channel = ICQConstants.FLAP_CHANNELL_DATA;
+		
+		Snac data = new Snac();
+		data.serviceId = ICQConstants.SNAC_FAMILY_LOCATION;
+		data.subtypeId = ICQConstants.SNAC_LOCATION_XZREQ;
+		data.requestId = ICQConstants.SNAC_LOCATION_XZREQ;
+		
+		byte[] uidBytes;
+		try {
+			uidBytes = service.getUn().getBytes("ASCII");
+		} catch (UnsupportedEncodingException e) {
+			uidBytes = service.getUn().getBytes();
+		}
+		
+		byte[] allBytes = new byte[uidBytes.length + 1];
+		
+		allBytes[0] = (byte) uidBytes.length;
+		System.arraycopy(uidBytes, 0, allBytes, 1, uidBytes.length);
+		data.plainData = allBytes;
+		
+		flap.data = data;
+		
+		service.getRunnableService().sendToSocket(flap);
+	}
 }

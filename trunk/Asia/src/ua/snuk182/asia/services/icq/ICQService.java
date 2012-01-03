@@ -63,6 +63,9 @@ public class ICQService extends AccountService {
 					return serviceResponse.respond(IAccountServiceResponse.RES_SAVEIMAGEFILE, getServiceId(), args[0], args[1], Base64.encodeBytes((byte[]) args[2]));
 				case ICQServiceResponse.RES_CLUPDATED:
 					return serviceResponse.respond(IAccountServiceResponse.RES_CLUPDATED, getServiceId(), ICQEntityAdapter.ICQBuddyList2Buddylist(ICQService.this, (List<ICQBuddy>) args[0], internal.getUn(), getServiceId()), ICQEntityAdapter.ICQBuddyGroupList2BuddyGroupList((List<ICQBuddyGroup>) args[1], internal.getUn(), getServiceId()));
+				case ICQServiceResponse.RES_KEEPALIVE:
+					resetHeartbeat();
+					break;
 				case ICQServiceResponse.RES_MESSAGE:
 					TextMessage txtmessage = ICQEntityAdapter.icbmMessage2TextMessage((ICBMMessage) args[0], getServiceId());
 					
@@ -115,12 +118,8 @@ public class ICQService extends AccountService {
 					return serviceResponse.respond(IAccountServiceResponse.RES_TYPING, getServiceId(), args[0]);
 				}			
 			
-			}catch(ProtocolException e){
-				try {
-					return serviceResponse.respond(RES_LOG, getServiceId(), e.getLocalizedMessage());
-				} catch (ProtocolException e1) {
-					e1.printStackTrace();
-				}
+			} catch(ProtocolException e){
+				ServiceUtils.log(e);
 			}
 			return null;
 		}
@@ -340,5 +339,14 @@ public class ICQService extends AccountService {
 	@Override
 	protected String getUserID() {
 		return internal.getUn();
+	}
+
+	@Override
+	protected void keepaliveRequest() {
+		try {
+			internal.request(ICQServiceInternal.REQ_KEEPALIVE_CHECK);
+		} catch (ICQException e) {
+			ServiceUtils.log(e);
+		}
 	}
 }
