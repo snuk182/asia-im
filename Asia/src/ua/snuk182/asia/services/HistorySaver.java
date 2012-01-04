@@ -106,21 +106,22 @@ public final class HistorySaver {
 	}
 	
 	public List<TextMessage> getLastHistory(Context context, boolean getAll){
+		List<TextMessage> output = new ArrayList<TextMessage>();		
+		
+		long fileSize = context.getFileStreamPath(buddy.getOwnerAccountId()+" "+buddy.protocolUid+SUFFIX).length();
+		
+		getHistoryInternal(context, output, getAll, fileSize, DEFAULT_SKIP_AMOUNT, (byte) 4);
+		
+		return output;
+	}
+	
+	private void getHistoryInternal(Context context, List<TextMessage> output, boolean getAll, long fileSize, long skipAmount, byte desiredMessageCount) {
 		FileInputStream fis = null;
-		List<TextMessage> output = new ArrayList<TextMessage>();
 		try {
 			fis = context.openFileInput(buddy.getOwnerAccountId()+" "+buddy.protocolUid+SUFFIX);
 		} catch (FileNotFoundException e) {
 		}
 		
-		long fileSize = context.getFileStreamPath(buddy.getOwnerAccountId()+" "+buddy.protocolUid+SUFFIX).length();
-		
-		getHistoryInternal(context, output, fis, getAll, fileSize, DEFAULT_SKIP_AMOUNT, (byte) 4);
-		
-		return output;
-	}
-	
-	private void getHistoryInternal(Context context, List<TextMessage> output, FileInputStream fis, boolean getAll, long fileSize, long skipAmount, byte desiredMessageCount) {
 		if (fis == null || fileSize<8){
 			return;
 		}
@@ -174,8 +175,14 @@ public final class HistorySaver {
 			}
 		}
 		
+		try {
+			fis.close();
+		} catch (IOException e) {
+			ServiceUtils.log(e);
+		}
+		
 		if (output.size() < desiredMessageCount && fileSize>skipAmount){
-			getHistoryInternal(context, output, fis, getAll, fileSize, skipAmount+DEFAULT_SKIP_AMOUNT, desiredMessageCount);
+			getHistoryInternal(context, output, getAll, fileSize, skipAmount+DEFAULT_SKIP_AMOUNT, desiredMessageCount);
 		}
 	}
 	
