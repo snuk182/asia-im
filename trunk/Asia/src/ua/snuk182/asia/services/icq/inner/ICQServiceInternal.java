@@ -203,7 +203,7 @@ public class ICQServiceInternal {
 				try {
 					InputStream is = socket.getInputStream();
 					if (is.available()>0){
-						Thread.sleep(200);
+						Thread.sleep(1000);
 					
 						byte[] head = new byte[6];
 						

@@ -1,5 +1,6 @@
 package ua.snuk182.asia.services.xmpp;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,6 +44,11 @@ import org.jivesoftware.smackx.bytestreams.ibb.provider.CloseIQProvider;
 import org.jivesoftware.smackx.bytestreams.ibb.provider.DataPacketProvider;
 import org.jivesoftware.smackx.bytestreams.ibb.provider.OpenIQProvider;
 import org.jivesoftware.smackx.bytestreams.socks5.provider.BytestreamsProvider;
+import org.jivesoftware.smackx.filetransfer.FileTransfer.Status;
+import org.jivesoftware.smackx.filetransfer.FileTransferListener;
+import org.jivesoftware.smackx.filetransfer.FileTransferManager;
+import org.jivesoftware.smackx.filetransfer.FileTransferRequest;
+import org.jivesoftware.smackx.filetransfer.OutgoingFileTransfer;
 import org.jivesoftware.smackx.muc.Affiliate;
 import org.jivesoftware.smackx.muc.HostedRoom;
 import org.jivesoftware.smackx.muc.InvitationRejectionListener;
@@ -76,6 +82,8 @@ import org.jivesoftware.spark.util.DummySSLSocketFactory;
 import ua.snuk182.asia.R;
 import ua.snuk182.asia.core.dataentity.Buddy;
 import ua.snuk182.asia.core.dataentity.BuddyGroup;
+import ua.snuk182.asia.core.dataentity.FileInfo;
+import ua.snuk182.asia.core.dataentity.FileMessage;
 import ua.snuk182.asia.core.dataentity.MultiChatRoom;
 import ua.snuk182.asia.core.dataentity.MultiChatRoomOccupants;
 import ua.snuk182.asia.core.dataentity.OnlineInfo;
@@ -85,9 +93,10 @@ import ua.snuk182.asia.services.ServiceUtils;
 import ua.snuk182.asia.services.api.AccountService;
 import ua.snuk182.asia.services.api.IAccountServiceResponse;
 import ua.snuk182.asia.services.api.ProtocolException;
+import ua.snuk182.asia.services.icq.inner.ICQServiceResponse;
 import android.content.Context;
 
-public class XMPPService extends AccountService implements ConnectionListener, MessageListener, ChatManagerListener, RosterListener, MessageEventNotificationListener, ChatStateListener {
+public class XMPPService extends AccountService implements ConnectionListener, MessageListener, ChatManagerListener, RosterListener, MessageEventNotificationListener, ChatStateListener, FileTransferListener {
 
 	private static final String LOGIN_PORT = "loginport";
 
@@ -105,34 +114,25 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 
 	final Map<String, Chat> chats = new HashMap<String, Chat>();
 	final Map<String, MultiUserChat> multichats = new HashMap<String, MultiUserChat>();
+	final List<FileTransferRequest> fileTransfers = Collections.synchronizedList(new ArrayList<FileTransferRequest>());
 
 	private volatile boolean isContactListReady = false;
-	
+
 	@SuppressWarnings("unused")
 	private boolean isSecure = false;
-	
+
 	String groupchatService = null;
 
 	private List<OnlineInfo> infos = Collections.synchronizedList(new ArrayList<OnlineInfo>());
 
 	private final DefaultMessageEventRequestListener messageEventListener = new DefaultMessageEventRequestListener();
 	MessageEventManager messageEventManager;
+	FileTransferManager ftm;	
 
 	@Override
 	public void processMessage(Chat chat, final Message message) {
 		final String log = "message " + chat.getParticipant();
 		log(log);
-		/*
-		 * new Thread(log){
-		 * 
-		 * @Override public void run(){ try { TextMessage txtmessage =
-		 * XMPPEntityAdapter.xmppMessage2TextMessage(message, serviceId); if
-		 * (txtmessage.from.equals(getUserID())) { resetHeartbeat(); return; }
-		 * serviceResponse.respond(IAccountServiceResponse.RES_MESSAGE,
-		 * getServiceId(), txtmessage); } catch (ProtocolException e) { log(e);
-		 * } } }.start();
-		 */
-
 		processMessageInternal(message, false);
 	}
 
@@ -225,6 +225,17 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 	@Override
 	public Object request(short action, final Object... args) throws ProtocolException {
 		switch (action) {
+		case AccountService.REQ_SENDFILE:
+			List<File> files = new ArrayList<File>();
+			files.add((File) args[1]);
+
+			sendFile((Buddy) args[0], files);
+			break;
+		case AccountService.REQ_FILERESPOND:
+			fileRespond((FileMessage)args[0], (Boolean)args[1]);
+			break;
+		case AccountService.REQ_FILECANCEL:
+			break;
 		case AccountService.REQ_GETBUDDYINFO:
 			break;
 		case AccountService.REQ_ADDGROUP:
@@ -312,29 +323,82 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 		case AccountService.REQ_JOIN_CHAT_ROOM:
 			return joinChatRoom((String) args[0], (String) args[1], args.length > 2 ? (String) args[2] : null);
 		case AccountService.REQ_CHECK_GROUPCHATS_AVAILABLE:
-			return groupchatService!=null;
+			return groupchatService != null;
 		case AccountService.REQ_LEAVE_CHAT_ROOM:
 			leaveChatRoom((String) args[0]);
 			break;
 		case AccountService.REQ_GET_CHAT_ROOM_OCCUPANTS:
-			return getChatRoomOccupants((String)args[0], (Boolean) args[1]);
+			return getChatRoomOccupants((String) args[0], (Boolean) args[1]);
 		case AccountService.REQ_GETFULLBUDDYINFO:
-			return getFullInfo((String)args[0]);
+			return getFullInfo((String) args[0]);
 		}
 		return null;
 	}
-	
+
+	private void fileRespond(final FileMessage fileMessage, final Boolean accept) {
+		new Thread("File transfer "+fileMessage.messageId){
+			
+			@Override 
+			public void run(){
+				for (FileTransferRequest request : fileTransfers){
+					if (request.hashCode() == fileMessage.messageId){
+						if (accept){
+							request.accept();
+						} else {
+							request.reject();
+						}
+						break;
+					}
+				}
+			}
+		}.start();
+	}
+
+	private void sendFile(final Buddy buddy, final List<File> files) {
+		new Thread("File transfer") {
+
+			@Override
+			public void run() {
+				OutgoingFileTransfer transfer = ftm.createOutgoingFileTransfer(XMPPEntityAdapter.normalizeJID(buddy.protocolUid));
+
+				for (File file : files) {
+					try {
+						transfer.sendFile(file, file.getName());
+					} catch (XMPPException e) {
+						log(e);
+						return;
+					}
+
+					while (!transfer.isDone()) {
+						try {
+							if (transfer.getStatus() == Status.error) {
+								serviceResponse.respond(ICQServiceResponse.RES_FILEPROGRESS, serviceId, files.hashCode(), file.getAbsolutePath(), 100, (long) transfer.getProgress() * 100, false, transfer.getError().getMessage(), buddy.protocolUid);
+							} else {
+								serviceResponse.respond(ICQServiceResponse.RES_FILEPROGRESS, serviceId, files.hashCode(), file.getAbsolutePath(), 100, (long) transfer.getProgress() * 100, false, null, buddy.protocolUid);
+							}
+							Thread.sleep(1000);
+						} catch (InterruptedException e) {
+							log(e);
+						} catch (ProtocolException e) {
+							log(e);
+						}
+					}
+				}
+			}
+		}.start();
+	}
+
 	private PersonalInfo getFullInfo(String uid) throws ProtocolException {
 		PersonalInfo info = new PersonalInfo();
 		info.protocolUid = uid;
-		
-		if (uid.indexOf(groupchatService) > -1){
+
+		if (uid.indexOf(groupchatService) > -1) {
 			try {
 				RoomInfo room = MultiUserChat.getRoomInfo(connection, uid);
 				info.properties.putCharSequence(PersonalInfo.INFO_CHAT_DESCRIPTION, room.getDescription());
-				info.properties.putCharSequence(PersonalInfo.INFO_CHAT_OCCUPANTS, room.getOccupantsCount()+"");
+				info.properties.putCharSequence(PersonalInfo.INFO_CHAT_OCCUPANTS, room.getOccupantsCount() + "");
 				info.properties.putCharSequence(PersonalInfo.INFO_CHAT_SUBJECT, room.getSubject());
-				return info;				
+				return info;
 			} catch (XMPPException e) {
 				throw new ProtocolException(e.getLocalizedMessage());
 			}
@@ -346,10 +410,10 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 				info.properties.putCharSequence(PersonalInfo.INFO_LAST_NAME, card.getLastName());
 				info.properties.putCharSequence(PersonalInfo.INFO_NICK, card.getNickName());
 				info.properties.putCharSequence(PersonalInfo.INFO_EMAIL, card.getEmailHome());
-				
+
 				info.properties.putCharSequence("Organization", card.getOrganization());
 				info.properties.putCharSequence("Work email", card.getEmailWork());
-				
+
 				return info;
 			} catch (XMPPException e) {
 				throw new ProtocolException(e.getLocalizedMessage());
@@ -358,12 +422,12 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 	}
 
 	private MultiChatRoomOccupants getChatRoomOccupants(String chatId, boolean loadOccupantIcons) throws ProtocolException {
-		String roomJid = chatId.indexOf("@")>1 ? chatId : chatId+"@"+groupchatService;
+		String roomJid = chatId.indexOf("@") > 1 ? chatId : chatId + "@" + groupchatService;
 		MultiUserChat muc = multichats.get(roomJid);
-		if (muc == null){
+		if (muc == null) {
 			throw new ProtocolException("No joined chat found");
 		}
-		
+
 		try {
 			return XMPPEntityAdapter.xmppMUCOccupants2mcrOccupants(muc, this, loadOccupantIcons);
 		} catch (XMPPException e) {
@@ -372,42 +436,47 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 	}
 
 	@SuppressWarnings("unused")
-	private boolean amIOwner(MultiUserChat chat) throws XMPPException{
-		for (Affiliate aff: chat.getOwners()){
-			if (XMPPEntityAdapter.normalizeJID(aff.getJid()).equals(getJID())){
+	private boolean amIOwner(MultiUserChat chat) throws XMPPException {
+		for (Affiliate aff : chat.getOwners()) {
+			if (XMPPEntityAdapter.normalizeJID(aff.getJid()).equals(getJID())) {
 				return true;
 			}
 		}
 		return false;
 	}
-	
+
 	private void leaveChatRoom(String chatId) throws ProtocolException {
-		String roomJid = chatId.indexOf("@")>1 ? chatId : chatId+"@"+groupchatService;
+		String roomJid = chatId.indexOf("@") > 1 ? chatId : chatId + "@" + groupchatService;
 		MultiUserChat muc = multichats.get(roomJid);
-		if (muc == null){
+		if (muc == null) {
 			throw new ProtocolException("No joined chat found");
 		}
 		muc.leave();
-		
-		/*if (muc.getParticipants().size() < 2 && amIOwner(muc)){
-		
-		}*/
+
+		/*
+		 * if (muc.getParticipants().size() < 2 && amIOwner(muc)){
+		 * 
+		 * }
+		 */
 	}
 
-	private Buddy joinChatRoom(String chatId, String chatPassword, String nickName) throws ProtocolException{
-		String roomJid = chatId.indexOf("@")>1 ? chatId : chatId+"@"+groupchatService;
+	private Buddy joinChatRoom(String chatId, String chatPassword, String nickName) throws ProtocolException {
+		String roomJid = chatId.indexOf("@") > 1 ? chatId : chatId + "@" + groupchatService;
 		MultiUserChat chat = new MultiUserChat(connection, roomJid);
 		try {
-			/*DiscussionHistory history = new DiscussionHistory();
-			history.setMaxStanzas(5);
-		    chat.join(nickName == null ? un : nickName, chatPassword, history, SmackConfiguration.getPacketReplyTimeout());*/
-			
+			/*
+			 * DiscussionHistory history = new DiscussionHistory();
+			 * history.setMaxStanzas(5); chat.join(nickName == null ? un :
+			 * nickName, chatPassword, history,
+			 * SmackConfiguration.getPacketReplyTimeout());
+			 */
+
 			chat.join(nickName == null ? un : nickName, chatPassword);
-			
+
 			fillWithListeners(chat);
 			multichats.put(chat.getRoom(), chat);
 
-			RoomInfo info = MultiUserChat.getRoomInfo(connection, roomJid);			
+			RoomInfo info = MultiUserChat.getRoomInfo(connection, roomJid);
 			return XMPPEntityAdapter.chatRoomInfo2Buddy(this, info, getJID(), getServiceId(), true);
 		} catch (XMPPException e) {
 			notification(e.getLocalizedMessage());
@@ -417,7 +486,7 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 
 	private Buddy createChatRoom(String chatId, String chatName, String chatPassword, String nickName) throws ProtocolException {
 		try {
-			String roomJid = chatId.indexOf("@")>1 ? chatId : chatId+"@"+groupchatService;
+			String roomJid = chatId.indexOf("@") > 1 ? chatId : chatId + "@" + groupchatService;
 			MultiUserChat chat = new MultiUserChat(connection, roomJid);
 			chat.create(nickName == null ? un : nickName);
 			// TODO more!!!!11
@@ -446,9 +515,9 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 			}
 
 			chat.sendConfigurationForm(submitForm);
-			
+
 			chat.changeSubject(chatName);
-			
+
 			fillWithListeners(chat);
 			multichats.put(chat.getRoom(), chat);
 
@@ -471,24 +540,24 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 				log(e);
 			}
 		}
-		
+
 		for (final Buddy room : multiChatBuddies) {
 			MultiUserChat chat = new MultiUserChat(connection, room.protocolUid);
-			fillWithListeners(chat);			
+			fillWithListeners(chat);
 			multichats.put(room.protocolUid, chat);
-		}		
-		
+		}
+
 		return multiChatBuddies;
 	}
-	
-	private void chatDefaultAction(String chatId, String serviceMessage){
+
+	private void chatDefaultAction(String chatId, String serviceMessage) {
 		try {
 			serviceResponse.respond(IAccountServiceResponse.RES_SERVICEMESSAGE, serviceId, chatId, serviceMessage);
 			serviceResponse.respond(IAccountServiceResponse.RES_CHAT_PARTICIPANTS, serviceId, chatId, getChatRoomOccupants(chatId, false));
 		} catch (ProtocolException e) {
 			log(e);
 		}
-		
+
 	}
 
 	private void fillWithListeners(final MultiUserChat chat) {
@@ -497,130 +566,130 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 			@Override
 			public void processPacket(Packet packet) {
 				Message message = (Message) packet;
-				if (message.getFrom().split("/")[1].equals(chat.getNickname())){
+				if (message.getFrom().split("/")[1].equals(chat.getNickname())) {
 					return;
 				}
 				processMessageInternal(message, true);
 			}
 		});
-		
+
 		chat.addParticipantListener(new PacketListener() {
-			
+
 			@Override
 			public void processPacket(Packet packet) {
 				try {
 					serviceResponse.respond(IAccountServiceResponse.RES_CHAT_PARTICIPANTS, serviceId, getChatRoomOccupants(chat.getRoom(), false));
 				} catch (ProtocolException e) {
 					log(e);
-				}				
+				}
 			}
 		});
-		
+
 		chat.addInvitationRejectionListener(new InvitationRejectionListener() {
-			
+
 			@Override
 			public void invitationDeclined(String invitee, String reason) {
-				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(invitee)+" declined invitation: "+reason);
+				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(invitee) + " declined invitation: " + reason);
 			}
 		});
-		
+
 		chat.addParticipantStatusListener(new ParticipantStatusListener() {
-			
+
 			@Override
 			public void voiceRevoked(String participant) {
-				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant)+" voice revoked");
+				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant) + " voice revoked");
 			}
-			
+
 			@Override
 			public void voiceGranted(String participant) {
-				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant)+" voice granted");
+				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant) + " voice granted");
 			}
-			
+
 			@Override
 			public void ownershipRevoked(String participant) {
-				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant)+" ownership revoked");
+				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant) + " ownership revoked");
 			}
-			
+
 			@Override
 			public void ownershipGranted(String participant) {
-				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant)+" ownership granted");
+				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant) + " ownership granted");
 			}
-			
+
 			@Override
 			public void nicknameChanged(String participant, String newNickname) {
-				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant)+" changed nick to "+newNickname);
+				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant) + " changed nick to " + newNickname);
 			}
-			
+
 			@Override
 			public void moderatorRevoked(String participant) {
-				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant)+" moderator revoked");
+				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant) + " moderator revoked");
 			}
-			
+
 			@Override
 			public void moderatorGranted(String participant) {
-				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant)+" moderator granted");
+				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant) + " moderator granted");
 			}
-			
+
 			@Override
 			public void membershipRevoked(String participant) {
-				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant)+" membership revoked");
+				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant) + " membership revoked");
 			}
-			
+
 			@Override
 			public void membershipGranted(String participant) {
-				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant)+" membership granted");
+				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant) + " membership granted");
 			}
-			
+
 			@Override
 			public void left(String participant) {
-				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant)+" left the chat");
+				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant) + " left the chat");
 			}
-			
+
 			@Override
 			public void kicked(String participant, String actor, String reason) {
-				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant)+" was kicked by "+actor+": "+reason);
+				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant) + " was kicked by " + actor + ": " + reason);
 			}
-			
+
 			@Override
 			public void joined(String participant) {
-				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant)+" joined the chat");
+				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant) + " joined the chat");
 			}
-			
+
 			@Override
 			public void banned(String participant, String actor, String reason) {
-				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant)+" was banned by "+actor+": "+reason);
+				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant) + " was banned by " + actor + ": " + reason);
 			}
-			
+
 			@Override
 			public void adminRevoked(String participant) {
-				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant)+" admin revoked");
+				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant) + " admin revoked");
 			}
-			
+
 			@Override
 			public void adminGranted(String participant) {
-				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant)+" admin granted");
+				chatDefaultAction(chat.getRoom(), StringUtils.parseResource(participant) + " admin granted");
 			}
 		});
-		
+
 		chat.addSubjectUpdatedListener(new SubjectUpdatedListener() {
-			
+
 			@Override
 			public void subjectUpdated(String subject, String from) {
 				try {
-					serviceResponse.respond(IAccountServiceResponse.RES_SERVICEMESSAGE, serviceId, chat.getRoom(), StringUtils.parseResource(from)+" set chat topic to \""+subject+"\"");
+					serviceResponse.respond(IAccountServiceResponse.RES_SERVICEMESSAGE, serviceId, chat.getRoom(), StringUtils.parseResource(from) + " set chat topic to \"" + subject + "\"");
 					serviceResponse.respond(IAccountServiceResponse.RES_BUDDYMODIFIED, getServiceId(), XMPPEntityAdapter.chatInfo2Buddy(XMPPService.this, chat.getRoom(), subject, true));
 				} catch (ProtocolException e) {
 					log(e);
 				}
 			}
 		});
-		
+
 	}
 
 	private void getAvailableChatRooms() throws ProtocolException {
 		try {
 			Collection<String> mucServices = MultiUserChat.getServiceNames(connection);
-			if (mucServices.isEmpty()){
+			if (mucServices.isEmpty()) {
 				throw new ProtocolException(ProtocolException.ERROR_NO_GROUPCHAT_AVAILABLE, "This server does not support group chats");
 			}
 			List<HostedRoom> rooms = new ArrayList<HostedRoom>();
@@ -644,18 +713,18 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 
 	private void sendMessage(TextMessage textMessage) throws XMPPException {
 		MultiUserChat muc = multichats.get(textMessage.to);
-		
-		if (muc != null){
+
+		if (muc != null) {
 			muc.sendMessage(textMessage.text);
 			return;
 		}
-		
+
 		Chat chat = chats.get(textMessage.to);
 		if (chat == null) {
 			chat = connection.getChatManager().createChat(textMessage.to, this);
 			chats.put(textMessage.to, chat);
 		}
-		
+
 		chat.sendMessage(XMPPEntityAdapter.textMessage2XMPPMessage(textMessage, chat.getThreadID(), chat.getParticipant(), Message.Type.chat));
 
 	}
@@ -694,8 +763,8 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 		if (loginHost == null || loginPort < 1 || un == null || pw == null) {
 			throw new ProtocolException("Error: no auth data");
 		}
-		
-		if (serviceName == null){
+
+		if (serviceName == null) {
 			serviceName = loginHost;
 		}
 
@@ -706,8 +775,8 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 			} catch (Exception e) {
 			}
 		}
-		
-		if (args.length > 9){
+
+		if (args.length > 9) {
 			isSecure = true;
 		} else {
 			isSecure = false;
@@ -719,14 +788,14 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 				SmackConfiguration.setPacketReplyTimeout(120000);
 				ConnectionConfiguration config = new ConnectionConfiguration(loginHost, loginPort);
 				String login;
-				if (isGmail()){
+				if (isGmail()) {
 					SASLAuthentication.supportSASLMechanism("PLAIN", 0);
 					config.setSocketFactory(new DummySSLSocketFactory());
 					login = getJID();
 				} else {
 					login = un;
 				}
-				config.setServiceName(serviceName);					
+				config.setServiceName(serviceName);
 				configure(ProviderManager.getInstance());
 				connection = new XMPPConnection(config);
 				try {
@@ -748,7 +817,7 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 					serviceResponse.respond(IAccountServiceResponse.RES_CONNECTING, serviceId, 3);
 					connection.sendPacket(XMPPEntityAdapter.userStatus2XMPPPresence(onlineInfo.userStatus));
 					serviceResponse.respond(IAccountServiceResponse.RES_CONNECTING, serviceId, 5);
-					while(!roster.rosterInitialized){
+					while (!roster.rosterInitialized) {
 						Thread.sleep(500);
 					}
 					List<Buddy> buddies = XMPPEntityAdapter.rosterEntryCollection2BuddyList(XMPPService.this, roster.getEntries());
@@ -773,6 +842,9 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 						messageEventManager.addMessageEventRequestListener(messageEventListener);
 					}
 					messageEventManager.addMessageEventNotificationListener(XMPPService.this);
+					ftm = new FileTransferManager(connection);
+					ftm.addFileTransferListener(XMPPService.this);
+					
 					sendKeepalive();
 				} catch (Exception e) {
 					log(e);
@@ -790,10 +862,10 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 
 	protected void chechGroupChatAvailability() throws XMPPException {
 		Collection<String> mucServices = MultiUserChat.getServiceNames(connection);
-		
-		if (!mucServices.isEmpty()){
+
+		if (!mucServices.isEmpty()) {
 			groupchatService = mucServices.iterator().next();
-		}		
+		}
 	}
 
 	private void respondInfo(VCard card, String jid, PersonalInfo personalInfo) throws ProtocolException {
@@ -860,9 +932,9 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 		try {
 			card.load(connection, jid);
 			log("got card " + jid + " " + card.getNickName() + " " + card.getAvatar());
-			new Thread(){
+			new Thread() {
 				@Override
-				public void run(){
+				public void run() {
 					try {
 						respondInfo(card, jid, new PersonalInfo());
 					} catch (ProtocolException e) {
@@ -1086,8 +1158,8 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 		// SharedGroupsInfo
 		pm.addIQProvider("sharedgroup", "http://www.jivesoftware.org/protocol/sharedgroup", new SharedGroupsInfo.Provider());
 	}
-	
-	private void notification(String text){
+
+	private void notification(String text) {
 		try {
 			serviceResponse.respond(IAccountServiceResponse.RES_NOTIFICATION, getServiceId(), text);
 		} catch (ProtocolException e) {
@@ -1105,6 +1177,26 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 			request(REQ_SENDMESSAGE, msg);
 		} catch (ProtocolException e) {
 			ServiceUtils.log(e);
+		}
+	}
+
+	@Override
+	public void fileTransferRequest(FileTransferRequest request) {
+		log("incoming file "+request.getFileName()+" from "+request.getRequestor());
+		fileTransfers.add(request);	
+		FileMessage fm = new FileMessage(XMPPEntityAdapter.normalizeJID(request.getRequestor()));
+		
+		FileInfo fi = new FileInfo();
+		fi.filename = request.getFileName();
+		fi.size = request.getFileSize();
+		fm.files.add(fi);
+		fm.serviceId = serviceId;
+		fm.messageId = request.hashCode();
+		
+		try {
+			serviceResponse.respond(IAccountServiceResponse.RES_FILEMESSAGE, getServiceId(), fm);
+		} catch (ProtocolException e) {
+			log(e);
 		}
 	}
 }
