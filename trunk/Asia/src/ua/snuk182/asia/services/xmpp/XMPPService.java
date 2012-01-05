@@ -48,6 +48,7 @@ import org.jivesoftware.smackx.filetransfer.FileTransfer.Status;
 import org.jivesoftware.smackx.filetransfer.FileTransferListener;
 import org.jivesoftware.smackx.filetransfer.FileTransferManager;
 import org.jivesoftware.smackx.filetransfer.FileTransferRequest;
+import org.jivesoftware.smackx.filetransfer.IncomingFileTransfer;
 import org.jivesoftware.smackx.filetransfer.OutgoingFileTransfer;
 import org.jivesoftware.smackx.muc.Affiliate;
 import org.jivesoftware.smackx.muc.HostedRoom;
@@ -343,7 +344,22 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 				for (FileTransferRequest request : fileTransfers){
 					if (request.hashCode() == fileMessage.messageId){
 						if (accept){
-							request.accept();
+							IncomingFileTransfer transfer = request.accept();
+							
+							while (!transfer.isDone()) {
+								try {
+									if (transfer.getStatus() == Status.error) {
+										serviceResponse.respond(ICQServiceResponse.RES_FILEPROGRESS, serviceId, request.hashCode(), request.getFileName(), 100, (long) transfer.getProgress() * 100, false, transfer.getError().getMessage(), fileMessage.from);
+									} else {
+										serviceResponse.respond(ICQServiceResponse.RES_FILEPROGRESS, serviceId, request.hashCode(), request.getFileName(), 100, (long) transfer.getProgress() * 100, false, null, fileMessage.from);
+									}
+									Thread.sleep(1000);
+								} catch (InterruptedException e) {
+									log(e);
+								} catch (ProtocolException e) {
+									log(e);
+								}
+							}
 						} else {
 							request.reject();
 						}
