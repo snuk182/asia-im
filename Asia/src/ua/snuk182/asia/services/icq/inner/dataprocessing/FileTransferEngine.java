@@ -80,21 +80,6 @@ public class FileTransferEngine {
 	}
 
 	private void acceptFile(ICBMMessage message) {
-		/*if (message.rvIp.equalsIgnoreCase(message.externalIp)) {
-			connectPeer(message, null);
-		} else {
-			//connectProxy(message, null);
-			try {
-				message.receiverId = message.senderId;
-				message.senderId = service.getUn();			
-				
-				createPeer(message, null);
-			} catch (IOException e) {
-				service.log(e);
-				connectProxy(message, null);
-			}
-		}*/		
-		
 		connectPeer(message, null, true);
 	}
 

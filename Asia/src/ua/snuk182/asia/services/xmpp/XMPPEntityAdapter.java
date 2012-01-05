@@ -110,6 +110,9 @@ public final class XMPPEntityAdapter {
 		
 		info.userStatus = xmppPresence2UserStatus(presence);
 		info.xstatusName = presence.getStatus();
+		if (info.userStatus != Buddy.ST_OFFLINE){
+			info.canFileShare = true;
+		}
 		
 		return info;
 	}
