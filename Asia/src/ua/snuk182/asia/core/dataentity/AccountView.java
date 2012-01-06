@@ -28,6 +28,8 @@ public class AccountView implements Parcelable {
 	public static final byte VIS_TO_ALL = 1;
 	public static final byte VIS_INVISIBLE = 2;
 	
+	public boolean isEnabled = true;
+	
 	public byte serviceId = -1;
 	//private String protocolId;
 	public String protocolName;
@@ -69,6 +71,7 @@ public class AccountView implements Parcelable {
 		dest.writeBundle(options);
 		dest.writeInt(connectionState);
 		dest.writeLong(lastUpdateTime);
+		dest.writeByte((byte) (isEnabled ? 1: 0));
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -90,6 +93,7 @@ public class AccountView implements Parcelable {
 		options = in.readBundle();
 		connectionState = (short) in.readInt();
 		lastUpdateTime = in.readLong();
+		isEnabled = in.readByte() != 0;
 	}
 	
 	public static final Parcelable.Creator<AccountView> CREATOR = new Parcelable.Creator<AccountView>(){

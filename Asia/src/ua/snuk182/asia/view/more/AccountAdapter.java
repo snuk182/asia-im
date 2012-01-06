@@ -48,6 +48,43 @@ public class AccountAdapter extends ArrayAdapter<AccountView> {
 			view.accountTypeImg.setImageDrawable(getContext().getResources().getDrawable(R.drawable.mrim_online_medium));
 		}
 		
+		view.accEnabledCb.setChecked(!Boolean.parseBoolean(account.options.getString(getEntryPoint().getString(R.string.key_disabled))));
+		
+		view.accEnabledCb.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+				
+				int askId = view.accEnabledCb.isChecked() ? R.string.label_this_account_to_be_enabled : R.string.label_this_account_to_be_disabled;
+				builder.setMessage(getContext().getResources().getString(askId)+account.protocolUid+"?")
+				       .setCancelable(false)
+				       .setPositiveButton(getContext().getResources().getString(R.string.label_yes), new DialogInterface.OnClickListener() {
+				           public void onClick(DialogInterface dialog, int id) {
+				        	   String key = getContext().getString(R.string.key_disabled);
+								String value = Boolean.toString(!view.accEnabledCb.isChecked());
+								account.options.putString(key, value);
+								try {
+									getEntryPoint().runtimeService.savePreference(key, value, account!=null ? account.serviceId : -1);
+									getEntryPoint().refreshAccounts();
+								} catch (NullPointerException npe) {	
+									ServiceUtils.log(npe);
+								} catch (RemoteException e) {
+									getEntryPoint().onRemoteCallFailed(e);
+								}
+				           }
+				       })
+				       .setNegativeButton(getContext().getResources().getString(R.string.label_no), new DialogInterface.OnClickListener() {
+				           public void onClick(DialogInterface dialog, int id) {
+				                dialog.cancel();
+				                view.accEnabledCb.setChecked(!view.accEnabledCb.isChecked());
+				           }
+				       });
+				AlertDialog dialog = builder.create();
+				dialog.show();				
+			}
+		});
+		
 		view.editBtn.setOnClickListener(new OnClickListener(){
 
 			@Override

@@ -182,6 +182,7 @@ public final class HistorySaver {
 		}
 		
 		if (output.size() < desiredMessageCount && fileSize>skipAmount){
+			output.clear();
 			getHistoryInternal(context, output, getAll, fileSize, skipAmount+DEFAULT_SKIP_AMOUNT, desiredMessageCount);
 		}
 	}

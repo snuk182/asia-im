@@ -24,7 +24,7 @@ public class AccountManagerView extends ListView implements ITabContent {
 		super(entryPoint);
 		List<AccountView> accounts;
 		try {
-			accounts = entryPoint.runtimeService.getProtocolServices();
+			accounts = entryPoint.runtimeService.getAccounts(true);
 		} catch (NullPointerException npe) {	
 			accounts = new ArrayList<AccountView>(0);
 			ServiceUtils.log(npe);
@@ -48,7 +48,7 @@ public class AccountManagerView extends ListView implements ITabContent {
 			break;
 		case R.id.menuitem_add:
 			try {
-				if (getEntryPoint().runtimeService.getProtocolServices().size() < 126){
+				if (getEntryPoint().runtimeService.getAccounts(true).size() < 126){
 					getEntryPoint().addAccountEditorTab(null);
 					getEntryPoint().mainScreen.removeTabByTag(AccountManagerView.class.getSimpleName());
 				} else {

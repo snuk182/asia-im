@@ -2,6 +2,8 @@
 <resources>
 	<string name="description">TextDescr</string>
 	
+	<string name="key_disabled">PrefAccDisabled</string>	
+	    
 	<string name="value_chat_date_none">dateNone</string>
  	<string name="value_chat_date_time">dateTime</string>
  	<string name="value_chat_date_full">dateFull</string>

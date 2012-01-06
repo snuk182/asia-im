@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 import ua.snuk182.asia.R;
@@ -462,5 +463,25 @@ public final class ServiceUtils {
 		case AccountView.VIS_INVISIBLE:
 			return 4;
 		}
+	}
+
+	public static File createLocalFileForReceiving(String filename, long filesize, long modTime) {
+		File root = Environment.getExternalStorageDirectory();
+		File downloads = new File(root, "Asia");
+		downloads.mkdirs();
+
+		File file = new File(downloads, filename);
+
+		if (file.exists()) {
+			boolean deleted = file.delete();
+			if (!deleted){
+				file = new File(downloads, new Random().nextInt() + "_" + filename);
+			}
+		}
+		if (modTime > 0){
+			file.setLastModified(modTime);
+		}
+		
+		return file;
 	}
 }

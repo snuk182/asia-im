@@ -63,4 +63,5 @@ public interface IMainScreen {
 	void availableChatsList(byte serviceId, List<MultiChatRoom> chats);
 	void chatRoomOccupants(byte serviceId, String chatId, MultiChatRoomOccupants occupants);
 	void serviceMessage(ServiceMessage msg);
+	void refreshAccounts();
 }

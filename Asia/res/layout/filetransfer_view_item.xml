@@ -36,7 +36,7 @@
 			/>
 	<TextView android:id="@+id/title" 
   		android:layout_width="fill_parent" 
-  		android:layout_height="wrap_content" 
+  		android:layout_height="fill_parent" 
   		android:text="File"
   		android:layout_toRightOf="@id/direction_img_left"
   		android:layout_toLeftOf="@id/direction_img_right"
@@ -53,7 +53,7 @@
 			android:layout_toLeftOf="@id/buddy_icon_right"
 			android:layout_toRightOf="@id/buddy_icon_left"
 			android:layout_below="@id/title"
-			android:layout_alignParentBottom="true"
+  			android:layout_alignParentBottom="true"
 			/>
 	
 </RelativeLayout>

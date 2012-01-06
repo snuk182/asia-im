@@ -17,6 +17,9 @@
 	<string name="label_show_participants">Show participants</string>
 	<string name="label_chat_enter_manually">Enter manually</string>
 	
+	<string name="label_this_account_to_be_enabled">"This account to be enabled: "</string>
+	<string name="label_this_account_to_be_disabled">"This account to be disabled: "</string>
+	
 	<string name="label_name">Name</string>
 	
 	<string name="label_view_type">App view type (needs restart)</string>
