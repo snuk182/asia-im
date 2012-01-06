@@ -5,6 +5,9 @@
 	<string name="label_view_type_notabs">Без вкладок</string>
 	<string name="label_view_type_tablet">Планшетный</string>
 
+	<string name="label_this_account_to_be_enabled">"Включаю учетную запись: "</string>
+	<string name="label_this_account_to_be_disabled">"Выключаю учетную запись: "</string>
+	
 	<string name="label_copy_all">Копировать всё</string>
 	<string name="label_personal_info">Персональные данные</string>
 	<string name="label_male">Мужской</string>

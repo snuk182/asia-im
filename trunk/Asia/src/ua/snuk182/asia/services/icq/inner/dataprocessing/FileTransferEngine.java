@@ -1013,22 +1013,7 @@ public class FileTransferEngine {
 		String storageState = Environment.getExternalStorageState();
 		if (storageState.equals(Environment.MEDIA_MOUNTED)) {
 			try {
-				File root = Environment.getExternalStorageDirectory();
-				File downloads = new File(root, "Asia");
-				downloads.mkdirs();
-
-				File file = new File(downloads, filename);
-
-				if (file.exists()) {
-					boolean deleted = file.delete();
-					if (!deleted){
-						file = new File(downloads, new Random().nextInt() + "_" + filename);
-					}
-				}
-				if (modTime > 0){
-					file.setLastModified(modTime);
-				}
-				
+				File file = ServiceUtils.createLocalFileForReceiving(filename, filesize, modTime);
 				FileOutputStream fos = new FileOutputStream(file, true);
 				ExtendedBufferedOutputStream os = new ExtendedBufferedOutputStream(file, fos);
 				return os;

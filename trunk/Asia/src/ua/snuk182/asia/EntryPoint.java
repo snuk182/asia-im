@@ -363,7 +363,7 @@ public class EntryPoint extends ActivityGroup {
     				mainScreen.addTab(TabInfoFactory.recreateTabContent(this, tab), false);    	
     			}
     		} else {
-    			List<AccountView> protocols = runtimeService.getProtocolServices();
+    			List<AccountView> protocols = runtimeService.getAccounts(false);
     			    			
     			if (protocols.size()<1){
     				addAccountEditorTab(null);
@@ -1022,4 +1022,8 @@ public class EntryPoint extends ActivityGroup {
 	}
 		
 	public final Handler threadMsgHandler = new Handler();
+
+	public void refreshAccounts() {
+		mainScreen.refreshAccounts();
+	}
 }

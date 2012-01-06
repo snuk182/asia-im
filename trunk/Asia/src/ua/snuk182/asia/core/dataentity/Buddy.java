@@ -195,6 +195,7 @@ public class Buddy implements Parcelable, Comparable<Buddy> {
 		signonTime = origin.signonTime;
 		visibility = origin.visibility;
 		unread = origin.unread;
+		canFileShare = origin.canFileShare;
 		//capabilities = origin.capabilities;
 		groupId = origin.groupId;
 		iconHash = origin.iconHash;

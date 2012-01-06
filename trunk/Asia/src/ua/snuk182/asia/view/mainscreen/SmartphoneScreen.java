@@ -24,6 +24,7 @@ import ua.snuk182.asia.view.IMainScreen;
 import ua.snuk182.asia.view.cl.ContactList;
 import ua.snuk182.asia.view.conversations.ConversationsView;
 import ua.snuk182.asia.view.groupchats.GroupChatsView;
+import ua.snuk182.asia.view.more.AsiaCoreException;
 import ua.snuk182.asia.view.more.HistoryView;
 import ua.snuk182.asia.view.more.PreferencesView;
 import ua.snuk182.asia.view.more.SearchUsersView;
@@ -565,5 +566,44 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 				((IHasServiceMessages)tab.content).serviceMessageReceived(message);					
 			}
 		}
+	}
+
+	@Override
+	public void refreshAccounts() {
+		try {
+			List<AccountView> accounts = getEntryPoint().runtimeService.getAccounts(false);
+			
+			tabs.clear();
+			
+			for (int i=accounts.size()-1; i>=0; i--) {
+				AccountView account = accounts.get(i);
+				TabInfo info = TabInfoFactory.createContactList(getEntryPoint(), account);
+				tabs.add(0, info);
+			}
+			
+			try {
+	    		setCurrentTab(0);
+	    		getTabWidget().setFocusable(false);
+	    		clearAllTabs();
+	    	} catch (Exception e) {
+				ServiceUtils.log(e);
+			}	
+			
+	    	for (TabInfo info:tabs){
+	    		try {
+	    			addTab(info.tabSpec);
+				} catch (Exception e) {
+					ServiceUtils.log(e);
+				}
+	    	}
+			
+	    	getTabWidget().setFocusable(true);	
+		} catch (NullPointerException npe) {
+			ServiceUtils.log(npe);
+		} catch (RemoteException e){
+			getEntryPoint().onRemoteCallFailed(e);
+		} catch (AsiaCoreException e) {
+			ServiceUtils.log(e);
+		}		
 	}	
 }

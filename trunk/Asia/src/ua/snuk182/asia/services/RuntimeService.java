@@ -176,6 +176,10 @@ public class RuntimeService extends Service {
 		
 		String autoconnect = appOptions.getString(getResources().getString(R.string.key_autoconnect));
 		for (Account a: accounts){
+			if (!a.accountView.isEnabled){
+				continue;
+			}
+			
 			if (a.accountView.getConnectionState() != AccountService.STATE_DISCONNECTED || (autoconnect!=null && autoconnect.indexOf("true") > -1)){
 				try {
 					a.accountView.setConnectionState(AccountService.STATE_CONNECTING);
@@ -376,15 +380,12 @@ public class RuntimeService extends Service {
 					
 				});
 				
-				// account.editBuddy(buddy, true);
-
 				if (!args[1].equals(account.protocolUid) && args[2] != null){
 					final Buddy buddy = account.getBuddyByProtocolUid((String) args[1]);
-					buddy.iconHash = (String) args[2];					
-				}
-				
-				
-				//storage.saveAccount(account);		
+					if (buddy != null){
+						buddy.iconHash = (String) args[2];	
+					}				
+				}				
 				
 				break;
 			case IAccountServiceResponse.RES_SAVEPARAMS:
@@ -945,9 +946,12 @@ public class RuntimeService extends Service {
 		}
 
 		@Override
-		public List<AccountView> getProtocolServices() throws RemoteException {
+		public List<AccountView> getAccounts(boolean disabledToo) throws RemoteException {
 			List<AccountView> views = new ArrayList<AccountView>();
 			for (Account a : accounts) {
+				if (!disabledToo && !a.accountView.isEnabled) {
+					continue;
+				}
 				views.add(a.accountView);
 			}
 			return views;
@@ -1141,6 +1145,11 @@ public class RuntimeService extends Service {
 					} else {
 						removePlayerStateListener(getPlayerStateListener(musicKey), account);
 					}
+				}
+				
+				if (key.endsWith(getResources().getString(R.string.key_disabled))) {
+					account.isEnabled = !Boolean.parseBoolean(value);
+					serviceBinder.disconnect(account.serviceId);
 				}
 			} else {
 				account = null;
@@ -1864,7 +1873,9 @@ public class RuntimeService extends Service {
 						//order of application bar icons is changed in Android 2.3
 						if (Build.VERSION.SDK_INT < 9){
 							for (Account a : accounts) {
-								if (serviceId > -1 && a.accountView.serviceId == serviceId){
+								if (!a.accountView.isEnabled) {
+									notificator.cancel(a.accountView);									
+								} else if (serviceId > -1 && a.accountView.serviceId == serviceId){
 									notificator.notifyAccountChanged(a.accountView, message);
 								} else {
 									notificator.notifyAccountChanged(a.accountView, null);
@@ -1873,7 +1884,9 @@ public class RuntimeService extends Service {
 						} else {
 							for (int i=accounts.size()-1; i>=0; i--) {
 								Account a = accounts.get(i);
-								if (serviceId > -1 && a.accountView.serviceId == serviceId){
+								if (!a.accountView.isEnabled) {
+									notificator.cancel(a.accountView);									
+								} else if (serviceId > -1 && a.accountView.serviceId == serviceId){
 									notificator.notifyAccountChanged(a.accountView, message);
 								} else {
 									notificator.notifyAccountChanged(a.accountView, null);

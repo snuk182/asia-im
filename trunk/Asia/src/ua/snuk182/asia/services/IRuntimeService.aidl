@@ -21,7 +21,7 @@ interface IRuntimeService{
 	void editAccount(in AccountView account);
 	
 	//Bitmap getIcon(String filename);
-	List<AccountView> getProtocolServices();
+	List<AccountView> getAccounts(boolean disabledToo);
 	Buddy getBuddy(byte serviceId, String buddyProtocolUid);
 	List<Buddy> getBuddies(byte serviceId, in List<String> buddyProtocolUid);
 	List<TabInfo> getSavedTabs();

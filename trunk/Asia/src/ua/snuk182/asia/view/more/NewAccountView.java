@@ -50,7 +50,7 @@ public class NewAccountView extends ScrollView implements ITabContent {
 			tag = NewAccountView.class.getSimpleName()+" "+account.serviceId;
 		} else {
 			try {
-				tag = NewAccountView.class.getSimpleName()+" "+entryPoint.runtimeService.getProtocolServices().size();
+				tag = NewAccountView.class.getSimpleName()+" "+entryPoint.runtimeService.getAccounts(true).size();
 			} catch (NullPointerException npe) {	
 				ServiceUtils.log(npe);
 			} catch (RemoteException e) {

@@ -12,6 +12,9 @@
 	<string name="label_autoconnect">Автопідключення</string>
 	<string name="label_message_sound_only">Звук лише для повідомлень</string>
 	
+	<string name="label_this_account_to_be_enabled">"Вмикаю обліковий запис: "</string>
+	<string name="label_this_account_to_be_disabled">"Вимикаю обліковий запис: "</string>
+	
 	<string name="label_manage_visibility">Видимість</string>
 	
 	<string name="label_send_typing">Сповіщати про набір</string>

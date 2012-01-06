@@ -25,6 +25,7 @@ import ua.snuk182.asia.view.IMainScreen;
 import ua.snuk182.asia.view.cl.ContactList;
 import ua.snuk182.asia.view.conversations.ConversationsView;
 import ua.snuk182.asia.view.groupchats.GroupChatsView;
+import ua.snuk182.asia.view.more.AsiaCoreException;
 import ua.snuk182.asia.view.more.HistoryView;
 import ua.snuk182.asia.view.more.PersonalInfoView;
 import ua.snuk182.asia.view.more.PreferencesView;
@@ -766,6 +767,49 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
 			if (tab.content != null && (tab.content instanceof IHasServiceMessages)){
 				((IHasServiceMessages)tab.content).serviceMessageReceived(message);					
 			}
+		}
+	}
+
+	@Override
+	public void refreshAccounts() {
+		try {
+			List<AccountView> accounts = getEntryPoint().runtimeService.getAccounts(false);
+			
+			tabsAccount.clear();
+			tabsChat.clear();
+			
+			tabHostChat.clearAllTabs();
+			addTab(splash, true);	
+			
+			for (int i=accounts.size()-1; i>=0; i--) {
+				AccountView account = accounts.get(i);
+				TabInfo info = TabInfoFactory.createContactList(getEntryPoint(), account);
+				tabsAccount.add(0, info);
+			}
+			
+			try {
+	    		tabHostAccount.setCurrentTab(0);
+	    		tabHostAccount.getTabWidget().setFocusable(false);
+	    		tabHostAccount.clearAllTabs();
+	    	} catch (Exception e) {
+				ServiceUtils.log(e);
+			}	
+			
+	    	for (TabInfo info:tabsAccount){
+	    		try {
+	    			tabHostAccount.addTab(info.tabSpec);
+				} catch (Exception e) {
+					ServiceUtils.log(e);
+				}
+	    	}
+			
+	    	tabHostAccount.getTabWidget().setFocusable(true);	
+		} catch (NullPointerException npe) {
+			ServiceUtils.log(npe);
+		} catch (RemoteException e){
+			getEntryPoint().onRemoteCallFailed(e);
+		} catch (AsiaCoreException e) {
+			ServiceUtils.log(e);
 		}
 	}
 }
