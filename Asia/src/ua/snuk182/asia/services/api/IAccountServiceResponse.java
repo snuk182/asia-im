@@ -40,6 +40,7 @@ public interface IAccountServiceResponse {
 	public static final short RES_AVAILABLE_CHATS = 34;
 	public static final short RES_CHAT_PARTICIPANTS = 35;
 	public static final short RES_SERVICEMESSAGE = 36;
+	public static final short RES_ACCOUNT_ACTIVITY = 37;	
 	
 	public static final String SHARED_PREFERENCES = "ProtocolSharedPrefs";		
 }

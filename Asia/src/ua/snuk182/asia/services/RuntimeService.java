@@ -23,6 +23,7 @@ import ua.snuk182.asia.core.dataentity.Account;
 import ua.snuk182.asia.core.dataentity.AccountView;
 import ua.snuk182.asia.core.dataentity.Buddy;
 import ua.snuk182.asia.core.dataentity.BuddyGroup;
+import ua.snuk182.asia.core.dataentity.FileInfo;
 import ua.snuk182.asia.core.dataentity.FileMessage;
 import ua.snuk182.asia.core.dataentity.MultiChatRoom;
 import ua.snuk182.asia.core.dataentity.MultiChatRoomOccupants;
@@ -272,6 +273,8 @@ public class RuntimeService extends Service {
 			}
 
 			final AccountView account = a.accountView;
+			final boolean storeActivity = Boolean.parseBoolean(account.options.getString(getResources().getString(R.string.key_account_activity_log)));
+			
 			account.updateTime();			
 			switch (action) {
 			/*case IAccountServiceResponse.RES_LOG:
@@ -287,6 +290,9 @@ public class RuntimeService extends Service {
 			case IAccountServiceResponse.RES_TYPING:
 				try {
 					uiCallback.typing(account.serviceId, (String)args[0]);
+					if (storeActivity){
+						ServiceUtils.storeAccountActivity(account, getString(R.string.logparam_typing), args[0]);
+					}
 				} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e2) {
 					ServiceUtils.log(e2);
 				}
@@ -489,6 +495,10 @@ public class RuntimeService extends Service {
 				} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e2) {
 					ServiceUtils.log(e2);
 				}
+				if (storeActivity){
+					String stateName = ServiceUtils.getBuddyStateName(buddy.status, getApplicationContext());
+					ServiceUtils.storeAccountActivity(account, getString(R.string.logparam_buddy_state), buddy, stateName);
+				}
 				break;
 			case IAccountServiceResponse.RES_NOTIFICATION:
 				notificationToast((String)args[0]);		
@@ -499,9 +509,6 @@ public class RuntimeService extends Service {
 				} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e2) {
 					ServiceUtils.log(e2);
 				}
-				
-				
-
 				break;
 			case IAccountServiceResponse.RES_ACCOUNTUPDATED:
 				OnlineInfo nfo = (OnlineInfo) args[0];
@@ -593,6 +600,9 @@ public class RuntimeService extends Service {
 				} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e) {
 					ServiceUtils.log(e);
 				}
+				if (storeActivity){
+					ServiceUtils.storeAccountActivity(account, getString(R.string.logparam_ask_for_auth), buddddy, sm.text);
+				}
 				break;
 			case IAccountServiceResponse.RES_SEARCHRESULT:
 				final ArrayList<PersonalInfo> infos = (ArrayList<PersonalInfo>) args[0];
@@ -679,6 +689,20 @@ public class RuntimeService extends Service {
 				} catch (RemoteException e) {
 					ServiceUtils.log(e);
 				}
+				if (storeActivity){
+					StringBuilder sb = new StringBuilder();
+					for (FileInfo fo : fm.files){
+						sb.append(fo.filename);
+						sb.append(':');
+						sb.append(fo.size);
+						sb.append(" bytes");
+						sb.append("\n");
+					}
+					ServiceUtils.storeAccountActivity(account, getString(R.string.logparam_file_request), bud, sb);
+				}				
+				break;
+			case IAccountServiceResponse.RES_ACCOUNT_ACTIVITY:
+				ServiceUtils.storeAccountActivity(account, getString(R.string.logparam_default), args[0]);
 				break;
 			case IAccountServiceResponse.RES_FILEPROGRESS:
 				String statusbarNotification = appOptions.getString(getApplicationContext().getResources().getString(R.string.key_statusbar_type));

@@ -116,6 +116,8 @@ public class ICQService extends AccountService {
 					return serviceResponse.respond(IAccountServiceResponse.RES_MESSAGEACK, getServiceId(), args[0], args[1], args[2]);
 				case ICQServiceResponse.RES_TYPING:
 					return serviceResponse.respond(IAccountServiceResponse.RES_TYPING, getServiceId(), args[0]);
+				case ICQServiceResponse.RES_ACCOUNT_ACTIVITY:
+					return serviceResponse.respond(IAccountServiceResponse.RES_ACCOUNT_ACTIVITY, getServiceId(), args[0]);
 				}			
 			
 			} catch(ProtocolException e){

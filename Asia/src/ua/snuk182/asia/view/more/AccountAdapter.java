@@ -67,6 +67,7 @@ public class AccountAdapter extends ArrayAdapter<AccountView> {
 								try {
 									getEntryPoint().runtimeService.savePreference(key, value, account!=null ? account.serviceId : -1);
 									getEntryPoint().refreshAccounts();
+									getEntryPoint().addAccountsManagerTab();
 								} catch (NullPointerException npe) {	
 									ServiceUtils.log(npe);
 								} catch (RemoteException e) {

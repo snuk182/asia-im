@@ -27,6 +27,7 @@
 	<string name="label_androidmusic_playing_to_status">"Зараз грає..." з Музичного програвача</string>	
 	
 	<string name="label_dont_draw_smileys">Не малювати смайли</string>
+	<string name="label_account_activity_log">Журнал активності</string>
 	
 	<string name="label_size_big">Великий</string>
 	<string name="label_size_medium">Середній</string>
@@ -240,4 +241,10 @@
 	<string name="label_get_available_chats">Отримати доступні чати</string>
 	<string name="label_chat_options">Опції чату</string>
 	<string name="label_chat_enter_manually">Ввести вручну</string>
+	
+	<string name="logparam_typing">"%s пише вам"</string>
+	<string name="logparam_buddy_state">"%s змінив статус на $s"</string>
+	<string name="logparam_ask_for_auth">"%s питає про авторизацію: $s"</string>
+	<string name="logparam_file_request">"%s надсилає файл: $s"</string>
+	<string name="logparam_default">"$s"</string>
 </resources>
