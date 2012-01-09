@@ -36,6 +36,7 @@ public interface ICQServiceResponse {
 	public static final short RES_MESSAGEACK = 29;
 	public static final short RES_TYPING = 30;
 	
-	public static final short RES_KEEPALIVE = 31;	
+	public static final short RES_KEEPALIVE = 31;
+	public static final short RES_ACCOUNT_ACTIVITY = 32;	
 	
 }

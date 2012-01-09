@@ -25,6 +25,7 @@
 	<string name="label_androidmusic_playing_to_status">"Сейчас играет..." из Музыкального проигрывателя</string>
 	
 	<string name="label_export">Экспорт на карту памяти"</string>
+	<string name="label_account_activity_log">Журнал активности</string>
 	
 	<string name="label_blink_led">Мигать индикатором при новом сообщении</string>
 	
@@ -240,4 +241,10 @@
 	<string name="label_get_available_chats">Получить доступные чаты</string>
 	<string name="label_chat_options">Опции чата</string>
 	<string name="label_chat_enter_manually">Ввести вручную</string>
+	
+	<string name="logparam_typing">"%s пишет вам"</string>
+	<string name="logparam_buddy_state">"%s сменил статус на $s"</string>
+	<string name="logparam_ask_for_auth">"%s просит авторизацию: $s"</string>
+	<string name="logparam_file_request">"%s отправляет вам файл: $s"</string>
+	<string name="logparam_default">"$s"</string>
 </resources>

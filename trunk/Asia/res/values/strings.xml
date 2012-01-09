@@ -21,6 +21,7 @@
 	<string name="label_this_account_to_be_disabled">"This account to be disabled: "</string>
 	
 	<string name="label_name">Name</string>
+	<string name="label_account_activity_log">Account activity log</string>
 	
 	<string name="label_view_type">App view type (needs restart)</string>
 	<string name="label_view_type_plain">Plain</string>
@@ -247,4 +248,10 @@
 	<string name="menu_value_delete_group">"Delete group"</string>
 	<string name="menu_value_join_chat">Join chat</string>
 	<string name="menu_value_leave_chat">Leave chat</string>
+	
+	<string name="logparam_typing">"%s is typing to you"</string>
+	<string name="logparam_buddy_state">"%s went $s"</string>
+	<string name="logparam_ask_for_auth">"%s asks for authorization: $s"</string>
+	<string name="logparam_file_request">"%s sends you files: $s"</string>
+	<string name="logparam_default">"$s"</string>
 </resources>

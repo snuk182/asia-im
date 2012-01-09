@@ -78,7 +78,7 @@ public class Buddy implements Parcelable, Comparable<Buddy> {
 	
 	@Override
 	public String toString(){
-		return name+": "+protocolUid;
+		return getName()+" ("+protocolUid+")";
 	}
 	
 	@Override

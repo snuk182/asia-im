@@ -18,4 +18,7 @@
   	<CheckBoxPreference android:title="@string/label_poweramp_playing_to_status" android:key="@string/key_poweramp_playing_to_status" android:defaultValue="false"/>
   	<CheckBoxPreference android:title="@string/label_androidmusic_playing_to_status" android:key="@string/key_androidmusic_playing_to_status" android:defaultValue="false"/>
   </PreferenceCategory>
+   <PreferenceCategory android:title="@string/label_misc_prefs" >
+   	<CheckBoxPreference android:persistent="false" android:title="@string/label_account_activity_log" android:key="@string/key_account_activity_log" android:defaultValue="false"/>  	
+   </PreferenceCategory>
 </PreferenceScreen>
