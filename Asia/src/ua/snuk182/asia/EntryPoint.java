@@ -25,6 +25,7 @@ import ua.snuk182.asia.view.conversations.ConversationsView;
 import ua.snuk182.asia.view.groupchats.GroupChatsView;
 import ua.snuk182.asia.view.mainscreen.SmartphoneScreen;
 import ua.snuk182.asia.view.mainscreen.TabletScreen;
+import ua.snuk182.asia.view.more.AccountActivityView;
 import ua.snuk182.asia.view.more.AccountManagerView;
 import ua.snuk182.asia.view.more.AsiaCoreException;
 import ua.snuk182.asia.view.more.HistoryView;
@@ -424,6 +425,21 @@ public class EntryPoint extends ActivityGroup {
 		} catch (RemoteException e) {
 			onRemoteCallFailed(e);
 		}    	
+    }
+    
+    public void addAccountActivityTab(AccountView account) {
+    	String tag = AccountActivityView.class.getSimpleName()+" "+account.getAccountId();
+    	
+    	if (mainScreen.checkAndSetCurrentTabByTag(tag)){
+    		return;
+    	}
+    	
+    	try {
+    		TabInfo info = TabInfoFactory.createAccountActivityTab(this, account);
+			mainScreen.addTab(info, true);
+    	} catch (NullPointerException npe) {	
+			ServiceUtils.log(npe);
+		} 
     }
     
     public void addHistoryTab(Buddy buddy){

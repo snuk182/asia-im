@@ -1,11 +1,19 @@
 package ua.snuk182.asia.services;
 
+import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
@@ -26,6 +34,8 @@ import android.util.Log;
 
 public final class ServiceUtils {
 
+	final static DateFormat DATE_FORMATTER = new SimpleDateFormat("dd/MM/yy HH:mm:ss");	
+	
 	public static final Set<String> GROUPCHAT_PREFERENCE_MAP;
 	public static boolean logToFile = false;
 
@@ -509,11 +519,49 @@ public final class ServiceUtils {
 
 			String string = String.format(format, object);
 
-			fos.write(new String(new Date() + " --> " + string + "\n").getBytes());
+			fos.write(new String(DATE_FORMATTER.format(new Date()) + " --> " + string + "\n").getBytes());
 			fos.close();
 		} catch (IOException e) {
 			log(e, account);
 		}
+	}
+	
+	public static synchronized List<ServiceMessage> getAccountActivity(AccountView account) {
+		File root = Environment.getExternalStorageDirectory();
+		File downloads = new File(root, "Asia");
+		downloads.mkdirs();
+		File file;
+		if (account != null) {
+			file = new File(downloads, "Activity " + account.getAccountId() + ".log");
+		} else {
+			file = new File(downloads, "Activity.log");
+		}
+
+		List<ServiceMessage> messages = new LinkedList<ServiceMessage>();
+		
+		if (!file.exists()){
+			return messages;
+		}
+		
+		try {
+			FileInputStream fis = new FileInputStream(file);
+			
+			String strLine = "";
+			BufferedReader br = new BufferedReader(new InputStreamReader(new DataInputStream(fis)));
+			
+			while ((strLine = br.readLine()) != null){
+				 ServiceMessage msg = new ServiceMessage(account.getAccountId());
+				 msg.serviceId = account.serviceId;
+				 msg.text = strLine;
+				 messages.add(msg);
+			 }
+			
+			fis.close();
+		} catch (IOException e) {	
+			log(e, account);
+		}
+		
+		return messages;
 	}
 
 	public static final String getBuddyStateName(byte status, Context ctx) {
@@ -546,4 +594,8 @@ public final class ServiceUtils {
 			return ctx.getString(R.string.label_st_offline);
 		}
 	}
+
+	static final int DEFAULT_SKIP_AMOUNT = 1500;
+
+	
 }

@@ -16,6 +16,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import ua.snuk182.asia.R;
 import ua.snuk182.asia.core.dataentity.Account;
 import ua.snuk182.asia.core.dataentity.AccountView;
 import ua.snuk182.asia.core.dataentity.Buddy;
@@ -412,6 +413,9 @@ public final class ServiceStoredPreferences {
 		Map<String, ?> map = soptions.getAll();
 		for (String key : map.keySet()) {
 			bbu.putString(key, (String) map.get(key));
+			if (key.endsWith(context.getResources().getString(R.string.key_disabled))) {
+				account.isEnabled = !Boolean.parseBoolean((String) map.get(key));
+			}
 		}
 		return bbu;
 	}

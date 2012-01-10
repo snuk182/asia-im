@@ -10,6 +10,7 @@ import ua.snuk182.asia.core.dataentity.TabInfo;
 import ua.snuk182.asia.view.cl.ContactList;
 import ua.snuk182.asia.view.conversations.ConversationsView;
 import ua.snuk182.asia.view.groupchats.GroupChatsView;
+import ua.snuk182.asia.view.more.AccountActivityView;
 import ua.snuk182.asia.view.more.AccountManagerView;
 import ua.snuk182.asia.view.more.AsiaCoreException;
 import ua.snuk182.asia.view.more.FileTransferView;
@@ -185,6 +186,14 @@ public final class TabInfoFactory {
 		PersonalInfoView infoView = new PersonalInfoView(entryPoint, buddy, info);
 		String tag = PersonalInfoView.class.getSimpleName() + " " + buddy.serviceId + " " + buddy.protocolUid;
 		TabInfo tab = new TabInfo(tag, infoView, entryPoint.mainScreen.getChatsTabHost());
+
+		return tab;
+	}
+	
+	public static final TabInfo createAccountActivityTab(EntryPoint entryPoint, AccountView account) {
+		AccountActivityView acView = new AccountActivityView(entryPoint, account);
+		String tag = AccountActivityView.class.getSimpleName() + " " + account.getAccountId();
+		TabInfo tab = new TabInfo(tag, acView, entryPoint.mainScreen.getChatsTabHost());
 
 		return tab;
 	}

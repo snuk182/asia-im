@@ -249,9 +249,9 @@
 	<string name="menu_value_join_chat">Join chat</string>
 	<string name="menu_value_leave_chat">Leave chat</string>
 	
-	<string name="logparam_typing">"%s is typing to you"</string>
-	<string name="logparam_buddy_state">"%s went $s"</string>
-	<string name="logparam_ask_for_auth">"%s asks for authorization: $s"</string>
-	<string name="logparam_file_request">"%s sends you files: $s"</string>
-	<string name="logparam_default">"$s"</string>
+	<string name="logparam_typing" formatted="false">"%s is typing to you"</string>
+	<string name="logparam_buddy_state" formatted="false">"%s went %s"</string>
+	<string name="logparam_ask_for_auth" formatted="false">"%s asks for authorization: %s"</string>
+	<string name="logparam_file_request" formatted="false">"%s sends you files: %s"</string>
+	<string name="logparam_default" formatted="false">"%s"</string>
 </resources>

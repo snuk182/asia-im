@@ -242,9 +242,9 @@
 	<string name="label_chat_options">Опции чата</string>
 	<string name="label_chat_enter_manually">Ввести вручную</string>
 	
-	<string name="logparam_typing">"%s пишет вам"</string>
-	<string name="logparam_buddy_state">"%s сменил статус на $s"</string>
-	<string name="logparam_ask_for_auth">"%s просит авторизацию: $s"</string>
-	<string name="logparam_file_request">"%s отправляет вам файл: $s"</string>
-	<string name="logparam_default">"$s"</string>
+	<string name="logparam_typing" formatted="false">"%s пишет вам"</string>
+	<string name="logparam_buddy_state" formatted="false">"%s сменил статус на %s"</string>
+	<string name="logparam_ask_for_auth" formatted="false">"%s просит авторизацию: %s"</string>
+	<string name="logparam_file_request" formatted="false">"%s отправляет вам файл: %s"</string>
+	<string name="logparam_default" formatted="false">"%s"</string>
 </resources>

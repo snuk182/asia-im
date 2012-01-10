@@ -563,7 +563,7 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 		for (int i=0; i<tabs.size(); i++){
 			TabInfo tab = tabs.get(i);
 			if (tab.content != null && (tab.content instanceof IHasServiceMessages)){
-				((IHasServiceMessages)tab.content).serviceMessageReceived(message);					
+				((IHasServiceMessages)tab.content).serviceMessageReceived(message, i==getCurrentTab());					
 			}
 		}
 	}

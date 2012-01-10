@@ -200,6 +200,12 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 			} 
 		}
 		
+		MenuItem accountLogItem = menu.findItem(R.id.menuitem_account_log);
+		if (accountLogItem != null){
+			boolean logEnabled = Boolean.parseBoolean(account.options.getString(getResources().getString(R.string.key_account_activity_log)));
+			accountLogItem.setVisible(logEnabled);
+		}
+		
 		MenuItem editStatusItem = menu.findItem(R.id.menuitem_editstatus);
 		editStatusItem.setIcon(ServiceUtils.getStatusResIdByAccountMedium(getContext(), account, true));
 		
@@ -267,6 +273,9 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 	    		}
 	    	}.start();   	
 	    	return true;
+	    case R.id.menuitem_account_log:
+	    	getEntryPoint().addAccountActivityTab(account);
+	    	break;
 	    case R.id.menuitem_editstatus:
 	    	ViewUtils.menuEditStatus(getEntryPoint(), account);
 	    	return true;

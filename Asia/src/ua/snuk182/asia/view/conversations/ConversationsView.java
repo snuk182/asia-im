@@ -190,7 +190,7 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 		
 		@Override
 		public void run() {
-			scroller.scrollBy(0, getEntryPoint().metrics.heightPixels);			
+			scroller.scrollBy(0, 4*getEntryPoint().metrics.heightPixels);			
 		}
 	};
 	private final Runnable bitmapGot = new Runnable(){
@@ -964,8 +964,8 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 	public void configChanged() {}
 
 	@Override
-	public void serviceMessageReceived(ServiceMessage message) {
-		if (message.serviceId == getServiceId() && buddy.visibility == Buddy.VIS_GROUPCHAT){
+	public void serviceMessageReceived(ServiceMessage message, boolean tabActive) {
+		if (message.serviceId == getServiceId() && message.from.equals(buddy.protocolUid) && buddy.visibility == Buddy.VIS_GROUPCHAT){
 			historyView.addView(getListItem(message));
 			scroller.post(scrollToEnd);	
 		}

@@ -13,6 +13,8 @@
 		android:title="@string/label_account_settings" />
 	<item android:id="@+id/menuitem_prefs" android:icon="@drawable/preferences"
 		android:title="@string/label_preferences" />
+	<item android:id="@+id/menuitem_account_log" android:icon="@android:drawable/ic_menu_agenda"
+		android:title="@string/label_account_activity_log" />
 	<item android:id="@+id/menuitem_accounts" android:icon="@drawable/accounts"
 		android:title="@string/label_manage_accounts" />
 	<item android:id="@+id/menuitem_about" android:icon="@android:drawable/ic_menu_info_details"
