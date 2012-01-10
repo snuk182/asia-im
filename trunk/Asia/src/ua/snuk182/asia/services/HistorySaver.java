@@ -10,8 +10,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,14 +19,11 @@ import android.content.Context;
 import android.os.Environment;
 
 public final class HistorySaver {
-	private static final int DEFAULT_SKIP_AMOUNT = 1500;
 	private static final String MARK_IN = ">->";
 	private static final String MARK_OUT = "<-<";
 	
 	private static final String SUFFIX = ".history";
 	private static final String RECORD_DIVIDER = "--------------------------------------";
-	
-	private final static DateFormat formatter = new SimpleDateFormat("dd/MM/yy HH:mm:ss");	
 	
 	private Buddy buddy;
 	
@@ -49,14 +44,14 @@ public final class HistorySaver {
 		
 		bu.append(" (");
 		
-		bu.append(formatter.format(message.time));
+		bu.append(ServiceUtils.DATE_FORMATTER.format(message.time));
 		bu.append("): ");
 		bu.append(message.text);
 		
 		message.text = bu.toString();
 		
 		return message;
-	}
+	}	
 	
 	public boolean deleteHistory(Context context){
 		return context.deleteFile(buddy.getOwnerAccountId()+" "+buddy.protocolUid+SUFFIX);
@@ -110,7 +105,7 @@ public final class HistorySaver {
 		
 		long fileSize = context.getFileStreamPath(buddy.getOwnerAccountId()+" "+buddy.protocolUid+SUFFIX).length();
 		
-		getHistoryInternal(context, output, getAll, fileSize, DEFAULT_SKIP_AMOUNT, (byte) 4);
+		getHistoryInternal(context, output, getAll, fileSize, ServiceUtils.DEFAULT_SKIP_AMOUNT, (byte) 4);
 		
 		return output;
 	}
@@ -139,6 +134,7 @@ public final class HistorySaver {
 		try {
 			 while ((strLine = br.readLine()) != null){
 				 sb.append(strLine);
+				 sb.append("\n");
 			 }
 		} catch (IOException e) {	
 			e.printStackTrace();
@@ -183,7 +179,7 @@ public final class HistorySaver {
 		
 		if (output.size() < desiredMessageCount && fileSize>skipAmount){
 			output.clear();
-			getHistoryInternal(context, output, getAll, fileSize, skipAmount+DEFAULT_SKIP_AMOUNT, desiredMessageCount);
+			getHistoryInternal(context, output, getAll, fileSize, skipAmount+ServiceUtils.DEFAULT_SKIP_AMOUNT, desiredMessageCount);
 		}
 	}
 	

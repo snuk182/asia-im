@@ -43,7 +43,7 @@ public class PersonalInfoView extends ScrollView implements ITabContent{
 
 	public PersonalInfoView(EntryPoint context, Buddy buddy, PersonalInfo info) {
 		super(context);
-		layout = new LinearLayout(getContext());
+		layout = new LinearLayout(context);
 		
 		this.buddy = buddy;
 		this.info = info;

@@ -4,5 +4,5 @@ import ua.snuk182.asia.core.dataentity.ServiceMessage;
 
 public interface IHasServiceMessages {
 
-	public void serviceMessageReceived(ServiceMessage msg);
+	public void serviceMessageReceived(ServiceMessage msg, boolean tabActive);
 }
