@@ -1,5 +1,6 @@
 package ua.snuk182.asia.services.mrim.inner;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -81,6 +82,7 @@ public final class MrimServiceInternal {
 	private final MrimOnlineInfo onlineInfo = new MrimOnlineInfo(); 
 	public String lastConnectionError = null;
 	private long pingFrequency = 120;
+	private FileTransferEngine fileTransferEngine;
 	
 	public MrimServiceInternal(){
 		onlineInfo.status = MrimConstants.STATUS_ONLINE;
@@ -337,6 +339,7 @@ public final class MrimServiceInternal {
 		return serviceResponse;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public Object request(short action, final Object... args) throws MrimException {
 		switch(action){
 		case REQ_CONNECT:
@@ -383,8 +386,30 @@ public final class MrimServiceInternal {
 		case REQ_SENDTYPING:
 			processor.sendTyping((String)args[0]);
 			break;
+		case REQ_SENDFILE:
+			final String buddyMrid = (String) args[0];
+			final List<File> files = (List<File>) args[1];
+			
+			byte[] internalIp;
+			
+			if (args.length > 2){
+				internalIp = (byte[]) args[2];
+			} else {
+				internalIp = new byte[]{127,0,0,1};
+			}
+			
+			getFileTransferEngine().sendFiles(buddyMrid, files, internalIp);
+			break;
 		}
 		return null;
+	}
+
+	public FileTransferEngine getFileTransferEngine() {
+		if (fileTransferEngine == null){
+			fileTransferEngine = new FileTransferEngine(this);
+		}
+		
+		return fileTransferEngine;
 	}
 
 	public String getLoginHost() {
@@ -439,5 +464,9 @@ public final class MrimServiceInternal {
 
 	public MrimOnlineInfo getOnlineInfo() {
 		return onlineInfo;
+	}
+
+	public void askForWebAuthKey() {
+		processor.askForWebAuthKey();
 	}
 }

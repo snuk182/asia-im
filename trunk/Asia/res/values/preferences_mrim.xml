@@ -5,12 +5,14 @@
 		<item>password</item>
 		<item>loginhost</item>
 		<item>loginport</item>
+		<item>pingtimeout</item>
 	</string-array>
 	<string-array name="mrim_preference_defaults">
 		<item></item>
 		<item></item>
 		<item>mrim.mail.ru</item>
 		<item>2042</item>
+		<item>200</item>
 	</string-array>
 	
 	<string-array name="mrim_contact_menu_names">

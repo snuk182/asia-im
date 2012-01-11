@@ -8,6 +8,7 @@
 		<item>Password</item>
 		<item>Service host</item>
 		<item>Service port</item>
+		<item>Ping timeout (seconds)</item>
 	</string-array>
 	
 	<string-array name="mrim_xstatus_descr">	

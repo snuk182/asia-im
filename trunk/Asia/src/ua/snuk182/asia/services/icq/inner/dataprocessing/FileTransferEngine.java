@@ -38,6 +38,9 @@ import ua.snuk182.asia.services.icq.inner.dataentity.Snac;
 import ua.snuk182.asia.services.icq.inner.dataentity.TLV;
 import android.os.Environment;
 
+/*
+ * it's strongly recommended not even breathe here, unless you're absolutely absolutely sure about what you gonna do...
+ */
 public class FileTransferEngine {
 	
 	private static final int SERVER_SOCKET_TIMEOUT = 600000;
@@ -112,7 +115,7 @@ public class FileTransferEngine {
 		Socket socket;
 		try {
 			socket = new Socket();
-			socket.connect(new InetSocketAddress(InetAddress.getByAddress(ProtocolUtils.ipString2ByteBE(message.rvIp)), message.externalPort), 4000);
+			socket.connect(new InetSocketAddress(InetAddress.getByAddress(ProtocolUtils.ipString2ByteBE(message.rvIp)), message.externalPort), 10000);
 		} catch (UnknownHostException e) {
 			service.log(e);
 			socket = null;
@@ -1412,7 +1415,7 @@ public class FileTransferEngine {
 		removeMessageByMessageId(messageId);		
 	}
 	
-	protected class NotificationData {
+	private class NotificationData {
 		
 		public byte[] messageId;
 		public String filePath;

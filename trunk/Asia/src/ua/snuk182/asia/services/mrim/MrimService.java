@@ -2,12 +2,12 @@ package ua.snuk182.asia.services.mrim;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import ua.snuk182.asia.R;
 import ua.snuk182.asia.core.dataentity.Buddy;
+import ua.snuk182.asia.core.dataentity.FileMessage;
 import ua.snuk182.asia.core.dataentity.TextMessage;
 import ua.snuk182.asia.services.ServiceUtils;
 import ua.snuk182.asia.services.api.AccountService;
@@ -19,6 +19,7 @@ import ua.snuk182.asia.services.mrim.inner.MrimException;
 import ua.snuk182.asia.services.mrim.inner.MrimServiceInternal;
 import ua.snuk182.asia.services.mrim.inner.MrimServiceResponse;
 import ua.snuk182.asia.services.mrim.inner.dataentity.MrimBuddy;
+import ua.snuk182.asia.services.mrim.inner.dataentity.MrimFileTransfer;
 import ua.snuk182.asia.services.mrim.inner.dataentity.MrimGroup;
 import ua.snuk182.asia.services.mrim.inner.dataentity.MrimMessage;
 import ua.snuk182.asia.services.mrim.inner.dataentity.MrimOnlineInfo;
@@ -105,15 +106,15 @@ public class MrimService extends AccountService {
 				break;
 			/*case AccountService.REQ_REMOVEGROUP:
 				internal.request(MrimServiceInternal.REQ_REMOVEGROUP, MrimEntityAdapter.buddyGroup2MrimBuddyGroup((BuddyGroup) args[0]));
-				break;
+				break;*/
 			case AccountService.REQ_FILERESPOND:
 				internal.request(MrimServiceInternal.REQ_FILERESPOND, ((FileMessage)args[0]).messageId, args[1], args[2]);
-				break;*/
+				break;
 			case AccountService.REQ_SENDFILE:
 				List<File> files = new ArrayList<File>();
 				files.add((File) args[1]);
 				
-				//return ProtocolUtils.bytes2LongBE((byte[]) internal.request(MrimServiceInternal.REQ_SENDFILE, MrimEntityAdapter.buddy2MrimBuddy((Buddy) args[0]), files, args[2]), 0);
+				return ProtocolUtils.bytes2LongBE((byte[]) internal.request(MrimServiceInternal.REQ_SENDFILE, ((Buddy) args[0]).protocolUid, files, args[2]), 0);
 			case AccountService.REQ_FILECANCEL:
 				internal.request(MrimServiceInternal.REQ_FILECANCEL, args[0]);
 				break;
@@ -135,6 +136,9 @@ public class MrimService extends AccountService {
 		public Object respond(short action, Object... args) {
 			try{
 				switch (action) {
+				case MrimServiceResponse.RES_KEEPALIVE:
+					resetHeartbeat();
+					break;
 				case MrimServiceResponse.RES_LOG:
 					ServiceUtils.log((String)args[0]);
 					break;
@@ -158,10 +162,10 @@ public class MrimService extends AccountService {
 				case MrimServiceResponse.RES_MESSAGE:
 					TextMessage txtmessage = MrimEntityAdapter.mrimMessage2TextMessage((MrimMessage) args[0], getServiceId());
 					
-					if (txtmessage.from.equals(getUserID())) {
+					/*if (txtmessage.from.equals(getUserID())) {
 						resetHeartbeat();
 						return null;
-					}
+					}*/
 					
 					txtmessage.to = internal.getMrid()+" "+getServiceName();
 					return serviceResponse.respond(IAccountServiceResponse.RES_MESSAGE, getServiceId(), txtmessage);
@@ -171,7 +175,7 @@ public class MrimService extends AccountService {
 					return serviceResponse.respond(IAccountServiceResponse.RES_CONNECTING, getServiceId(), args[0]);
 					
 				case MrimServiceResponse.RES_FILEMESSAGE:
-					//return serviceResponse.respond(IAccountServiceResponse.RES_FILEMESSAGE, getServiceId(), MrimEntityAdapter.icbmMessage2FileMessage((ICBMMessage)args[0], getServiceId()));
+					return serviceResponse.respond(IAccountServiceResponse.RES_FILEMESSAGE, getServiceId(), MrimEntityAdapter.mrimFileTransferMessage2FileMessage((MrimFileTransfer)args[0], getServiceId()));
 				case MrimServiceResponse.RES_NOTIFICATION:
 					if (args.length > 1){
 						return serviceResponse.respond(IAccountServiceResponse.RES_NOTIFICATION, getServiceId(), args[0], args[1]);
@@ -230,12 +234,13 @@ public class MrimService extends AccountService {
 		String host = sharedPreferences.get(LOGIN_HOST);
 		String port = sharedPreferences.get(LOGIN_PORT);
 
-		/*String ping = sharedPreferences.get(AccountService.PING_TIMEOUT);
-		if (ping != null){
+		String ping = sharedPreferences.get(AccountService.PING_TIMEOUT);
+		if (ping != null) {
 			try {
 				pingTimeout = Integer.parseInt(ping);
-			} catch (Exception e) {}
-		}*/
+			} catch (Exception e) {
+			}
+		}
 		
 		if (un==null || pw==null){
 			throw new ProtocolException("Error: no auth data");
@@ -258,7 +263,7 @@ public class MrimService extends AccountService {
 		options.put(PASSWORD, null);
 		options.put(LOGIN_HOST, null);
 		options.put(LOGIN_PORT, null + "");
-		pingTimeout = 0;
+		options.put(PING_TIMEOUT, pingTimeout + "");		
 	}
 
 	public MrimService(Context context) {
@@ -301,8 +306,6 @@ public class MrimService extends AccountService {
 		return R.array.mrim_preference_strings;
 	}
 	
-	
-
 	@Override
 	protected void timeoutDisconnect() {
 		internal.getRunnableService().disconnect();		
@@ -310,7 +313,9 @@ public class MrimService extends AccountService {
 
 	@Override
 	protected void keepaliveRequest() {
-		TextMessage msg = new TextMessage(getUserID());
+		internal.askForWebAuthKey();
+		
+		/*TextMessage msg = new TextMessage(getUserID());
 		msg.to = getUserID();
 		msg.time = new Date();
 		msg.text = "";
@@ -318,7 +323,7 @@ public class MrimService extends AccountService {
 			request(REQ_SENDMESSAGE, msg);
 		} catch (ProtocolException e) {
 			ServiceUtils.log(e);
-		}
+		}*/
 	}
 
 }

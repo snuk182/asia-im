@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -58,6 +57,8 @@ import org.jivesoftware.smackx.muc.ParticipantStatusListener;
 import org.jivesoftware.smackx.muc.RoomInfo;
 import org.jivesoftware.smackx.muc.SubjectUpdatedListener;
 import org.jivesoftware.smackx.packet.ChatStateExtension;
+import org.jivesoftware.smackx.packet.DiscoverItems;
+import org.jivesoftware.smackx.packet.DiscoverItems.Item;
 import org.jivesoftware.smackx.packet.LastActivity;
 import org.jivesoftware.smackx.packet.OfflineMessageInfo;
 import org.jivesoftware.smackx.packet.OfflineMessageRequest;
@@ -128,7 +129,7 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 
 	private final DefaultMessageEventRequestListener messageEventListener = new DefaultMessageEventRequestListener();
 	MessageEventManager messageEventManager;
-	FileTransferManager ftm;	
+	FileTransferManager ftm;
 
 	@Override
 	public void processMessage(Chat chat, final Message message) {
@@ -140,9 +141,9 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 	private void processMessageInternal(final Message message, boolean resourceAsWriterId) {
 		try {
 			TextMessage txtmessage = XMPPEntityAdapter.xmppMessage2TextMessage(message, serviceId, resourceAsWriterId);
-			if (txtmessage.from.equals(getUserID())) {
-				resetHeartbeat();
-			}
+			/*
+			 * if (txtmessage.from.equals(getUserID())) { resetHeartbeat(); }
+			 */
 			serviceResponse.respond(IAccountServiceResponse.RES_MESSAGE, getServiceId(), txtmessage);
 		} catch (ProtocolException e) {
 			log(e);
@@ -231,9 +232,9 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 			files.add((File) args[1]);
 
 			sendFile((Buddy) args[0], files);
-			return (long)files.hashCode();
+			return (long) files.hashCode();
 		case AccountService.REQ_FILERESPOND:
-			fileRespond((FileMessage)args[0], (Boolean)args[1]);
+			fileRespond((FileMessage) args[0], (Boolean) args[1]);
 			break;
 		case AccountService.REQ_FILECANCEL:
 			break;
@@ -337,25 +338,25 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 	}
 
 	private void fileRespond(final FileMessage fileMessage, final Boolean accept) {
-		new Thread("File transfer "+fileMessage.messageId){
-			
-			@Override 
-			public void run(){
-				for (FileTransferRequest request : fileTransfers){
-					if (request.hashCode() == fileMessage.messageId){
-						if (accept){
+		new Thread("File transfer " + fileMessage.messageId) {
+
+			@Override
+			public void run() {
+				for (FileTransferRequest request : fileTransfers) {
+					if (request.hashCode() == fileMessage.messageId) {
+						if (accept) {
 							IncomingFileTransfer transfer = request.accept();
 							try {
-								transfer.recieveFile(ServiceUtils.createLocalFileForReceiving(request.getFileName(), request.getFileSize(), 0));								
+								transfer.recieveFile(ServiceUtils.createLocalFileForReceiving(request.getFileName(), request.getFileSize(), 0));
 							} catch (XMPPException e1) {
 								log(e1);
 							}
 							while (!transfer.isDone()) {
 								try {
 									if (transfer.getStatus() == Status.error) {
-										serviceResponse.respond(ICQServiceResponse.RES_FILEPROGRESS, serviceId, (long)request.hashCode(), request.getFileName(), 100L, (long) transfer.getProgress() * 100, false, transfer.getError().getMessage(), fileMessage.from);
+										serviceResponse.respond(ICQServiceResponse.RES_FILEPROGRESS, serviceId, (long) request.hashCode(), request.getFileName(), 100L, (long) transfer.getProgress() * 100, false, transfer.getError().getMessage(), fileMessage.from);
 									} else {
-										serviceResponse.respond(ICQServiceResponse.RES_FILEPROGRESS, serviceId, (long)request.hashCode(), request.getFileName(), 100L, (long) transfer.getProgress() * 100, false, null, fileMessage.from);
+										serviceResponse.respond(ICQServiceResponse.RES_FILEPROGRESS, serviceId, (long) request.hashCode(), request.getFileName(), 100L, (long) transfer.getProgress() * 100, false, null, fileMessage.from);
 									}
 									Thread.sleep(1000);
 								} catch (InterruptedException e) {
@@ -364,7 +365,7 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 									log(e);
 								}
 							}
-							
+
 						} else {
 							request.reject();
 						}
@@ -393,9 +394,9 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 					while (!transfer.isDone()) {
 						try {
 							if (transfer.getStatus() == Status.error) {
-								serviceResponse.respond(ICQServiceResponse.RES_FILEPROGRESS, serviceId, (long)files.hashCode(), file.getAbsolutePath(), 100L, (long) transfer.getProgress() * 100, false, transfer.getError().getMessage(), buddy.protocolUid);
+								serviceResponse.respond(ICQServiceResponse.RES_FILEPROGRESS, serviceId, (long) files.hashCode(), file.getAbsolutePath(), 100L, (long) transfer.getProgress() * 100, false, transfer.getError().getMessage(), buddy.protocolUid);
 							} else {
-								serviceResponse.respond(ICQServiceResponse.RES_FILEPROGRESS, serviceId, (long)files.hashCode(), file.getAbsolutePath(), 100L, (long) transfer.getProgress() * 100, false, null, buddy.protocolUid);
+								serviceResponse.respond(ICQServiceResponse.RES_FILEPROGRESS, serviceId, (long) files.hashCode(), file.getAbsolutePath(), 100L, (long) transfer.getProgress() * 100, false, null, buddy.protocolUid);
 							}
 							Thread.sleep(1000);
 						} catch (InterruptedException e) {
@@ -865,7 +866,7 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 					messageEventManager.addMessageEventNotificationListener(XMPPService.this);
 					ftm = new FileTransferManager(connection);
 					ftm.addFileTransferListener(XMPPService.this);
-					
+
 					sendKeepalive();
 				} catch (Exception e) {
 					log(e);
@@ -1190,30 +1191,38 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 
 	@Override
 	protected void keepaliveRequest() {
-		TextMessage msg = new TextMessage(getUserID());
-		msg.to = getUserID();
-		msg.time = new Date();
-		msg.text = "";
+
+		ServiceDiscoveryManager discoManager = ServiceDiscoveryManager.getInstanceFor(connection);
+
 		try {
-			request(REQ_SENDMESSAGE, msg);
-		} catch (ProtocolException e) {
-			ServiceUtils.log(e);
+			DiscoverItems discoItems = discoManager.discoverItems(serviceName);
+			resetHeartbeat();
+
+			Iterator<Item> it = discoItems.getItems();
+			while (it.hasNext()) {
+				DiscoverItems.Item item = (DiscoverItems.Item) it.next();
+				System.out.println(item.getEntityID());
+				System.out.println(item.getNode());
+				System.out.println(item.getName());
+			}
+		} catch (XMPPException e) {
+			log(e);
 		}
 	}
 
 	@Override
 	public void fileTransferRequest(FileTransferRequest request) {
-		log("incoming file "+request.getFileName()+" from "+request.getRequestor());
-		fileTransfers.add(request);	
+		log("incoming file " + request.getFileName() + " from " + request.getRequestor());
+		fileTransfers.add(request);
 		FileMessage fm = new FileMessage(XMPPEntityAdapter.normalizeJID(request.getRequestor()));
-		
+
 		FileInfo fi = new FileInfo();
 		fi.filename = request.getFileName();
 		fi.size = request.getFileSize();
 		fm.files.add(fi);
 		fm.serviceId = serviceId;
 		fm.messageId = request.hashCode();
-		
+
 		try {
 			serviceResponse.respond(IAccountServiceResponse.RES_FILEMESSAGE, getServiceId(), fm);
 		} catch (ProtocolException e) {
