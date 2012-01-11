@@ -12,7 +12,7 @@
 		<item></item>
 		<item>jabber.ru</item>
 		<item>5222</item>
-		<item>0</item>
+		<item>200</item>
 	</string-array>
 	
 	<string-array name="xmpp_contact_menu_names">

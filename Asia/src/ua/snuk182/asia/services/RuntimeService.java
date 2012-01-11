@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
@@ -44,11 +45,8 @@ import ua.snuk182.asia.view.more.musiccontrol.poweramp.PowerAmpStateListener;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -57,7 +55,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.RemoteException;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -74,18 +71,18 @@ public class RuntimeService extends Service {
 	private Handler handler = new Handler();
 	private Bundle appOptions;
 	private Map<String, AbstractPlayerStateListener> playerStateListeners = new HashMap<String, AbstractPlayerStateListener>();
-	
+
 	private int startId;
-	
+
 	private WifiManager.WifiLock wifiLock = null;
 	private PowerManager.WakeLock powerLock = null;
-	
+
 	private boolean finished = false;
-	
-	private final Thread exitThread = new Thread(){
-		
+
+	private final Thread exitThread = new Thread() {
+
 		@Override
-		public void run(){
+		public void run() {
 			finished = true;
 			try {
 				serviceBinder.disconnectAll();
@@ -97,42 +94,39 @@ public class RuntimeService extends Service {
 			stopSelfResult(startId);
 		}
 	};
-	
+
 	@Override
 	public IBinder onBind(Intent intent) {
 		return serviceBinder;
 	}
-	
-	@Override 
-	public void onStart(Intent intent, int startId){
+
+	@Override
+	public void onStart(Intent intent, int startId) {
 		this.startId = startId;
 	}
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		
-		mNM = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-	    try {
-	        mStartForeground = getClass().getMethod("startForeground",
-	                mStartForegroundSignature);
-	        mStopForeground = getClass().getMethod("stopForeground",
-	                mStopForegroundSignature);
-	    } catch (Exception e) {
-	        // Running on an older platform.
-	        mStartForeground = mStopForeground = null;
-	    }
-	    try {
-	        mSetForeground = getClass().getMethod("setForeground",
-	                mSetForegroundSignature);
-	    } catch (Exception e) {
-	    	mSetForeground = null;
-	    }
-		//android.os.Debug.waitForDebugger();
+
+		mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		try {
+			mStartForeground = getClass().getMethod("startForeground", mStartForegroundSignature);
+			mStopForeground = getClass().getMethod("stopForeground", mStopForegroundSignature);
+		} catch (Exception e) {
+			// Running on an older platform.
+			mStartForeground = mStopForeground = null;
+		}
+		try {
+			mSetForeground = getClass().getMethod("setForeground", mSetForegroundSignature);
+		} catch (Exception e) {
+			mSetForeground = null;
+		}
+		// android.os.Debug.waitForDebugger();
 		startForegroundCompat(R.string.label_wait, new Notification());
-	    
+
 		protocolResponse = new ProtocolServiceResponse();
-		//setForeground(true);
+		// setForeground(true);
 		storage = new ServiceStoredPreferences(getApplicationContext());
 		notificator = new Notificator(getApplicationContext());
 
@@ -174,55 +168,59 @@ public class RuntimeService extends Service {
 				}
 			}
 		}.start();
-		
+
 		String autoconnect = appOptions.getString(getResources().getString(R.string.key_autoconnect));
-		for (Account a: accounts){
-			if (!a.accountView.isEnabled){
+		for (Account a : accounts) {
+			if (!a.accountView.isEnabled) {
 				continue;
 			}
-			
-			if (a.accountView.getConnectionState() != AccountService.STATE_DISCONNECTED || (autoconnect!=null && autoconnect.indexOf("true") > -1)){
+
+			if (a.accountView.getConnectionState() != AccountService.STATE_DISCONNECTED || (autoconnect != null && autoconnect.indexOf("true") > -1)) {
 				try {
 					a.accountView.setConnectionState(AccountService.STATE_CONNECTING);
 					serviceBinder.connect(a.accountView.serviceId);
-				} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e) {
+				} catch (NullPointerException npe) {
+					isAppVisible = false;
+				} catch (DeadObjectException de) {
+					isAppVisible = false;
+				} catch (RemoteException e) {
 					ServiceUtils.log(e);
 				}
 			}
-			
+
 			String powerampPlayerStatusKey = getResources().getString(R.string.key_poweramp_playing_to_status);
 			String playerStatus = a.accountView.options.getString(powerampPlayerStatusKey);
-			if (Boolean.parseBoolean(playerStatus)){				
+			if (Boolean.parseBoolean(playerStatus)) {
 				putPlayerStateListener(getPlayerStateListener(powerampPlayerStatusKey), a.accountView);
 			}
-			
+
 			String androidmusicPlayerStatusKey = getResources().getString(R.string.key_androidmusic_playing_to_status);
 			playerStatus = a.accountView.options.getString(androidmusicPlayerStatusKey);
-			if (Boolean.parseBoolean(playerStatus)){				
+			if (Boolean.parseBoolean(playerStatus)) {
 				putPlayerStateListener(getPlayerStateListener(androidmusicPlayerStatusKey), a.accountView);
 			}
 		}
 	}
-	
+
 	private AbstractPlayerStateListener getPlayerStateListener(String key) {
 		AbstractPlayerStateListener listener = playerStateListeners.get(key);
-		if (listener == null){
-			if (key.equals(getResources().getString(R.string.key_poweramp_playing_to_status))){
-				listener = new PowerAmpStateListener(this);				
+		if (listener == null) {
+			if (key.equals(getResources().getString(R.string.key_poweramp_playing_to_status))) {
+				listener = new PowerAmpStateListener(this);
 			}
-			
-			if (key.equals(getResources().getString(R.string.key_androidmusic_playing_to_status))){
-				listener = new AndroidMusicServiceStateListener(this);				
+
+			if (key.equals(getResources().getString(R.string.key_androidmusic_playing_to_status))) {
+				listener = new AndroidMusicServiceStateListener(this);
 			}
-			
+
 			playerStateListeners.put(key, listener);
 		}
-		
+
 		return listener;
 	}
 
 	@Override
-	public void onLowMemory(){
+	public void onLowMemory() {
 		storage.saveAccounts(accounts);
 		System.gc();
 		super.onLowMemory();
@@ -232,14 +230,14 @@ public class RuntimeService extends Service {
 	public void onDestroy() {
 		ServiceUtils.log("on destroy");
 		wipe();
-		//accounts.clear();
+		// accounts.clear();
 		super.onDestroy();
-		
+
 		stopForegroundCompat(R.string.label_wait);
 	}
-	
-	private void wipe(){
-		//removeStatusbarNotification();
+
+	private void wipe() {
+		// removeStatusbarNotification();
 		ServiceUtils.log("wipe service data");
 		if (wifiLock != null) {
 			wifiLock.release();
@@ -252,14 +250,15 @@ public class RuntimeService extends Service {
 		storage.saveAccounts(accounts);
 	}
 
-	public RuntimeService() {}
-	
-	public void requestIcon(byte serviceId, String uid){
+	public RuntimeService() {
+	}
+
+	public void requestIcon(byte serviceId, String uid) {
 		try {
 			getAccountInternal(serviceId).accountService.request(AccountService.REQ_GETICON, uid);
 		} catch (ProtocolException e) {
 			ServiceUtils.log(e);
-		} 
+		}
 	}
 
 	public class ProtocolServiceResponse implements IAccountServiceResponse {
@@ -274,14 +273,13 @@ public class RuntimeService extends Service {
 
 			final AccountView account = a.accountView;
 			final boolean storeActivity = Boolean.parseBoolean(account.options.getString(getResources().getString(R.string.key_account_activity_log)));
-			
-			account.updateTime();			
+
+			account.updateTime();
 			switch (action) {
-			/*case IAccountServiceResponse.RES_LOG:
-				synchronized (this) {
-					ServiceUtils.log((String) args[0], account, false);
-				}
-				break;*/
+			/*
+			 * case IAccountServiceResponse.RES_LOG: synchronized (this) {
+			 * ServiceUtils.log((String) args[0], account, false); } break;
+			 */
 			case IAccountServiceResponse.RES_GETFROMSTORAGE:
 				return storage.getMap((Set<String>) args[1], account.getAccountId() + " " + (String) args[0]);
 			case IAccountServiceResponse.RES_SAVETOSTORAGE:
@@ -289,11 +287,15 @@ public class RuntimeService extends Service {
 				break;
 			case IAccountServiceResponse.RES_TYPING:
 				try {
-					uiCallback.typing(account.serviceId, (String)args[0]);
-					if (storeActivity){
+					uiCallback.typing(account.serviceId, (String) args[0]);
+					if (storeActivity) {
 						ServiceUtils.storeAccountActivity(account, getString(R.string.logparam_typing), args[0]);
 					}
-				} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e2) {
+				} catch (NullPointerException npe) {
+					isAppVisible = false;
+				} catch (DeadObjectException de) {
+					isAppVisible = false;
+				} catch (RemoteException e2) {
 					ServiceUtils.log(e2);
 				}
 				break;
@@ -302,9 +304,13 @@ public class RuntimeService extends Service {
 				try {
 					account.setConnectionState(AccountService.STATE_CONNECTED);
 					uiCallback.accountConnected(account);
-					
+
 					storage.saveServiceState(accounts);
-				} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e2) {
+				} catch (NullPointerException npe) {
+					isAppVisible = false;
+				} catch (DeadObjectException de) {
+					isAppVisible = false;
+				} catch (RemoteException e2) {
 					ServiceUtils.log(e2);
 				}
 
@@ -322,11 +328,11 @@ public class RuntimeService extends Service {
 
 				break;
 			case IAccountServiceResponse.RES_DISCONNECTED:
-				if (finished){
+				if (finished) {
 					notificator.cancel(a.accountView);
 					break;
 				}
-				
+
 				boolean reconnect = false;
 
 				if (account.getConnectionState() != AccountService.STATE_DISCONNECTED && args.length < 1) {
@@ -335,7 +341,7 @@ public class RuntimeService extends Service {
 				disconnected(account);
 
 				if (args.length > 0) {
-					notificationToast((String)args[0]);		
+					notificationToast((String) args[0]);
 					break;
 				}
 
@@ -345,14 +351,18 @@ public class RuntimeService extends Service {
 						@Override
 						public void run() {
 							if (account.getConnectionState() == AccountService.STATE_DISCONNECTED) {
-								/*account.setConnectionState(AccountService.STATE_CONNECTING);
-								try {
-									getAccountById(serviceId).accountService.request(AccountService.REQ_CONNECT, account.status, account.xStatus, account.xStatusName, account.xStatusText);
-								} catch (ProtocolException e) {
-									ServiceUtils.log(e);
-								} catch (AsiaCoreException e) {
-									ServiceUtils.log(e);
-								}*/
+								/*
+								 * account.setConnectionState(AccountService.
+								 * STATE_CONNECTING); try {
+								 * getAccountById(serviceId
+								 * ).accountService.request
+								 * (AccountService.REQ_CONNECT, account.status,
+								 * account.xStatus, account.xStatusName,
+								 * account.xStatusText); } catch
+								 * (ProtocolException e) { ServiceUtils.log(e);
+								 * } catch (AsiaCoreException e) {
+								 * ServiceUtils.log(e); }
+								 */
 								try {
 									connect(getAccountById(serviceId));
 								} catch (AsiaCoreException e) {
@@ -369,30 +379,35 @@ public class RuntimeService extends Service {
 				break;
 			case IAccountServiceResponse.RES_SAVEIMAGEFILE:
 				byte[] iconData = (byte[]) args[0];
-				//Bitmap bitmap = BitmapFactory.decodeByteArray(iconData, 0, iconData.length);
+				// Bitmap bitmap = BitmapFactory.decodeByteArray(iconData, 0,
+				// iconData.length);
 
 				String filename = account.getAccountId() + " " + args[1];
 				log("icon for " + filename);
-				storage.saveIcon(filename, iconData, new Runnable(){
+				storage.saveIcon(filename, iconData, new Runnable() {
 
 					@Override
 					public void run() {
 						try {
 							uiCallback.icon(serviceId, (String) args[1]);
-						} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e2) {
+						} catch (NullPointerException npe) {
+							isAppVisible = false;
+						} catch (DeadObjectException de) {
+							isAppVisible = false;
+						} catch (RemoteException e2) {
 							ServiceUtils.log(e2);
 						}
 					}
-					
+
 				});
-				
-				if (!args[1].equals(account.protocolUid) && args[2] != null){
+
+				if (!args[1].equals(account.protocolUid) && args[2] != null) {
 					final Buddy buddy = account.getBuddyByProtocolUid((String) args[1]);
-					if (buddy != null){
-						buddy.iconHash = (String) args[2];	
-					}				
-				}				
-				
+					if (buddy != null) {
+						buddy.iconHash = (String) args[2];
+					}
+				}
+
 				break;
 			case IAccountServiceResponse.RES_SAVEPARAMS:
 				new Thread("Save account parameters") {
@@ -410,7 +425,7 @@ public class RuntimeService extends Service {
 				break;
 			case IAccountServiceResponse.RES_CLUPDATED:
 				Boolean saveNotInList = Boolean.parseBoolean(account.options.getString(getApplicationContext().getResources().getString(R.string.key_notinlist_save)));
-				
+
 				String loadIconsStr = account.options.getString(getResources().getString(R.string.key_load_icons));
 				boolean loadIcons;
 				if (loadIconsStr != null) {
@@ -424,10 +439,14 @@ public class RuntimeService extends Service {
 				account.setBuddyList((List<Buddy>) args[0], RuntimeService.this, loadIcons);
 				try {
 					uiCallback.contactListUpdated(account);
-				} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e2) {
+				} catch (NullPointerException npe) {
+					isAppVisible = false;
+				} catch (DeadObjectException de) {
+					isAppVisible = false;
+				} catch (RemoteException e2) {
 					ServiceUtils.log(e2);
 				}
-				
+
 				storage.saveAccount(account);
 				break;
 			case IAccountServiceResponse.RES_MESSAGE:
@@ -441,7 +460,7 @@ public class RuntimeService extends Service {
 					// TODO wtf
 					break;
 				}
-				
+
 				String playMessageOnly = appOptions.getString(getResources().getString(R.string.key_message_sound_only));
 				boolean msgOnlyValue = false;
 				try {
@@ -458,28 +477,27 @@ public class RuntimeService extends Service {
 					if (soundNotification.equals(getApplicationContext().getResources().getString(R.string.value_sound_type_profile))) {
 						notificator.playOnlineBasedOnProfile();
 					}
-					if (soundNotification.equals(getApplicationContext().getResources().getString(R.string.value_sound_type_all_on))
-							|| soundNotification.equals(getApplicationContext().getResources().getString(R.string.value_sound_type_sound))) {
+					if (soundNotification.equals(getApplicationContext().getResources().getString(R.string.value_sound_type_all_on)) || soundNotification.equals(getApplicationContext().getResources().getString(R.string.value_sound_type_sound))) {
 						notificator.playOnline();
 					}
 				}
 
 				ServiceUtils.mergeBuddyWithOnlineInfo(buddy, info);
-				
+
 				loadIconsStr = account.options.getString(getResources().getString(R.string.key_load_icons));
-				if (loadIconsStr == null){
+				if (loadIconsStr == null) {
 					loadIcons = true;
 				} else {
 					loadIcons = Boolean.parseBoolean(loadIconsStr);
 				}
-				
+
 				if (loadIcons/*
 							 * && (oldBuddy.icon == null ||
 							 * (oldBuddy.iconHash!=null &&
 							 * !oldBuddy.iconHash.equals(info.iconHash)))
 							 */) {
 					final String buddyUid = buddy.protocolUid;
-					ServiceUtils.log("icon request "+buddy.getFilename());
+					ServiceUtils.log("icon request " + buddy.getFilename());
 					new Thread("Runtime icon request") {
 						@Override
 						public void run() {
@@ -488,25 +506,35 @@ public class RuntimeService extends Service {
 					}.start();
 				}
 
-				//if (account.getConnectionState() != AccountService.STATE_CONNECTED && info.userStatus != Buddy.ST_OFFLINE) break;
+				// if (account.getConnectionState() !=
+				// AccountService.STATE_CONNECTED && info.userStatus !=
+				// Buddy.ST_OFFLINE) break;
 
 				try {
 					uiCallback.buddyStateChanged(buddy);
-				} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e2) {
+				} catch (NullPointerException npe) {
+					isAppVisible = false;
+				} catch (DeadObjectException de) {
+					isAppVisible = false;
+				} catch (RemoteException e2) {
 					ServiceUtils.log(e2);
 				}
-				if (storeActivity){
+				if (storeActivity) {
 					String stateName = ServiceUtils.getBuddyStateName(buddy.status, getApplicationContext());
 					ServiceUtils.storeAccountActivity(account, getString(R.string.logparam_buddy_state), buddy, stateName);
 				}
 				break;
 			case IAccountServiceResponse.RES_NOTIFICATION:
-				notificationToast((String)args[0]);		
+				notificationToast((String) args[0]);
 				break;
 			case IAccountServiceResponse.RES_CONNECTING:
 				try {
-					uiCallback.connecting(serviceId, (Integer)args[0]);
-				} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e2) {
+					uiCallback.connecting(serviceId, (Integer) args[0]);
+				} catch (NullPointerException npe) {
+					isAppVisible = false;
+				} catch (DeadObjectException de) {
+					isAppVisible = false;
+				} catch (RemoteException e2) {
 					ServiceUtils.log(e2);
 				}
 				break;
@@ -523,15 +551,19 @@ public class RuntimeService extends Service {
 
 				if (nfo != null) {
 					account.ownName = nfo.name;
-					if (nfo.userStatus != Buddy.ST_OFFLINE){
+					if (nfo.userStatus != Buddy.ST_OFFLINE) {
 						account.status = nfo.userStatus;
 					}
-					if (nfo.visibility != -1){
+					if (nfo.visibility != -1) {
 						account.visibility = nfo.visibility;
 					}
 					try {
 						uiCallback.accountUpdated(account);
-					} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e) {
+					} catch (NullPointerException npe) {
+						isAppVisible = false;
+					} catch (DeadObjectException de) {
+						isAppVisible = false;
+					} catch (RemoteException e) {
 						ServiceUtils.log(e);
 					}
 				}
@@ -547,35 +579,47 @@ public class RuntimeService extends Service {
 					account.ownName = pinfo.properties.getString(PersonalInfo.INFO_NICK);
 					try {
 						uiCallback.accountUpdated(account);
-					} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e) {
+					} catch (NullPointerException npe) {
+						isAppVisible = false;
+					} catch (DeadObjectException de) {
+						isAppVisible = false;
+					} catch (RemoteException e) {
 						ServiceUtils.log(e);
 					}
 				} else {
 					buddy = account.getBuddyByProtocolUid(pinfo.protocolUid);
-					
-					//WTF
-					if (buddy == null){
-						log("no buddy "+pinfo.protocolUid+" found");
+
+					// WTF
+					if (buddy == null) {
+						log("no buddy " + pinfo.protocolUid + " found");
 						return null;
 					}
-					
+
 					if (buddy.getName().equals(buddy.protocolUid)) {
 						String nick = pinfo.properties.getString(PersonalInfo.INFO_NICK);
 						if (nick != null) {
 							buddy.name = nick;
 						}
 					}
-					if (!buddy.waitsForInfo){
+					if (!buddy.waitsForInfo) {
 						try {
 							uiCallback.buddyStateChanged(buddy);
-						} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e) {
+						} catch (NullPointerException npe) {
+							isAppVisible = false;
+						} catch (DeadObjectException de) {
+							isAppVisible = false;
+						} catch (RemoteException e) {
 							ServiceUtils.log(e);
 						}
 					} else {
 						buddy.waitsForInfo = false;
 						try {
 							uiCallback.personalInfo(buddy, pinfo);
-						} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e) {
+						} catch (NullPointerException npe) {
+							isAppVisible = false;
+						} catch (DeadObjectException de) {
+							isAppVisible = false;
+						} catch (RemoteException e) {
 							ServiceUtils.log(e);
 						}
 					}
@@ -597,10 +641,14 @@ public class RuntimeService extends Service {
 				}
 				try {
 					uiCallback.serviceMessage(sm);
-				} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e) {
+				} catch (NullPointerException npe) {
+					isAppVisible = false;
+				} catch (DeadObjectException de) {
+					isAppVisible = false;
+				} catch (RemoteException e) {
 					ServiceUtils.log(e);
 				}
-				if (storeActivity){
+				if (storeActivity) {
 					ServiceUtils.storeAccountActivity(account, getString(R.string.logparam_ask_for_auth), buddddy, sm.text);
 				}
 				break;
@@ -608,7 +656,11 @@ public class RuntimeService extends Service {
 				final ArrayList<PersonalInfo> infos = (ArrayList<PersonalInfo>) args[0];
 				try {
 					uiCallback.searchResult(serviceId, infos);
-				} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e) {
+				} catch (NullPointerException npe) {
+					isAppVisible = false;
+				} catch (DeadObjectException de) {
+					isAppVisible = false;
+				} catch (RemoteException e) {
 					ServiceUtils.log(e);
 				}
 				break;
@@ -616,10 +668,14 @@ public class RuntimeService extends Service {
 				final BuddyGroup group = (BuddyGroup) args[0];
 				account.getBuddyGroupList().add(group);
 				storage.saveAccount(account);
-				
+
 				try {
 					uiCallback.groupAdded(group, account);
-				} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e) {
+				} catch (NullPointerException npe) {
+					isAppVisible = false;
+				} catch (DeadObjectException de) {
+					isAppVisible = false;
+				} catch (RemoteException e) {
 					ServiceUtils.log(e);
 				}
 				break;
@@ -629,7 +685,11 @@ public class RuntimeService extends Service {
 				storage.saveAccount(account);
 				try {
 					uiCallback.buddyAdded(uddy, account);
-				} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e) {
+				} catch (NullPointerException npe) {
+					isAppVisible = false;
+				} catch (DeadObjectException de) {
+					isAppVisible = false;
+				} catch (RemoteException e) {
 					ServiceUtils.log(e);
 				}
 				break;
@@ -640,7 +700,11 @@ public class RuntimeService extends Service {
 
 				try {
 					uiCallback.buddyRemoved(ddy, account);
-				} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e) {
+				} catch (NullPointerException npe) {
+					isAppVisible = false;
+				} catch (DeadObjectException de) {
+					isAppVisible = false;
+				} catch (RemoteException e) {
 					ServiceUtils.log(e);
 				}
 				break;
@@ -651,29 +715,41 @@ public class RuntimeService extends Service {
 
 				try {
 					uiCallback.groupRemoved(roup, account);
-				} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e) {
+				} catch (NullPointerException npe) {
+					isAppVisible = false;
+				} catch (DeadObjectException de) {
+					isAppVisible = false;
+				} catch (RemoteException e) {
 					ServiceUtils.log(e);
 				}
 				break;
 			case IAccountServiceResponse.RES_BUDDYMODIFIED:
 				final Buddy dy = (Buddy) args[0];
 				account.editBuddy(dy, false);
-				
+
 				storage.saveAccount(account);
 				try {
 					uiCallback.buddyEdited(dy, account);
-				} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e) {
+				} catch (NullPointerException npe) {
+					isAppVisible = false;
+				} catch (DeadObjectException de) {
+					isAppVisible = false;
+				} catch (RemoteException e) {
 					ServiceUtils.log(e);
 				}
 				break;
 			case IAccountServiceResponse.RES_GROUPMODIFIED:
 				final BuddyGroup oup = (BuddyGroup) args[0];
 				account.editGroup(oup);
-				
+
 				storage.saveAccount(account);
 				try {
 					uiCallback.groupEdited(oup, account);
-				} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e) {
+				} catch (NullPointerException npe) {
+					isAppVisible = false;
+				} catch (DeadObjectException de) {
+					isAppVisible = false;
+				} catch (RemoteException e) {
 					ServiceUtils.log(e);
 				}
 				break;
@@ -685,13 +761,13 @@ public class RuntimeService extends Service {
 				}
 				try {
 					uiCallback.fileMessage(fm);
-				} catch (NullPointerException npe) {					
+				} catch (NullPointerException npe) {
 				} catch (RemoteException e) {
 					ServiceUtils.log(e);
 				}
-				if (storeActivity){
+				if (storeActivity) {
 					StringBuilder sb = new StringBuilder();
-					for (FileInfo fo : fm.files){
+					for (FileInfo fo : fm.files) {
 						sb.append(fo.filename);
 						sb.append(':');
 						sb.append(fo.size);
@@ -699,37 +775,37 @@ public class RuntimeService extends Service {
 						sb.append("\n");
 					}
 					ServiceUtils.storeAccountActivity(account, getString(R.string.logparam_file_request), bud, sb);
-				}				
+				}
 				break;
 			case IAccountServiceResponse.RES_ACCOUNT_ACTIVITY:
 				ServiceUtils.storeAccountActivity(account, getString(R.string.logparam_default), args[0]);
 				break;
 			case IAccountServiceResponse.RES_FILEPROGRESS:
 				String statusbarNotification = appOptions.getString(getApplicationContext().getResources().getString(R.string.key_statusbar_type));
-				if (statusbarNotification != null && !statusbarNotification.equals(getResources().getString(R.string.value_statusbar_type_none))){
-					notificator.notifyFileProgress((Long)args[0], (String)args[1], (Long)args[2], (Long)args[3], (Boolean)args[4], (String)args[5]);
+				if (statusbarNotification != null && !statusbarNotification.equals(getResources().getString(R.string.value_statusbar_type_none))) {
+					notificator.notifyFileProgress((Long) args[0], (String) args[1], (Long) args[2], (Long) args[3], (Boolean) args[4], (String) args[5]);
 				}
-				
+
 				buddy = account.getBuddyByProtocolUid((String) args[6]);
-				
+
 				try {
-					uiCallback.fileProgress((Long)args[0], buddy, (String)args[1], (Long)args[2], (Long)args[3], (Boolean)args[4], (String)args[5]);
-				} catch (NullPointerException npe) {					
+					uiCallback.fileProgress((Long) args[0], buddy, (String) args[1], (Long) args[2], (Long) args[3], (Boolean) args[4], (String) args[5]);
+				} catch (NullPointerException npe) {
 				} catch (RemoteException e) {
 					ServiceUtils.log(e);
 				}
-				
+
 				break;
 			case IAccountServiceResponse.RES_MESSAGEACK:
 				Buddy buu = account.getBuddyByProtocolUid((String) args[0]);
-				
-				if (buu == null){
+
+				if (buu == null) {
 					break;
 				}
-				
-				try{
+
+				try {
 					uiCallback.messageAck(buu, (Long) args[1], (Integer) args[2]);
-				} catch (NullPointerException npe) {					
+				} catch (NullPointerException npe) {
 				} catch (RemoteException e) {
 					ServiceUtils.log(e);
 				}
@@ -737,15 +813,15 @@ public class RuntimeService extends Service {
 			case IAccountServiceResponse.RES_AVAILABLE_CHATS:
 				try {
 					uiCallback.availableChatsList(serviceId, (List<MultiChatRoom>) args[0]);
-				} catch (NullPointerException npe) {					
+				} catch (NullPointerException npe) {
 				} catch (RemoteException e) {
 					ServiceUtils.log(e);
 				}
 				break;
 			case IAccountServiceResponse.RES_CHAT_PARTICIPANTS:
 				try {
-					uiCallback.chatRoomOccupants(serviceId, (String) args[0], (MultiChatRoomOccupants)args[1]);
-				} catch (NullPointerException npe) {					
+					uiCallback.chatRoomOccupants(serviceId, (String) args[0], (MultiChatRoomOccupants) args[1]);
+				} catch (NullPointerException npe) {
 				} catch (RemoteException e) {
 					ServiceUtils.log(e);
 				}
@@ -757,7 +833,7 @@ public class RuntimeService extends Service {
 				sm.serviceId = serviceId;
 				try {
 					uiCallback.serviceMessage(sm);
-				} catch (NullPointerException npe) {					
+				} catch (NullPointerException npe) {
 				} catch (RemoteException e) {
 					ServiceUtils.log(e);
 				}
@@ -772,17 +848,21 @@ public class RuntimeService extends Service {
 		return protocolResponse;
 	}
 
-	public void disconnected(AccountView account) {		
-		
+	public void disconnected(AccountView account) {
+
 		account.disconnected();
 
 		try {
 			uiCallback.disconnected(account);
-		} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e) {
+		} catch (NullPointerException npe) {
+			isAppVisible = false;
+		} catch (DeadObjectException de) {
+			isAppVisible = false;
+		} catch (RemoteException e) {
 			ServiceUtils.log(e);
 		}
 
-		statusbarNotifyAccountChanged(false);		
+		statusbarNotifyAccountChanged(false);
 	}
 
 	private void textMessage(AccountView account, TextMessage message) {
@@ -790,37 +870,37 @@ public class RuntimeService extends Service {
 			return;
 		}
 		Buddy budddy = account.getBuddyByProtocolUid(message.from);
-		
-		if (budddy == null && message.from.equals(account.protocolUid)){
+
+		if (budddy == null && message.from.equals(account.protocolUid)) {
 			budddy = account.getBuddyByProtocolUid(message.to);
 		}
-		
-		if (budddy == null){
+
+		if (budddy == null) {
 			Boolean noAuthFromAliens = Boolean.parseBoolean(account.options.getString(getApplicationContext().getResources().getString(R.string.key_deny_messages_not_from_list)));
 			if (noAuthFromAliens != null && noAuthFromAliens) {
 				return;
 			}
 			budddy = buddyNotFromList(message, account);
 		}
-		
-		if (!isAppVisible){
+
+		if (!isAppVisible) {
 			budddy.unread++;
 		}
-		
+
 		budddy.getHistorySaver().saveHistoryRecord(HistorySaver.formatMessageForHistory(message, budddy, account.getSafeName()), getApplicationContext());
-		
+
 		try {
 			uiCallback.textMessage(message);
-		} catch (NullPointerException npe) { 
+		} catch (NullPointerException npe) {
 			isAppVisible = false;
 			budddy.unread++;
-		} catch (DeadObjectException de) { 
+		} catch (DeadObjectException de) {
 			isAppVisible = false;
 			budddy.unread++;
 		} catch (RemoteException e) {
 			ServiceUtils.log(e);
 		}
-		
+
 		String soundNotification = appOptions.getString(getApplicationContext().getResources().getString(R.string.key_sound_type));
 		if (soundNotification == null) {
 			soundNotification = getApplicationContext().getResources().getString(R.string.value_sound_type_profile);
@@ -844,12 +924,13 @@ public class RuntimeService extends Service {
 			if (statusbarNotification == null) {
 				statusbarNotification = getApplicationContext().getResources().getString(R.string.value_statusbar_type_messages);
 			}
-			
+
 			boolean blinkLed = false;
-			
+
 			try {
 				blinkLed = Boolean.parseBoolean(appOptions.getString(getApplicationContext().getResources().getString(R.string.key_blink_led)));
-			} catch (Exception e) {}
+			} catch (Exception e) {
+			}
 
 			if (statusbarNotification.equals(getApplicationContext().getResources().getString(R.string.value_statusbar_type_messages))) {
 				notificator.notifyMessageReceived(message, budddy, false, blinkLed);
@@ -857,9 +938,9 @@ public class RuntimeService extends Service {
 			if (statusbarNotification.equals(getApplicationContext().getResources().getString(R.string.value_statusbar_type_icon))) {
 				notificator.notifyMessageReceived(message, budddy, true, blinkLed);
 			}
-			statusbarNotifyAccountChanged(budddy.serviceId, budddy.getName()+": "+message.text.substring(message.text.indexOf("):")+2), true);
+			statusbarNotifyAccountChanged(budddy.serviceId, budddy.getName() + ": " + message.text.substring(message.text.indexOf("):") + 2), true);
 		}
-		
+
 	}
 
 	public void setProtocolResponse(ProtocolServiceResponse protocolResponse) {
@@ -879,25 +960,26 @@ public class RuntimeService extends Service {
 	void log(String string) {
 		ServiceUtils.log(string, null, false);
 	}
-	
-	private byte[] getMyIp(){
-		NetworkInfo info = ((ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
-		
+
+	/*private byte[] getMyIp() {
+		NetworkInfo info = ((ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
+
 		byte[] ip = null;
-		
-		switch(info.getType()){
+
+		switch (info.getType()) {
 		case (ConnectivityManager.TYPE_WIFI):
 			WifiManager wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
-			//ip = ServiceUtils.getIPBytesFromSystemIp(wifiManager.getConnectionInfo().getIpAddress());
-			ip = ServiceUtils.ipString2ByteBE(ServiceUtils.ipAddressToString(wifiManager.getConnectionInfo().getIpAddress())) ;
+			// ip =
+			// ServiceUtils.getIPBytesFromSystemIp(wifiManager.getConnectionInfo().getIpAddress());
+			ip = ServiceUtils.ipString2ByteBE(ServiceUtils.ipAddressToString(wifiManager.getConnectionInfo().getIpAddress()));
 			break;
 		case (ConnectivityManager.TYPE_MOBILE):
 			Enumeration<NetworkInterface> face;
 			try {
 				face = NetworkInterface.getNetworkInterfaces();
-				while(face.hasMoreElements()){
+				while (face.hasMoreElements()) {
 					NetworkInterface f = face.nextElement();
-					if(f.getName().equals("pdp0")){
+					if (f.getName().equals("pdp0")) {
 						ip = f.getInetAddresses().nextElement().getAddress();
 						break;
 					}
@@ -905,15 +987,32 @@ public class RuntimeService extends Service {
 			} catch (SocketException e) {
 				ServiceUtils.log(e);
 			}
-		
+
 			TelephonyManager telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
 			telephonyManager.getDataState();
-			
+
 			break;
 		}
 		return ip;
+	}*/
+
+	public byte[] getMyIp() {
+		try {
+			for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
+				NetworkInterface intf = en.nextElement();
+				for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+					InetAddress inetAddress = enumIpAddr.nextElement();
+					if (!inetAddress.isLoopbackAddress()) {
+						return ServiceUtils.ipString2ByteBE(inetAddress.getHostAddress());
+					}
+				}
+			}
+		} catch (SocketException ex) {
+			ServiceUtils.log(ex);
+		}
+		return new byte[]{0,0,0,0};
 	}
-	
+
 	private void connect(final Account a) {
 		new Runnable() {
 
@@ -923,7 +1022,7 @@ public class RuntimeService extends Service {
 				statusbarNotifyAccountChanged();
 				String secure = a.accountView.options.getString(getResources().getString(R.string.key_secure_login));
 				try {
-					if (secure != null && secure.equalsIgnoreCase("true")){
+					if (secure != null && secure.equalsIgnoreCase("true")) {
 						a.accountService.request(AccountService.REQ_CONNECT, a.accountView.status, a.accountView.xStatus, a.accountView.xStatusName, a.accountView.xStatusText, true);
 					} else {
 						a.accountService.request(AccountService.REQ_CONNECT, a.accountView.status, a.accountView.xStatus, a.accountView.xStatusName, a.accountView.xStatusText);
@@ -1030,12 +1129,13 @@ public class RuntimeService extends Service {
 			final String statusbarNotification = appOptions.getString(getApplicationContext().getResources().getString(R.string.key_statusbar_type));
 			if (buddy.unread > 0) {
 				if (message != null) {
-					
+
 					boolean blinkLed = false;
-					
+
 					try {
 						blinkLed = Boolean.parseBoolean(appOptions.getString(getApplicationContext().getResources().getString(R.string.key_blink_led)));
-					} catch (Exception e) {}
+					} catch (Exception e) {
+					}
 
 					if (statusbarNotification == null || statusbarNotification.equals(getApplicationContext().getResources().getString(R.string.value_statusbar_type_messages))) {
 						if (buddy != null) {
@@ -1091,9 +1191,9 @@ public class RuntimeService extends Service {
 			if (account.accountView.getConnectionState() == AccountService.STATE_CONNECTED) {
 				try {
 					account.accountService.request(AccountService.REQ_SETSTATUS, status, account.accountView.xStatus, account.accountView.xStatusName, account.accountView.xStatusText);
-					
+
 					uiCallback.status(account.accountView);
-					
+
 					statusbarNotifyAccountChanged();
 				} catch (ProtocolException e) {
 					ServiceUtils.log(e);
@@ -1127,7 +1227,7 @@ public class RuntimeService extends Service {
 				uiCallback.accountRemoved(account);
 			} catch (Exception e) {
 				ServiceUtils.log(e);
-			}			
+			}
 		}
 
 		@Override
@@ -1148,29 +1248,29 @@ public class RuntimeService extends Service {
 				account = getAccountInternal(serviceId).accountView;
 				account.options.putString(key, value);
 				account.updateTime();
-				
+
 				if (key.equals(getResources().getString(R.string.key_send_typing))) {
 					uiCallback.accountUpdated(account);
 				}
-				
+
 				String powerampKey = getResources().getString(R.string.key_poweramp_playing_to_status);
-				if (key.equals(powerampKey)){
-					if (Boolean.parseBoolean(value)){
+				if (key.equals(powerampKey)) {
+					if (Boolean.parseBoolean(value)) {
 						putPlayerStateListener(getPlayerStateListener(powerampKey), account);
 					} else {
 						removePlayerStateListener(getPlayerStateListener(powerampKey), account);
 					}
-				} 
-				
+				}
+
 				String musicKey = getResources().getString(R.string.key_androidmusic_playing_to_status);
-				if (key.equals(musicKey)){
-					if (Boolean.parseBoolean(value)){
+				if (key.equals(musicKey)) {
+					if (Boolean.parseBoolean(value)) {
 						putPlayerStateListener(getPlayerStateListener(musicKey), account);
 					} else {
 						removePlayerStateListener(getPlayerStateListener(musicKey), account);
 					}
 				}
-				
+
 				if (key.endsWith(getResources().getString(R.string.key_disabled))) {
 					account.isEnabled = !Boolean.parseBoolean(value);
 					serviceBinder.disconnect(account.serviceId);
@@ -1203,7 +1303,7 @@ public class RuntimeService extends Service {
 					}
 				}
 
-				if (statusbarNotification != null && statusbarNotification.equals(getApplicationContext().getResources().getString(R.string.value_statusbar_type_icon))){
+				if (statusbarNotification != null && statusbarNotification.equals(getApplicationContext().getResources().getString(R.string.value_statusbar_type_icon))) {
 					notificator.showAppIcon();
 				} else {
 					notificator.removeAppIcon();
@@ -1260,9 +1360,9 @@ public class RuntimeService extends Service {
 		@Override
 		public void setAppVisible(boolean visible) throws RemoteException {
 			isAppVisible = visible;
-			if (isAppVisible){
-				String statusbarNotification = appOptions.getString(getApplicationContext().getResources().getString(R.string.key_statusbar_type)); 
-				if (statusbarNotification != null && statusbarNotification.equals(getApplicationContext().getResources().getString(R.string.value_statusbar_type_icon))){
+			if (isAppVisible) {
+				String statusbarNotification = appOptions.getString(getApplicationContext().getResources().getString(R.string.key_statusbar_type));
+				if (statusbarNotification != null && statusbarNotification.equals(getApplicationContext().getResources().getString(R.string.value_statusbar_type_icon))) {
 					notificator.showAppIcon();
 				} else {
 					notificator.removeAppIcon();
@@ -1302,11 +1402,11 @@ public class RuntimeService extends Service {
 					ServiceUtils.log(e);
 				}
 			}
-			
-			if (buddy.visibility == Buddy.VIS_GROUPCHAT){
+
+			if (buddy.visibility == Buddy.VIS_GROUPCHAT) {
 				storage.delete(getGroupchatStorageName(account.accountView, buddy.protocolUid));
 			}
-			
+
 			account.accountView.removeBuddyByUid(buddy);
 			storage.saveAccount(account.accountView);
 			uiCallback.contactListUpdated(account.accountView);
@@ -1504,7 +1604,7 @@ public class RuntimeService extends Service {
 
 		@Override
 		public void respondFileMessage(FileMessage msg, boolean accept) throws RemoteException {
-			Account account = getAccountInternal(msg.serviceId);	
+			Account account = getAccountInternal(msg.serviceId);
 			try {
 				account.accountService.request(AccountService.REQ_FILERESPOND, msg, accept, getMyIp());
 			} catch (ProtocolException e) {
@@ -1515,11 +1615,11 @@ public class RuntimeService extends Service {
 		@Override
 		public void sendFile(Bundle bu, Buddy buddy) throws RemoteException {
 			File fi = (File) bu.getSerializable(File.class.getName());
-			if (fi != null && buddy != null){
+			if (fi != null && buddy != null) {
 				try {
-					
+
 					Account account = getAccountInternal(buddy.serviceId);
-					
+
 					long messageId = (Long) account.accountService.request(AccountService.REQ_SENDFILE, buddy, fi, getMyIp());
 					uiCallback.fileProgress(messageId, buddy, fi.getAbsolutePath(), fi.length(), -1, false, null);
 				} catch (ProtocolException e) {
@@ -1531,15 +1631,15 @@ public class RuntimeService extends Service {
 		@Override
 		public void cancelFileTransfer(byte serviceId, long messageId) throws RemoteException {
 			try {
-				
+
 				Account account = getAccountInternal(serviceId);
-				
+
 				notificator.cancelFileNotification(messageId);
-				
+
 				account.accountService.request(AccountService.REQ_FILECANCEL, messageId);
 			} catch (ProtocolException e) {
 				ServiceUtils.log(e);
-			}			
+			}
 		}
 
 		@Override
@@ -1548,7 +1648,7 @@ public class RuntimeService extends Service {
 				return;
 			}
 			getAccountInternal(serviceId).accountView.getBuddyByProtocolUid(uid).waitsForInfo = true;
-			try {				
+			try {
 				getAccountInternal(serviceId).accountService.request(AccountService.REQ_GETFULLBUDDYINFO, uid);
 			} catch (ProtocolException e) {
 				ServiceUtils.log(e);
@@ -1561,10 +1661,10 @@ public class RuntimeService extends Service {
 				return;
 			}
 			Account acc = getAccountInternal(serviceId);
-			if (acc.accountView.status == Buddy.ST_INVISIBLE){
+			if (acc.accountView.status == Buddy.ST_INVISIBLE) {
 				return;
 			}
-			try {				
+			try {
 				acc.accountService.request(AccountService.REQ_SENDTYPING, buddyUid);
 			} catch (ProtocolException e) {
 				ServiceUtils.log(e);
@@ -1581,7 +1681,7 @@ public class RuntimeService extends Service {
 			Account acc = getAccountInternal(serviceId);
 			BuddyGroup group = acc.accountView.getBuddyGroupByGroupId(groupId);
 			group.isCollapsed = collapsed;
-			
+
 			storage.saveAccount(acc.accountView);
 		}
 
@@ -1591,7 +1691,7 @@ public class RuntimeService extends Service {
 				return;
 			}
 			Account acc = getAccountInternal(buddy.serviceId);
-			try {				
+			try {
 				acc.accountService.request(AccountService.REQ_VISIBILITY, buddy);
 			} catch (ProtocolException e) {
 				ServiceUtils.log(e);
@@ -1604,7 +1704,7 @@ public class RuntimeService extends Service {
 		public void editMyVisibility(byte serviceId, byte visibility) throws RemoteException {
 			Account acc = getAccountInternal(serviceId);
 			acc.accountView.visibility = visibility;
-			try {				
+			try {
 				acc.accountService.request(AccountService.REQ_VISIBILITY, visibility);
 			} catch (ProtocolException e) {
 				ServiceUtils.log(e);
@@ -1615,7 +1715,7 @@ public class RuntimeService extends Service {
 		@Override
 		public void requestAvailableChatRooms(byte serviceId) throws RemoteException {
 			Account acc = getAccountInternal(serviceId);
-			try {				
+			try {
 				acc.accountService.request(AccountService.REQ_GET_CHAT_ROOMS);
 			} catch (ProtocolException e) {
 				ServiceUtils.log(e);
@@ -1625,21 +1725,25 @@ public class RuntimeService extends Service {
 		@Override
 		public byte createChat(byte serviceId, String chatId, String chatNickname, String chatName, String chatPassword) throws RemoteException {
 			Account acc = getAccountInternal(serviceId);
-			try {				
-				Buddy chat = (Buddy) acc.accountService.request(AccountService.REQ_CREATE_CHAT_ROOM, chatId, chatName, (chatPassword == null || chatPassword.length()<1) ? null : chatPassword, chatNickname);
-				
+			try {
+				Buddy chat = (Buddy) acc.accountService.request(AccountService.REQ_CREATE_CHAT_ROOM, chatId, chatName, (chatPassword == null || chatPassword.length() < 1) ? null : chatPassword, chatNickname);
+
 				AccountView account = acc.accountView;
 				account.addBuddyToList(chat);
 				storage.saveAccount(account);
-				
+
 				Map<String, String> map = new HashMap<String, String>();
 				map.put(ServiceConstants.GROUPCHAT_PREFERENCE_NICKNAME, chatNickname);
 				map.put(ServiceConstants.GROUPCHAT_PREFERENCE_PASSWORD, chatPassword);
 				storage.saveMap(map, getGroupchatStorageName(account, chat.protocolUid));
-				
+
 				try {
 					uiCallback.buddyAdded(chat, account);
-				} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e) {
+				} catch (NullPointerException npe) {
+					isAppVisible = false;
+				} catch (DeadObjectException de) {
+					isAppVisible = false;
+				} catch (RemoteException e) {
 					ServiceUtils.log(e);
 				}
 				return ProtocolException.ERROR_NONE;
@@ -1648,15 +1752,15 @@ public class RuntimeService extends Service {
 				return e.errorCode;
 			}
 		}
-		
-		private String getGroupchatStorageName(AccountView account, String chatId){
-			return ServiceConstants.GROUPCHAT_PREFERENCES_PREFIX+" "+account.protocolUid+" "+chatId;
+
+		private String getGroupchatStorageName(AccountView account, String chatId) {
+			return ServiceConstants.GROUPCHAT_PREFERENCES_PREFIX + " " + account.protocolUid + " " + chatId;
 		}
-		
+
 		@Override
 		public byte joinExistingChat(byte serviceId, String chatId) throws RemoteException {
 			Account acc = getAccountInternal(serviceId);
-			
+
 			Map<String, String> map = storage.getMap(ServiceUtils.GROUPCHAT_PREFERENCE_MAP, getGroupchatStorageName(acc.accountView, chatId));
 			return joinChatInternal(acc, chatId, map.get(ServiceConstants.GROUPCHAT_PREFERENCE_NICKNAME), map.get(ServiceConstants.GROUPCHAT_PREFERENCE_PASSWORD), false);
 		}
@@ -1668,26 +1772,30 @@ public class RuntimeService extends Service {
 		}
 
 		private byte joinChatInternal(Account acc, String chatId, String chatNickname, String chatPassword, boolean saveChatData) {
-			try {				
-				Buddy chat = (Buddy) acc.accountService.request(AccountService.REQ_JOIN_CHAT_ROOM, chatId, (chatPassword == null || chatPassword.length()<1) ? null : chatPassword, chatNickname);
-				
+			try {
+				Buddy chat = (Buddy) acc.accountService.request(AccountService.REQ_JOIN_CHAT_ROOM, chatId, (chatPassword == null || chatPassword.length() < 1) ? null : chatPassword, chatNickname);
+
 				AccountView account = acc.accountView;
 				account.addBuddyToList(chat);
 				storage.saveAccount(account);
-				
-				if (saveChatData){
+
+				if (saveChatData) {
 					Map<String, String> map = new HashMap<String, String>();
 					map.put(ServiceConstants.GROUPCHAT_PREFERENCE_NICKNAME, chatNickname);
 					map.put(ServiceConstants.GROUPCHAT_PREFERENCE_PASSWORD, chatPassword);
 					storage.saveMap(map, getGroupchatStorageName(account, chat.protocolUid));
 				}
-				try {					
-					if (acc.accountView.getBuddyByProtocolUid(chatId) != null){
+				try {
+					if (acc.accountView.getBuddyByProtocolUid(chatId) != null) {
 						uiCallback.buddyStateChanged(chat);
 					} else {
 						uiCallback.buddyAdded(chat, account);
-					}					
-				} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e) {
+					}
+				} catch (NullPointerException npe) {
+					isAppVisible = false;
+				} catch (DeadObjectException de) {
+					isAppVisible = false;
+				} catch (RemoteException e) {
 					ServiceUtils.log(e);
 				}
 				return ProtocolException.ERROR_NONE;
@@ -1702,7 +1810,8 @@ public class RuntimeService extends Service {
 			Account acc = getAccountInternal(serviceId);
 			try {
 				return (Boolean) acc.accountService.request(AccountService.REQ_CHECK_GROUPCHATS_AVAILABLE);
-			} catch (Exception e) {}
+			} catch (Exception e) {
+			}
 			return false;
 		}
 
@@ -1715,7 +1824,11 @@ public class RuntimeService extends Service {
 				buddy.status = Buddy.ST_OFFLINE;
 				try {
 					uiCallback.buddyStateChanged(buddy);
-				} catch (NullPointerException npe) { isAppVisible = false;} catch (DeadObjectException de) { isAppVisible = false;} catch (RemoteException e) {
+				} catch (NullPointerException npe) {
+					isAppVisible = false;
+				} catch (DeadObjectException de) {
+					isAppVisible = false;
+				} catch (RemoteException e) {
 					ServiceUtils.log(e);
 				}
 				return ProtocolException.ERROR_NONE;
@@ -1731,13 +1844,13 @@ public class RuntimeService extends Service {
 			try {
 				boolean loadIcons;
 				String loadIconsStr = acc.accountView.options.getString(getResources().getString(R.string.key_load_icons));
-				if (loadIconsStr == null){
+				if (loadIconsStr == null) {
 					loadIcons = true;
 				} else {
 					loadIcons = Boolean.parseBoolean(loadIconsStr);
 				}
-				
-				return (MultiChatRoomOccupants) acc.accountService.request(AccountService.REQ_GET_CHAT_ROOM_OCCUPANTS, chatId, loadIcons);				
+
+				return (MultiChatRoomOccupants) acc.accountService.request(AccountService.REQ_GET_CHAT_ROOM_OCCUPANTS, chatId, loadIcons);
 			} catch (ProtocolException e) {
 				ServiceUtils.log(e);
 				return null;
@@ -1776,13 +1889,13 @@ public class RuntimeService extends Service {
 
 	private void putPlayerStateListener(AbstractPlayerStateListener playerStateListener, final AccountView account) {
 		playerStateListener.addPlayerStateListener(account.serviceId, new IPlayerStateListener() {
-			
+
 			@Override
 			public void onStateChanged(int status, Object... properties) {
 				Account a = getAccountInternal(account.serviceId);
 				switch (status) {
-					case IPlayerStateListener.TRACK:
-					case IPlayerStateListener.STARTED:
+				case IPlayerStateListener.TRACK:
+				case IPlayerStateListener.STARTED:
 					a.accountView = ServiceUtils.editXStatusWithPlayed(getApplicationContext(), account, properties);
 					try {
 						setXStatusInternal(a);
@@ -1798,14 +1911,14 @@ public class RuntimeService extends Service {
 					}
 					break;
 				}
-				
+
 			}
 		});
 	}
 
 	private void restoreXStatus(Account account) throws XmlPullParserException, IOException {
 		storage.getAccount(account.accountView, false);
-		
+
 		try {
 			setXStatusInternal(account);
 		} catch (RemoteException e) {
@@ -1814,7 +1927,7 @@ public class RuntimeService extends Service {
 	}
 
 	private void setXStatusInternal(Account a) throws RemoteException {
-		if (uiCallback == null){
+		if (uiCallback == null) {
 			return;
 		}
 		AccountView account = a.accountView;
@@ -1829,24 +1942,24 @@ public class RuntimeService extends Service {
 	}
 
 	private void removeStatusbarNotification() {
-		new Thread("Remove statusbar notification"){
+		new Thread("Remove statusbar notification") {
 			@Override
-			public void run(){
+			public void run() {
 				String statusbarNotification = appOptions.getString(getApplicationContext().getResources().getString(R.string.key_statusbar_type));
 				if (statusbarNotification != null && statusbarNotification.equals(getApplicationContext().getResources().getString(R.string.value_statusbar_type_account_status))) {
-					synchronized(notificator){
+					synchronized (notificator) {
 						for (Account account : accounts) {
 							notificator.cancel(account.accountView);
 						}
 					}
 				}
-				if (statusbarNotification != null && statusbarNotification.equals(getApplicationContext().getResources().getString(R.string.value_statusbar_type_icon))){
-					synchronized(notificator){
+				if (statusbarNotification != null && statusbarNotification.equals(getApplicationContext().getResources().getString(R.string.value_statusbar_type_icon))) {
+					synchronized (notificator) {
 						notificator.removeAppIcon();
 					}
 				}
 			}
-		}.start();		
+		}.start();
 	}
 
 	protected Buddy buddyNotFromList(ua.snuk182.asia.core.dataentity.Message message, final AccountView account) {
@@ -1857,32 +1970,33 @@ public class RuntimeService extends Service {
 		try {
 			uiCallback.contactListUpdated(account);
 			serviceBinder.requestBuddyShortInfo(account.serviceId, newBuddy.protocolUid);
-		} catch (NullPointerException npe) {			
+		} catch (NullPointerException npe) {
 		} catch (RemoteException e) {
 			ServiceUtils.log(e);
 		}
 
 		return newBuddy;
 	}
-	
-	private void statusbarNotifyAccountChanged(boolean runSeparateThread){
+
+	private void statusbarNotifyAccountChanged(boolean runSeparateThread) {
 		statusbarNotifyAccountChanged((byte) -1, null, runSeparateThread);
 	}
-	
-	private void statusbarNotifyAccountChanged(){
+
+	private void statusbarNotifyAccountChanged() {
 		statusbarNotifyAccountChanged((byte) -1, null, true);
 	}
-	
-	public void notificationToast(final String text){
-		handler.post(new Runnable(){
+
+	public void notificationToast(final String text) {
+		handler.post(new Runnable() {
 
 			@Override
 			public void run() {
 				Toast toast = Toast.makeText(RuntimeService.this, text, Toast.LENGTH_LONG);
-				//toast.setGravity(Gravity.CENTER_HORIZONTAL|Gravity.TOP, 0, 4);
+				// toast.setGravity(Gravity.CENTER_HORIZONTAL|Gravity.TOP, 0,
+				// 4);
 				toast.show();
 			}
-			
+
 		});
 	}
 
@@ -1893,24 +2007,25 @@ public class RuntimeService extends Service {
 			public void run() {
 				String statusbarNotification = appOptions.getString(getApplicationContext().getResources().getString(R.string.key_statusbar_type));
 				if (statusbarNotification != null && statusbarNotification.equals(getApplicationContext().getResources().getString(R.string.value_statusbar_type_account_status))) {
-					synchronized(notificator){
-						//order of application bar icons is changed in Android 2.3
-						if (Build.VERSION.SDK_INT < 9){
+					synchronized (notificator) {
+						// order of application bar icons is changed in Android
+						// 2.3
+						if (Build.VERSION.SDK_INT < 9) {
 							for (Account a : accounts) {
 								if (!a.accountView.isEnabled) {
-									notificator.cancel(a.accountView);									
-								} else if (serviceId > -1 && a.accountView.serviceId == serviceId){
+									notificator.cancel(a.accountView);
+								} else if (serviceId > -1 && a.accountView.serviceId == serviceId) {
 									notificator.notifyAccountChanged(a.accountView, message);
 								} else {
 									notificator.notifyAccountChanged(a.accountView, null);
 								}
 							}
 						} else {
-							for (int i=accounts.size()-1; i>=0; i--) {
+							for (int i = accounts.size() - 1; i >= 0; i--) {
 								Account a = accounts.get(i);
 								if (!a.accountView.isEnabled) {
-									notificator.cancel(a.accountView);									
-								} else if (serviceId > -1 && a.accountView.serviceId == serviceId){
+									notificator.cancel(a.accountView);
+								} else if (serviceId > -1 && a.accountView.serviceId == serviceId) {
 									notificator.notifyAccountChanged(a.accountView, message);
 								} else {
 									notificator.notifyAccountChanged(a.accountView, null);
@@ -1922,20 +2037,17 @@ public class RuntimeService extends Service {
 			}
 
 		};
-		
-		if (runSeparateThread){
+
+		if (runSeparateThread) {
 			thread.start();
 		} else {
 			thread.run();
 		}
 	}
-	
-	private static final Class<?>[] mSetForegroundSignature = new Class[] {
-	    boolean.class};
-	private static final Class<?>[] mStartForegroundSignature = new Class[] {
-	    int.class, Notification.class};
-	private static final Class<?>[] mStopForegroundSignature = new Class[] {
-	    boolean.class};
+
+	private static final Class<?>[] mSetForegroundSignature = new Class[] { boolean.class };
+	private static final Class<?>[] mStartForegroundSignature = new Class[] { int.class, Notification.class };
+	private static final Class<?>[] mStopForegroundSignature = new Class[] { boolean.class };
 
 	private NotificationManager mNM;
 	private Method mSetForeground;
@@ -1946,15 +2058,15 @@ public class RuntimeService extends Service {
 	private Object[] mStopForegroundArgs = new Object[1];
 
 	void invokeMethod(Method method, Object[] args) {
-	    try {
-	        method.invoke(this, args);
-	    } catch (InvocationTargetException e) {
-	        // Should not happen.
-	        Log.w("ApiDemos", "Unable to invoke method", e);
-	    } catch (IllegalAccessException e) {
-	        // Should not happen.
-	        Log.w("ApiDemos", "Unable to invoke method", e);
-	    }
+		try {
+			method.invoke(this, args);
+		} catch (InvocationTargetException e) {
+			// Should not happen.
+			Log.w("ApiDemos", "Unable to invoke method", e);
+		} catch (IllegalAccessException e) {
+			// Should not happen.
+			Log.w("ApiDemos", "Unable to invoke method", e);
+		}
 	}
 
 	/**
@@ -1962,18 +2074,18 @@ public class RuntimeService extends Service {
 	 * APIs if it is not available.
 	 */
 	void startForegroundCompat(int id, Notification notification) {
-	    // If we have the new startForeground API, then use it.
-	    if (mStartForeground != null) {
-	        mStartForegroundArgs[0] = Integer.valueOf(id);
-	        mStartForegroundArgs[1] = notification;
-	        invokeMethod(mStartForeground, mStartForegroundArgs);
-	        return;
-	    }
+		// If we have the new startForeground API, then use it.
+		if (mStartForeground != null) {
+			mStartForegroundArgs[0] = Integer.valueOf(id);
+			mStartForegroundArgs[1] = notification;
+			invokeMethod(mStartForeground, mStartForegroundArgs);
+			return;
+		}
 
-	    // Fall back on the old API.
-	    mSetForegroundArgs[0] = Boolean.TRUE;
-	    invokeMethod(mSetForeground, mSetForegroundArgs);
-	    mNM.notify(id, notification);
+		// Fall back on the old API.
+		mSetForegroundArgs[0] = Boolean.TRUE;
+		invokeMethod(mSetForeground, mSetForegroundArgs);
+		mNM.notify(id, notification);
 	}
 
 	/**
@@ -1981,17 +2093,17 @@ public class RuntimeService extends Service {
 	 * APIs if it is not available.
 	 */
 	void stopForegroundCompat(int id) {
-	    // If we have the new stopForeground API, then use it.
-	    if (mStopForeground != null) {
-	        mStopForegroundArgs[0] = Boolean.TRUE;
-	        invokeMethod(mStopForeground, mStopForegroundArgs);
-	        return;
-	    }
+		// If we have the new stopForeground API, then use it.
+		if (mStopForeground != null) {
+			mStopForegroundArgs[0] = Boolean.TRUE;
+			invokeMethod(mStopForeground, mStopForegroundArgs);
+			return;
+		}
 
-	    // Fall back on the old API.  Note to cancel BEFORE changing the
-	    // foreground state, since we could be killed at that point.
-	    mNM.cancel(id);
-	    mSetForegroundArgs[0] = Boolean.FALSE;
-	    invokeMethod(mSetForeground, mSetForegroundArgs);
+		// Fall back on the old API. Note to cancel BEFORE changing the
+		// foreground state, since we could be killed at that point.
+		mNM.cancel(id);
+		mSetForegroundArgs[0] = Boolean.FALSE;
+		invokeMethod(mSetForeground, mSetForegroundArgs);
 	}
 }

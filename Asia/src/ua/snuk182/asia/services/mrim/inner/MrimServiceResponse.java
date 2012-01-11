@@ -35,4 +35,6 @@ public interface MrimServiceResponse {
 	public static final short RES_FILEPROGRESS = 28;
 	public static final short RES_MESSAGEACK = 29;
 	public static final short RES_TYPING = 30;
+	
+	public static final short RES_KEEPALIVE = 31;
 }

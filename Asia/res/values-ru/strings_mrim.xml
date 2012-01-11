@@ -5,6 +5,7 @@
 		<item>Пароль</item>
 		<item>Хост</item>
 		<item>Порт</item>
+		<item>Таймаут пинга (секунды)</item>
 	</string-array>
 	
 	<string-array name="mrim_xstatus_descr">	

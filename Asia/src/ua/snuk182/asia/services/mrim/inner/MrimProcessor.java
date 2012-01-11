@@ -32,8 +32,9 @@ public final class MrimProcessor {
 	
 	private Map<Long, MessageData> msgIDs = new HashMap<Long, MessageData>();
 
-	private static final String ALIAS = "Asia IM";
-	private static final String VERSION_INFO = "client=\"Asia IM\" title=\"Asia IM\" version=\"1.0\"";
+	private static final String ALIAS = "Mail.ru Agent for Android";
+	private static final String VERSION_INFO = "client=\"magent\" title=\"Asia IM\" version=\"5\"";
+	//private static final String VERSION_INFO = "client=\"magent\" version=\"5.8\" build=\"4139\"";
 	private static final String LANG = "ru";
 	private static final String ICON_SERVER = "http://obraz.foto.mail.ru/%s/%s/_mrimavatar";
 	
@@ -70,7 +71,7 @@ public final class MrimProcessor {
 
 	public void parsePacketTail(MrimPacket packet) {
 		// TODO remove
-		service.log("packet " + packet.type);
+		//service.log("packet " + packet.type);
 
 		if (packet.type == MrimConstants.MRIM_CS_HELLO) {
 			service.log("server hello");
@@ -79,6 +80,9 @@ public final class MrimProcessor {
 		}
 
 		switch (packet.type) {
+		case MrimConstants.MRIM_CS_MPOP_SESSION:
+			service.getServiceResponse().respond(MrimServiceResponse.RES_KEEPALIVE);
+			break;
 		case MrimConstants.MRIM_CS_HELLO_ACK:
 			parsePingFreq(packet);
 			proceedLogin();
@@ -132,6 +136,12 @@ public final class MrimProcessor {
 			break;
 		case 0x1079:
 			service.log("some 1079 received");
+			break;
+		case MrimConstants.MRIM_CS_FILE_TRANSFER:
+			service.getFileTransferEngine().parseFTRequest(packet);
+			break;
+		case MrimConstants.MRIM_CS_FILE_TRANSFER_ACK:
+			service.getFileTransferEngine().parseFTResponse(packet);
 			break;
 		}
 		return;
@@ -291,7 +301,7 @@ public final class MrimProcessor {
 		info.xstatusName = xstatusname;
 		info.xstatusText = xstatustext;
 		
-		service.log("uid "+email+" status "+status+" / "+statusName+" / "+xstatusname+" / "+xstatustext);
+		service.log("uid "+email+" status "+status+" / "+statusName+" / "+xstatusname+" / "+xstatustext+" / "+new String(packet.rawData, pos, packet.rawData.length-pos-1));
 		
 		service.getServiceResponse().respond(MrimServiceResponse.RES_BUDDYSTATECHANGED, info);
 	}
@@ -793,6 +803,13 @@ public final class MrimProcessor {
 		message.messageId = VERSION_INFO.hashCode();
 		
 		sendMessage(message);
+	}
+
+	public void askForWebAuthKey() {
+		MrimPacket packet = new MrimPacket();
+		packet.type = MrimConstants.MRIM_CS_GET_MPOP_SESSION;
+		
+		service.getRunnableService().sendToSocket(packet);
 	}
 
 }

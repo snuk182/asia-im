@@ -8,12 +8,16 @@ import java.util.List;
 
 import ua.snuk182.asia.core.dataentity.Buddy;
 import ua.snuk182.asia.core.dataentity.BuddyGroup;
+import ua.snuk182.asia.core.dataentity.FileInfo;
+import ua.snuk182.asia.core.dataentity.FileMessage;
 import ua.snuk182.asia.core.dataentity.OnlineInfo;
 import ua.snuk182.asia.core.dataentity.TextMessage;
 import ua.snuk182.asia.services.api.ProtocolUtils;
 import ua.snuk182.asia.services.mrim.inner.MrimConstants;
 import ua.snuk182.asia.services.mrim.inner.dataentity.MrimBuddy;
+import ua.snuk182.asia.services.mrim.inner.dataentity.MrimFileTransfer;
 import ua.snuk182.asia.services.mrim.inner.dataentity.MrimGroup;
+import ua.snuk182.asia.services.mrim.inner.dataentity.MrimIncomingFile;
 import ua.snuk182.asia.services.mrim.inner.dataentity.MrimMessage;
 import ua.snuk182.asia.services.mrim.inner.dataentity.MrimOnlineInfo;
 
@@ -181,6 +185,7 @@ public final class MrimEntityAdapter {
 		out.name = in.name;
 		out.groupId = in.groupId;
 		out.status = mrimUserStatus2UserStatus(in.onlineInfo.status, in.onlineInfo.xstatusId);
+		out.canFileShare = out.status != Buddy.ST_OFFLINE;
 		out.xstatus = mrimXStatus2XStatus(in.onlineInfo.xstatusId);
 		out.xstatusName = in.onlineInfo.xstatusName;
 		out.xstatusDescription = in.onlineInfo.xstatusText;
@@ -294,11 +299,24 @@ public final class MrimEntityAdapter {
 		OnlineInfo out = new OnlineInfo();
 		out.userStatus = mrimUserStatus2UserStatus(in.status, in.xstatusId);
 		out.xstatus = mrimXStatus2XStatus(in.xstatusId);
-		out.canFileShare = false;
+		out.canFileShare = true;
 		out.xstatusName = in.xstatusName;
 		out.xstatusDescription = in.xstatusText;
 		out.protocolUid = in.uin;
 
 		return out;
+	}
+
+	public static final FileMessage mrimFileTransferMessage2FileMessage(MrimFileTransfer mrimFileTransfer, byte serviceId) {
+		FileMessage fm = new FileMessage(mrimFileTransfer.buddyMrid);
+		fm.serviceId = serviceId;
+		fm.messageId = mrimFileTransfer.messageId;
+		for (MrimIncomingFile file: mrimFileTransfer.incomingFiles){
+			FileInfo info = new FileInfo();
+			info.filename = file.filename;
+			info.size = file.filesize;
+			fm.files.add(info);
+		}
+		return fm;
 	}
 }

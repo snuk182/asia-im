@@ -350,6 +350,9 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 	
 	public void updated(AccountView origin, boolean refreshContacts){
 		if (origin!=null){
+			/*if (origin.getConnectionState() == account.getConnectionState()){
+				refreshContacts = false;
+			}*/
 			this.account.merge(origin);
 		}
 		if (account.getConnectionState() != AccountService.STATE_CONNECTING && account.getConnectionState() != AccountService.STATE_DISCONNECTING){
