@@ -71,6 +71,7 @@ public final class MrimConstants {
     public static final int MRIM_CS_LOGIN_ACK = 0x1004;
     public static final int MRIM_CS_LOGIN_REJ = 0x1005;
     public static final int MRIM_CS_LOGIN2 = 0x1038;
+    public static final int MRIM_CS_LOGIN3 = 0x1078;
     public static final int MRIM_CS_LOGOUT = 0x1013;
     public static final int MRIM_CS_MAILBOX_STATUS = 0x1033;
     public static final int MRIM_CS_MESSAGE = 0x1008;

@@ -59,10 +59,12 @@ public class PreferencesView extends PreferenceActivity implements ITabContent {
 				pref.setOnPreferenceChangeListener(new OnPreferenceChangeListener(){
 
 					@Override
-					public boolean onPreferenceChange(Preference arg0, Object arg1) {
-						options.putString(arg0.getKey(), arg1.toString());
+					public boolean onPreferenceChange(Preference pref, Object arg1) {
+						options.putString(pref.getKey(), arg1.toString());
 						try {
-							entryPoint.runtimeService.savePreference(arg0.getKey(), arg1.toString(), account!=null ? account.serviceId : -1);
+							entryPoint.runtimeService.savePreference(pref.getKey(), arg1.toString(), account!=null ? account.serviceId : -1);
+							
+							fillSummary(pref, arg1.toString());
 						} catch (NullPointerException npe) {	
 							ServiceUtils.log(npe);
 						} catch (RemoteException e) {
@@ -78,16 +80,15 @@ public class PreferencesView extends PreferenceActivity implements ITabContent {
 					}
 					if (pref instanceof EditTextPreference){
 						((EditTextPreference)pref).setText(value);
-						pref.setSummary(value);
 					}
 					if (pref instanceof ListPreference){
 						((ListPreference)pref).setValue( value);
-						pref.setSummary(((ListPreference)pref).getEntry());
 					}
 					if (pref instanceof SeekBarPreference){
 						((SeekBarPreference)pref).setValue(value);
-						pref.setSummary(value);
 					}
+					
+					fillSummary(pref, value);
 				}
 			}
 		}
@@ -104,6 +105,18 @@ public class PreferencesView extends PreferenceActivity implements ITabContent {
 				updateStyleForTitle(child, bgType);				
 			}
 		});
+	}
+	
+	private void fillSummary(Preference pref, String value){
+		if (pref instanceof EditTextPreference){
+			pref.setSummary(value);
+		}
+		if (pref instanceof ListPreference){
+			pref.setSummary(((ListPreference)pref).getEntry());
+		}
+		if (pref instanceof SeekBarPreference){
+			pref.setSummary(value);
+		}
 	}
 
 	@Override
