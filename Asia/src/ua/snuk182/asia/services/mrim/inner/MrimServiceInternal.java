@@ -235,13 +235,13 @@ public final class MrimServiceInternal {
 				packet.seqNumber = getFlapSeqNumber();
 				byte[] out = processor.packet2Bytes(packet);
 				
-				if (currentState != STATE_AUTHENTICATING){
+				/*if (currentState != STATE_AUTHENTICATING){
 					log("To be sent "+ProtocolUtils.getSpacedHexString(out));
 				} else {
 					log("smth secret to be sent");
-				}
+				}*/
 				
-				//log("To be sent "+ProtocolUtils.getSpacedHexString(out));
+				log("To be sent "+ProtocolUtils.getSpacedHexString(out));
 				
 				os.write(out);
 				
@@ -399,6 +399,22 @@ public final class MrimServiceInternal {
 			}
 			
 			getFileTransferEngine().sendFiles(buddyMrid, files, internalIp);
+			break;
+		case REQ_FILERESPOND:
+			
+			final byte[] intIp;
+			if (args.length > 2){
+				intIp = (byte[]) args[2];
+			} else {
+				intIp = new byte[]{127,0,0,1};
+			}
+			
+			new Thread("File accept response"){
+				@Override
+				public void run(){
+					getFileTransferEngine().fileReceiveResponse((Long)args[0], (Boolean)args[1], intIp);
+				}
+			}.start();
 			break;
 		}
 		return null;

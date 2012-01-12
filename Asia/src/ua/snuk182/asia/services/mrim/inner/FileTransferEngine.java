@@ -103,11 +103,12 @@ public class FileTransferEngine {
 			File file = frs.transfer.files.get(i);
 			ln += file.length();
 
-			sb.append(file.getName().replace(':', '_').replace(';', '_'));
-			sb.append(IN_DATA_DIVIDER);
+			sb.append(file.getName().replaceAll(IN_DATA_DIVIDER, "_").replaceAll(LIST_DATA_DIVIDER, "_"));
+			//sb.append(IN_DATA_DIVIDER);
+			sb.append(LIST_DATA_DIVIDER);
 			sb.append(file.length());
 			if (i < frs.transfer.files.size() - 1) {
-				sb.append(';');
+				sb.append(LIST_DATA_DIVIDER);
 			}
 		}
 		byte[] lengthSum = ProtocolUtils.long2ByteLE(ln);
@@ -445,7 +446,7 @@ public class FileTransferEngine {
 					service.log(transfer.buddyMrid + " asks for file " + fileInfo);
 
 					for (File fi : transfer.files) {
-						if (fi.getName().equals(fileInfo)) {
+						if (fi.getName().replaceAll(IN_DATA_DIVIDER, "_").replaceAll(LIST_DATA_DIVIDER, "_").equals(fileInfo)) {
 							sendFileToSocket(fi);
 							return;
 						}
@@ -534,44 +535,102 @@ public class FileTransferEngine {
 	public void parseFTRequest(MrimPacket packet) {
 		MrimFileTransfer transfer = new MrimFileTransfer();
 
-		int i = 44;
-		transfer.buddyMrid = MrimEntityAdapter.lpsa2String(packet.rawData, i);
-		i += 4 + transfer.buddyMrid.length();
-		transfer.messageId = ProtocolUtils.bytes2IntLE(packet.rawData, i);
-		i += 4;
-		i += 4; // total filesize - useless
-		i += 4; // total file info size - useless
+		int version = ProtocolUtils.bytes2IntLE(packet.rawData, 4);
+		
+		if (version > MrimConstants.PROTO_VERSION){
+			int i = 44;
+			transfer.buddyMrid = MrimEntityAdapter.lpsa2String(packet.rawData, i);
+			i += 4 + transfer.buddyMrid.length();
+			transfer.messageId = ProtocolUtils.bytes2IntLE(packet.rawData, i);
+			i += 4;
+			i += 4; // total filesize - useless
+			i += 4; // total file info size - useless
 
-		String fileStr = MrimEntityAdapter.lpsa2String(packet.rawData, i);
+			String fileStr = MrimEntityAdapter.lpsa2String(packet.rawData, i);
 
-		String[] strFiles = fileStr.split(LIST_DATA_DIVIDER);
-		transfer.incomingFiles = new LinkedList<MrimIncomingFile>();
-		for (String file : strFiles) {
-			String[] attrs = file.split(IN_DATA_DIVIDER);
-			MrimIncomingFile ifile = new MrimIncomingFile();
-			ifile.filename = attrs[0];
-			ifile.filesize = Long.parseLong(attrs[1]);
-			transfer.incomingFiles.add(ifile);
+			parseFiles(fileStr, transfer);
+			
+			i += 4 + fileStr.length();
+
+			int nextPacket = ProtocolUtils.bytes2IntLE(packet.rawData, i);
+			i += 4;
+			if (nextPacket == 0x50){
+				int count = ProtocolUtils.bytes2IntLE(packet.rawData, i);
+				i += 4;
+				for (int ii=0; ii<count; ii++){
+					fileStr = MrimEntityAdapter.lpsw2String(packet.rawData, i);
+					i+=4 + 2*fileStr.length();
+					
+					parseFiles(fileStr, transfer);					
+				}
+			}
+
+			String ipData = MrimEntityAdapter.lpsa2String(packet.rawData, i);
+			String[] ipDataParts = ipData.split(LIST_DATA_DIVIDER);
+			for (String data : ipDataParts) {
+				String[] connection = data.split(IN_DATA_DIVIDER);
+
+				transfer.host = connection[0];
+				transfer.port = Integer.parseInt(connection[1]);
+
+				break; // TODO do we need more?
+			}
+
+			transfers.add(transfer);
+		} else {
+			int i = 44;
+			transfer.buddyMrid = MrimEntityAdapter.lpsa2String(packet.rawData, i);
+			i += 4 + transfer.buddyMrid.length();
+			transfer.messageId = ProtocolUtils.bytes2IntLE(packet.rawData, i);
+			i += 4;
+			i += 4; // total filesize - useless
+			i += 4; // total file info size - useless
+
+			String fileStr = MrimEntityAdapter.lpsa2String(packet.rawData, i);
+
+			String[] strFiles = fileStr.split(LIST_DATA_DIVIDER);
+			transfer.incomingFiles = new LinkedList<MrimIncomingFile>();
+			for (String file : strFiles) {
+				String[] attrs = file.split(IN_DATA_DIVIDER);
+				MrimIncomingFile ifile = new MrimIncomingFile();
+				ifile.filename = attrs[0];
+				ifile.filesize = Long.parseLong(attrs[1]);
+				transfer.incomingFiles.add(ifile);
+			}
+			
+			i += 4 + fileStr.length();
+
+			i += 4; // data divider
+
+			String ipData = MrimEntityAdapter.lpsa2String(packet.rawData, i);
+			String[] ipDataParts = ipData.split(LIST_DATA_DIVIDER);
+			for (String data : ipDataParts) {
+				String[] connection = data.split(IN_DATA_DIVIDER);
+
+				transfer.host = connection[0];
+				transfer.port = Integer.parseInt(connection[1]);
+
+				break; // TODO do we need more?
+			}
+
+			transfers.add(transfer);
 		}
-
-		i += 4 + fileStr.length();
-
-		i += 4; // data divider
-
-		String ipData = MrimEntityAdapter.lpsa2String(packet.rawData, i);
-		String[] ipDataParts = ipData.split(LIST_DATA_DIVIDER);
-		for (String data : ipDataParts) {
-			String[] connection = data.split(IN_DATA_DIVIDER);
-
-			transfer.host = connection[0];
-			transfer.port = Integer.parseInt(connection[1]);
-
-			break; // TODO do we need more?
-		}
-
-		transfers.add(transfer);
 
 		service.getServiceResponse().respond(MrimServiceResponse.RES_FILEMESSAGE, transfer);
+	}
+
+	private void parseFiles(String fileStr, MrimFileTransfer transfer) {
+		String[] strFiles = fileStr.split(LIST_DATA_DIVIDER);
+		transfer.incomingFiles = new LinkedList<MrimIncomingFile>();
+		
+		for (int ii=0; ii<strFiles.length; ){
+			MrimIncomingFile ifile = new MrimIncomingFile();
+			ifile.filename = strFiles[ii];
+			ii++;
+			ifile.filesize = Long.parseLong(strFiles[ii]);
+			transfer.incomingFiles.add(ifile);
+			ii++;
+		}
 	}
 
 	public void parseFTResponse(MrimPacket packet) {
@@ -583,13 +642,7 @@ public class FileTransferEngine {
 		int msgId = ProtocolUtils.bytes2IntLE(packet.rawData, i);
 		i += 4;
 
-		MrimFileTransfer transfer = null;
-		for (MrimFileTransfer tr : transfers) {
-			if (tr.messageId == msgId) {
-				transfer = tr;
-				break;
-			}
-		}
+		MrimFileTransfer transfer = findTransfer(msgId);
 
 		if (transfer == null)
 			return;
@@ -617,6 +670,15 @@ public class FileTransferEngine {
 			}
 			break;
 		}
+	}
+
+	private MrimFileTransfer findTransfer(int msgId) {
+		for (MrimFileTransfer tr : transfers) {
+			if (tr.messageId == msgId) {
+				return tr;
+			}
+		}
+		return null;
 	}
 
 	private void connectPeer(MrimFileTransfer transfer, FileRunnableService runnable) {
@@ -670,7 +732,7 @@ public class FileTransferEngine {
 
 			FileRunnableService frs = createPeer(transfer);
 
-			String ipData = ProtocolUtils.getIPString(localIp) + IN_DATA_DIVIDER + frs.socket.getLocalPort();
+			String ipData = ProtocolUtils.getIPString(localIp) + IN_DATA_DIVIDER + frs.server.getLocalPort();
 
 			packet.rawData = ProtocolUtils.concatByteArrays(packet.rawData, ipData.getBytes());
 
@@ -762,6 +824,24 @@ public class FileTransferEngine {
 					service.log(e);
 				}
 			}
+		}
+	}
+
+	public void fileReceiveResponse(Long msgId, Boolean accept, byte[] internalIp) {
+		MrimFileTransfer transfer = findTransfer(msgId.intValue());		
+		
+		if (transfer == null) {
+			service.log("ft: no message");
+			return;
+		}
+		
+		this.localIp = internalIp;
+		if (!accept) {
+			service.log("ft: reject "+transfer.messageId);
+			service.getRunnableService().sendToSocket(getAnswerMessage(transfer, MrimConstants.FILE_TRANSFER_STATUS_DECLINE));
+		} else {
+			service.log("ft: accept "+transfer.messageId);
+			connectPeer(transfer, null);
 		}
 	}
 }
