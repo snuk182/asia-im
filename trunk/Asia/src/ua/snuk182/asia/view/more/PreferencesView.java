@@ -112,6 +112,7 @@ public class PreferencesView extends PreferenceActivity implements ITabContent {
 			pref.setSummary(value);
 		}
 		if (pref instanceof ListPreference){
+			((ListPreference)pref).setValue( value);
 			pref.setSummary(((ListPreference)pref).getEntry());
 		}
 		if (pref instanceof SeekBarPreference){

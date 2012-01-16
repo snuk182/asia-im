@@ -35,6 +35,8 @@ public class FileTransferItem extends RelativeLayout {
 	
 	public FileTransferItem(final FileTransferView ftView, final long messageId, String filename, final Buddy buddy, boolean incoming, int progress, int total, String error) {
 		super(ftView.getEntryPoint());
+		ServiceUtils.log("ft "+filename+" "+progress);
+		
 		this.ftView = ftView;
 		this.messageId = messageId;
 		this.filePath = filename;

@@ -20,5 +20,11 @@ public class MrimFileTransfer implements Serializable {
 	public String host;
 	public int port;
 	
-	public boolean mirror = false;
+	public byte connection = CONN_PEER;
+
+	public byte[] proxySessionId = null;
+	
+	public static final byte CONN_PEER = 0;
+	public static final byte CONN_MIRROR = 1;
+	public static final byte CONN_PROXY = 2;
 }

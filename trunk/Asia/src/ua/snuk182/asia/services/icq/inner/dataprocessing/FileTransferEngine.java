@@ -115,7 +115,7 @@ public class FileTransferEngine {
 		Socket socket;
 		try {
 			socket = new Socket();
-			socket.connect(new InetSocketAddress(InetAddress.getByAddress(ProtocolUtils.ipString2ByteBE(message.rvIp)), message.externalPort), 10000);
+			socket.connect(new InetSocketAddress(InetAddress.getByAddress(ProtocolUtils.ipString2ByteBE(message.rvIp)), message.externalPort), 7000);
 		} catch (UnknownHostException e) {
 			service.log(e);
 			socket = null;

@@ -75,7 +75,7 @@ public final class MrimServiceInternal {
 	
 	private MrimRunnableService runnableService;
 	private final List<MrimPacket> packets = Collections.synchronizedList(new ArrayList<MrimPacket>());
-	private MrimProcessor processor = new MrimProcessor(this);
+	MrimProcessor processor = new MrimProcessor(this);
 	
 	private short currentState = STATE_DISCONNECTED;
 	//private int currentStatus = MrimConstants.STATUS_ONLINE;
@@ -220,7 +220,12 @@ public final class MrimServiceInternal {
 					}				
 				}catch(IOException e){
 					log(e);
-					disconnect();					
+					new Thread("mrim disconnection"){
+						@Override
+						public void run(){
+							disconnect();	
+						}
+					}.start();				
 				}catch (Exception e) {
 					log(e);
 				} 

@@ -244,7 +244,12 @@ public class ICQServiceInternal {
 					}				
 				}catch(IOException e){
 					log(e);
-					disconnect();					
+					new Thread("icq disconnection"){
+						@Override
+						public void run(){
+							disconnect();	
+						}
+					}.start();			
 				}catch (Exception e) {
 					log(e);
 				} 
