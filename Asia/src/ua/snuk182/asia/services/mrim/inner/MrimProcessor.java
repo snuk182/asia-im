@@ -147,6 +147,12 @@ public final class MrimProcessor {
 		case MrimConstants.MRIM_CS_FILE_TRANSFER_ACK:
 			service.getFileTransferEngine().parseFTResponse(packet);
 			break;
+		case MrimConstants.MRIM_CS_PROXY:
+			service.getFileTransferEngine().parseFTProxyConnectionRequest(packet);
+			break;
+		case MrimConstants.MRIM_CS_PROXY_ACK:
+			service.getFileTransferEngine().parseFTProxyAck(packet);
+			break;
 		}
 		return;
 	}
@@ -987,6 +993,8 @@ public final class MrimProcessor {
 
 	
 	private class WeirdLoginEntity implements Serializable {
+		private static final long serialVersionUID = -5484794243398170724L;
+		
 		public int type;
 		public final List<byte[]> blobs = new LinkedList<byte[]>();
 		

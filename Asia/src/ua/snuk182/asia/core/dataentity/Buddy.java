@@ -237,6 +237,7 @@ public class Buddy implements Parcelable, Comparable<Buddy> {
 		BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inDither = false;
 		options.inScaled = false;
+		options.inPurgeable=true;
 		options.inPreferredConfig = Bitmap.Config.ARGB_8888;
 
 		return BitmapFactory.decodeStream(fis, null, options);

@@ -78,6 +78,7 @@ public class MrimService extends AccountService {
 				internal.request(MrimServiceInternal.REQ_DISCONNECT);
 				break;
 			case AccountService.REQ_CONNECT:
+				sendKeepalive();
 				run(args);
 				break;
 			case AccountService.REQ_GETCONTACTLIST:
@@ -143,8 +144,7 @@ public class MrimService extends AccountService {
 					ServiceUtils.log((String)args[0]);
 					break;
 				case MrimServiceResponse.RES_CONNECTED:
-					serviceResponse.respond(IAccountServiceResponse.RES_CONNECTED, getServiceId());
-					sendKeepalive();
+					serviceResponse.respond(IAccountServiceResponse.RES_CONNECTED, getServiceId());					
 					break;
 				case MrimServiceResponse.RES_DISCONNECTED:
 					closeKeepaliveThread();
@@ -203,7 +203,7 @@ public class MrimService extends AccountService {
 				case MrimServiceResponse.RES_GROUPMODIFIED:
 					return serviceResponse.respond(IAccountServiceResponse.RES_GROUPMODIFIED, getServiceId(), MrimEntityAdapter.MrimBuddyGroup2BuddyGroup((MrimBuddyGroup) args[0], internal.getMrid(), getServiceId()));
 				*/case MrimServiceResponse.RES_FILEPROGRESS:
-					return serviceResponse.respond(IAccountServiceResponse.RES_FILEPROGRESS, getServiceId(), ProtocolUtils.bytes2LongBE((byte[]) args[0], 0), args[1], args[2], args[3], args[4], args[5], (args.length > 6)?args[6] : null);
+					return serviceResponse.respond(IAccountServiceResponse.RES_FILEPROGRESS, getServiceId(), args[0], args[1], args[2], args[3], args[4], args[5], (args.length > 6)?args[6] : null);
 				case MrimServiceResponse.RES_MESSAGEACK:
 					return serviceResponse.respond(IAccountServiceResponse.RES_MESSAGEACK, getServiceId(), args[0], args[1], args[2]);
 				case MrimServiceResponse.RES_TYPING:

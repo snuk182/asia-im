@@ -74,6 +74,10 @@ public final class MrimConstants {
     public static final int MRIM_CS_LOGIN3 = 0x1078;
     public static final int MRIM_CS_LOGOUT = 0x1013;
     public static final int MRIM_CS_MAILBOX_STATUS = 0x1033;
+    public static final int MRIM_CS_PROXY = 0x1044;
+    public static final int MRIM_CS_PROXY_ACK = 0x1045;    
+    public static final int MRIM_CS_PROXY_HELLO = 0x1046;
+    public static final int MRIM_CS_PROXY_HELLO_ACK = 0x1047;  
     public static final int MRIM_CS_MESSAGE = 0x1008;
     public static final int MRIM_CS_MESSAGE_ACK = 0x1009;
     public static final int MRIM_CS_MESSAGE_RECV = 0x1011;
@@ -119,5 +123,18 @@ public final class MrimConstants {
     public static final int STATUS_ONLINE = 0x01;
     public static final int STATUS_OTHER = 0x04;
     public static final int STATUS_UNDETERMINATED = 0x03;
+    
+    public static final int MRIM_PROXY_TYPE_VOICE = 1;
+    public static final int MRIM_PROXY_TYPE_FILES = 2;
+    public static final int MRIM_PROXY_TYPE_CALLOUT = 3;
+    
+    public static final int PROXY_STATUS_OK = 1;
+    public static final int PROXY_STATUS_DECLINE = 0;
+    public static final int PROXY_STATUS_ERROR = 2;
+    public static final int PROXY_STATUS_INCOMPATIBLE_VERS = 3;
+    public static final int PROXY_STATUS_NOHARDWARE = 4;
+    public static final int PROXY_STATUS_MIRROR = 5;
+    public static final int PROXY_STATUS_CLOSED = 6;
+
 
 }

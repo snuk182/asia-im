@@ -174,6 +174,7 @@ public class FileTransferView extends ScrollView implements ITabContent, IHasFil
 
 	@Override
 	public void notifyFileProgress(long messageId, Buddy buddy, String filename, long totalSize, long sizeTransferred, Boolean isReceive, String error) {
+		ServiceUtils.log("progress "+messageId+" "+sizeTransferred+"/"+totalSize);
 		FileTransferItem item = null;
 		for (int i = 0; i<layout.getChildCount(); i++){
 			FileTransferItem ft = (FileTransferItem) layout.getChildAt(i);

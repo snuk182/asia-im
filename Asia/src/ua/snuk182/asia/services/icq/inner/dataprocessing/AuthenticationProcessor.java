@@ -355,6 +355,7 @@ public class AuthenticationProcessor extends AbstractFlapProcessor {
 				service.getServiceResponse().respond(ICQServiceResponse.RES_ACCOUNTUPDATED, service.getOnlineInfo());
 				if (service.getCurrentState() == ICQServiceInternal.STATE_AUTHENTICATING && endLogin){
 					deactivateTimer();
+					service.getServiceResponse().respond(ICQServiceResponse.RES_KEEPALIVE);
 					service.startMainProcessor();
 				}
 				break;

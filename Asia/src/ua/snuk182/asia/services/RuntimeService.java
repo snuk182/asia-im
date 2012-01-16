@@ -6,10 +6,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -998,16 +998,18 @@ public class RuntimeService extends Service {
 
 	public byte[] getMyIp() {
 		try {
+			List<String> ips = new LinkedList<String>();
 			for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
 				NetworkInterface intf = en.nextElement();
 				for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
 					InetAddress inetAddress = enumIpAddr.nextElement();
 					if (!inetAddress.isLoopbackAddress()) {
-						return ServiceUtils.ipString2ByteBE(inetAddress.getHostAddress());
+						ips.add(inetAddress.getHostAddress());						
 					}
 				}
 			}
-		} catch (SocketException ex) {
+			return ServiceUtils.ipString2ByteBE(ips.get(0));
+		} catch (Exception ex) {
 			ServiceUtils.log(ex);
 		}
 		return new byte[]{0,0,0,0};
