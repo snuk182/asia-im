@@ -95,7 +95,6 @@ import ua.snuk182.asia.services.ServiceUtils;
 import ua.snuk182.asia.services.api.AccountService;
 import ua.snuk182.asia.services.api.IAccountServiceResponse;
 import ua.snuk182.asia.services.api.ProtocolException;
-import ua.snuk182.asia.services.icq.inner.ICQServiceResponse;
 import android.content.Context;
 
 public class XMPPService extends AccountService implements ConnectionListener, MessageListener, ChatManagerListener, RosterListener, MessageEventNotificationListener, ChatStateListener, FileTransferListener {
@@ -354,9 +353,9 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 							while (!transfer.isDone()) {
 								try {
 									if (transfer.getStatus() == Status.error) {
-										serviceResponse.respond(ICQServiceResponse.RES_FILEPROGRESS, serviceId, (long) request.hashCode(), request.getFileName(), 100L, (long) transfer.getProgress() * 100, false, transfer.getError().getMessage(), fileMessage.from);
+										serviceResponse.respond(IAccountServiceResponse.RES_FILEPROGRESS, serviceId, (long) request.hashCode(), request.getFileName(), 100L, (long) transfer.getProgress() * 100, false, transfer.getError().getMessage(), fileMessage.from);
 									} else {
-										serviceResponse.respond(ICQServiceResponse.RES_FILEPROGRESS, serviceId, (long) request.hashCode(), request.getFileName(), 100L, (long) transfer.getProgress() * 100, false, null, fileMessage.from);
+										serviceResponse.respond(IAccountServiceResponse.RES_FILEPROGRESS, serviceId, (long) request.hashCode(), request.getFileName(), 100L, (long) transfer.getProgress() * 100, false, null, fileMessage.from);
 									}
 									Thread.sleep(1000);
 								} catch (InterruptedException e) {
@@ -394,9 +393,9 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 					while (!transfer.isDone()) {
 						try {
 							if (transfer.getStatus() == Status.error) {
-								serviceResponse.respond(ICQServiceResponse.RES_FILEPROGRESS, serviceId, (long) files.hashCode(), file.getAbsolutePath(), 100L, (long) transfer.getProgress() * 100, false, transfer.getError().getMessage(), buddy.protocolUid);
+								serviceResponse.respond(IAccountServiceResponse.RES_FILEPROGRESS, serviceId, (long) files.hashCode(), file.getAbsolutePath(), 100L, (long) transfer.getProgress() * 100, false, transfer.getError().getMessage(), buddy.protocolUid);
 							} else {
-								serviceResponse.respond(ICQServiceResponse.RES_FILEPROGRESS, serviceId, (long) files.hashCode(), file.getAbsolutePath(), 100L, (long) transfer.getProgress() * 100, false, null, buddy.protocolUid);
+								serviceResponse.respond(IAccountServiceResponse.RES_FILEPROGRESS, serviceId, (long) files.hashCode(), file.getAbsolutePath(), 100L, (long) transfer.getProgress() * 100, false, null, buddy.protocolUid);
 							}
 							Thread.sleep(1000);
 						} catch (InterruptedException e) {

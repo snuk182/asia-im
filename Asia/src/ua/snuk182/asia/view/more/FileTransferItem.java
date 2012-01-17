@@ -35,7 +35,6 @@ public class FileTransferItem extends RelativeLayout {
 	
 	public FileTransferItem(final FileTransferView ftView, final long messageId, String filename, final Buddy buddy, boolean incoming, int progress, int total, String error) {
 		super(ftView.getEntryPoint());
-		ServiceUtils.log("ft "+filename+" "+progress);
 		
 		this.ftView = ftView;
 		this.messageId = messageId;
@@ -44,7 +43,7 @@ public class FileTransferItem extends RelativeLayout {
 		LayoutInflater inflate = LayoutInflater.from(getContext());
 		inflate.inflate(R.layout.filetransfer_view_item, this);
 		
-		setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, (int) (83*ftView.getEntryPoint().metrics.density)));
+		setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
 		
 		int pad = (int) (3*ftView.getEntryPoint().metrics.density);
 		setPadding(pad, pad, pad, pad);

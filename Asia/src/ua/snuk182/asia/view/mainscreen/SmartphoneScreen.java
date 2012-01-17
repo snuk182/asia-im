@@ -438,7 +438,11 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 		if (getCurrentTab() >= tabs.size()){
 			ServiceUtils.log(getCurrentTabTag()+" has no tabinfo!!");
 		}
-		return tabs.get(getCurrentTab());
+		try {
+			return tabs.get(getCurrentTab());
+		} catch (Exception e) {
+			return tabs.get(0);
+		}
 	}
 	
 	private TabInfo getTabByTag(String tag){
