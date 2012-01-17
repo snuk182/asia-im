@@ -216,7 +216,7 @@ public final class MrimServiceInternal {
 						}.start();
 						tail = null;
 					} else {
-						Thread.sleep(300);
+						Thread.sleep(1000);
 					}				
 				}catch(IOException e){
 					log(e);
