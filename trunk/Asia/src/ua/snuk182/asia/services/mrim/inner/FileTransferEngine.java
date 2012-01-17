@@ -23,7 +23,6 @@ import java.util.Random;
 
 import ua.snuk182.asia.services.ServiceUtils;
 import ua.snuk182.asia.services.api.ProtocolUtils;
-import ua.snuk182.asia.services.icq.inner.ICQServiceResponse;
 import ua.snuk182.asia.services.mrim.MrimEntityAdapter;
 import ua.snuk182.asia.services.mrim.inner.dataentity.MrimFileTransfer;
 import ua.snuk182.asia.services.mrim.inner.dataentity.MrimIncomingFile;
@@ -38,7 +37,7 @@ public class FileTransferEngine {
 	private static final String IN_DATA_DIVIDER = ":";
 
 	private static final int SERVER_SOCKET_TIMEOUT = 600000;
-	
+
 	private static final String MrimProxyName = "mrim10-3.mail.ru";
 
 	private byte[] localIp = new byte[] { 0, 0, 0, 0 };
@@ -98,11 +97,11 @@ public class FileTransferEngine {
 	}
 
 	private void sendFileTransferRequest(FileRunnableService frs) {
-		
+
 		String myIpPortStr = ProtocolUtils.getIPString(localIp) + IN_DATA_DIVIDER + frs.server.getLocalPort() + LIST_DATA_DIVIDER;
-		
-		service.log("--- my ipport "+myIpPortStr);
-		
+
+		service.log("--- my ipport " + myIpPortStr);
+
 		MrimPacket packet = new MrimPacket();
 		packet.type = MrimConstants.MRIM_CS_FILE_TRANSFER;
 		byte[] to = MrimEntityAdapter.string2lpsa(frs.transfer.buddyMrid);
@@ -116,7 +115,7 @@ public class FileTransferEngine {
 			ln += file.length();
 
 			sb.append(file.getName().replaceAll(IN_DATA_DIVIDER, "_").replaceAll(LIST_DATA_DIVIDER, "_"));
-			//sb.append(IN_DATA_DIVIDER);
+			// sb.append(IN_DATA_DIVIDER);
 			sb.append(LIST_DATA_DIVIDER);
 			sb.append(file.length());
 			sb.append(LIST_DATA_DIVIDER);
@@ -152,7 +151,7 @@ public class FileTransferEngine {
 	private byte[] getHandshakeData(MrimFileTransfer transfer) {
 		service.log("get handshake for " + transfer.host + " id " + transfer.messageId);
 
-		String str = new String(MRA_FT_HELLO+service.getMrid());
+		String str = new String(MRA_FT_HELLO + service.getMrid());
 		byte[] boo = new byte[str.length() + 1];
 		System.arraycopy(str.getBytes(), 0, boo, 0, str.length());
 		boo[boo.length - 1] = 0;
@@ -167,7 +166,7 @@ public class FileTransferEngine {
 			@Override
 			public void run() {
 				try {
-					setName("FT Server socket listener "+server.getLocalPort());
+					setName("FT Server socket listener " + server.getLocalPort());
 					server.setSoTimeout(SERVER_SOCKET_TIMEOUT);
 					Socket socket = server.accept();
 
@@ -180,7 +179,7 @@ public class FileTransferEngine {
 			}
 
 		}.start();
-		
+
 		return server;
 	}
 
@@ -188,7 +187,7 @@ public class FileTransferEngine {
 		MrimFileTransfer transfer = new MrimFileTransfer();
 		transfer.buddyMrid = buddyMrid;
 		transfer.files = files;
-		transfer.messageId = files.hashCode()+new Random().nextInt();
+		transfer.messageId = files.hashCode() + new Random().nextInt();
 		return transfer;
 	}
 
@@ -211,7 +210,7 @@ public class FileTransferEngine {
 		long currentFileSize = 0;
 		byte[] currentFileInfo = null;
 		private ExtendedBufferedOutputStream currentFileStream;
-		
+
 		byte[] buffer = null;
 
 		public FileRunnableService(MrimFileTransfer transfer) {
@@ -226,11 +225,11 @@ public class FileTransferEngine {
 				for (File f : transfer.files) {
 					currentFileSize += f.length();
 				}
-			} 
+			}
 
 			participantUid = transfer.buddyMrid;
 
-			setName("File transfer " + transfer.buddyMrid+" "+transfer.messageId);
+			setName("File transfer " + transfer.buddyMrid + " " + transfer.messageId);
 		}
 
 		@Override
@@ -241,7 +240,7 @@ public class FileTransferEngine {
 
 			getDataFromSocket();
 		}
-		
+
 		private ExtendedBufferedOutputStream createFile(String filename, long filesize, long modTime, MrimFileTransfer transfer, String participantUid) {
 			// Dummy
 			String storageState = Environment.getExternalStorageState();
@@ -262,12 +261,12 @@ public class FileTransferEngine {
 
 		private void sendFileRequest(MrimIncomingFile file) {
 			currentFileStream = createFile(file.filename, file.filesize, new Date().getTime(), transfer, participantUid);
-			
+
 			byte[] infoBlob;
 
 			String str = MRA_GET_FILE + file.filename;
 			infoBlob = new byte[str.length() + 1];
-			System.arraycopy(str.getBytes(), 0, infoBlob, 0, infoBlob.length-1);
+			System.arraycopy(str.getBytes(), 0, infoBlob, 0, infoBlob.length - 1);
 			infoBlob[infoBlob.length - 1] = 0;
 
 			currentFileSize = file.filesize;
@@ -275,8 +274,8 @@ public class FileTransferEngine {
 			connectionState = CONNSTATE_FILE_BODY;
 			sendToSocket(infoBlob);
 		}
-		
-		private void sendProxyHandshake(){
+
+		private void sendProxyHandshake() {
 			connectionState = CONNSTATE_CONNECTED;
 			try {
 				sendToSocket(getProxyHandshakeData(transfer));
@@ -292,7 +291,7 @@ public class FileTransferEngine {
 			connectionState = CONNSTATE_HANDSHAKE;
 			sendToSocket(getHandshakeData(transfer));
 		}
-		
+
 		public byte[] getProxyHandshakeData(MrimFileTransfer transfer) throws MrimException {
 			MrimPacket packet = new MrimPacket();
 			packet.type = MrimConstants.MRIM_CS_PROXY_HELLO;
@@ -300,7 +299,7 @@ public class FileTransferEngine {
 			return service.processor.packet2Bytes(packet);
 		}
 
-		private boolean getDataFromSocket() {
+		private void getDataFromSocket() {
 			int read = 0;
 			boolean fullPacket = true;
 			final List<byte[]> tmpBlobs = new LinkedList<byte[]>();
@@ -318,18 +317,20 @@ public class FileTransferEngine {
 						switch (connectionState) {
 						case CONNSTATE_CONNECTED:
 							byte[] head = new byte[44];
-							
-							is.read(head, 0, 44);							
-							
+
+							is.read(head, 0, 44);
+
+							service.log("-- FT got " + ProtocolUtils.getSpacedHexString(head));
+
 							int ack = ProtocolUtils.bytes2IntLE(head, 12);
-							
-							if (ack == MrimConstants.MRIM_CS_PROXY_HELLO_ACK){
+
+							if (ack == MrimConstants.MRIM_CS_PROXY_HELLO_ACK) {
 								connectionState = CONNSTATE_HANDSHAKE;
-								if (transfer.files == null){
+								if (transfer.files == null) {
 									sendHandshake();
 								}
 							}
-							
+
 							break;
 						case CONNSTATE_HANDSHAKE:
 						case CONNSTATE_FILE_HEADER:
@@ -338,33 +339,27 @@ public class FileTransferEngine {
 							is.read(blob, 0, blob.length);
 
 							String str = new String(blob);
-							service.log("-- FT got "+ProtocolUtils.getSpacedHexString(blob)+" ("+str+")");
-							if (str.contains(MRA_FT_HELLO)){
-								connectionState = CONNSTATE_FILE_HEADER;
-								if (transfer.files != null){ //i am sender
-									if (transfer.connection == MrimFileTransfer.CONN_PEER){
-										sendHandshake();										
-									} 
+							service.log("-- FT got " + ProtocolUtils.getSpacedHexString(blob) + " (" + str + ")");
+
+							connectionState = CONNSTATE_FILE_HEADER;
+							if (str.contains(MRA_FT_HELLO)) {
+								if (transfer.files != null) { // i am sender
+									if (transfer.connection != MrimFileTransfer.CONN_MIRROR) {
+										sendHandshake();
+									}
 								} else {
-									if (transfer.connection == MrimFileTransfer.CONN_MIRROR){
-										sendHandshake();	
-									} 
-									//service.getRunnableService().sendToSocket(getAcceptMessage(transfer));									
-									sendFileRequest(transfer.incomingFiles.remove(0));									
+									if (transfer.connection == MrimFileTransfer.CONN_MIRROR) {
+										sendHandshake();
+									}
+									// service.getRunnableService().sendToSocket(getAcceptMessage(transfer));
+									sendFileRequest(transfer.incomingFiles.remove(0));
 								}
 								break;
 							}
-							
-							fullPacket = false;
-							for (int i=0; i<blob.length; i++) {
-								byte bu = blob[i];
-								if (bu == 0) {
-									fullPacket = true;
-									tmpBlobs.add(blob);
-									break;
-								}
+
+							if (str.contains(MRA_GET_FILE)) {
+								processHeader(blob);
 							}
-							tmpBlobs.add(blob);
 							break;
 						case CONNSTATE_FILE_BODY:
 							if (buffer == null) {
@@ -380,16 +375,16 @@ public class FileTransferEngine {
 								// sendFileAck();
 								connectionState = CONNSTATE_FILE_HEADER;
 								buffer = null;
-								
-								if (transfer.incomingFiles != null){
-									if (transfer.incomingFiles.size() > 0){
-										sendFileRequest(transfer.incomingFiles.remove(0));	
+
+								if (transfer.incomingFiles != null) {
+									if (transfer.incomingFiles.size() > 0) {
+										sendFileRequest(transfer.incomingFiles.remove(0));
 									} else {
 										cleanup();
 									}
 								}
-								
-								if (transfer.files != null && transfer.files.size() < 1){
+
+								if (transfer.files != null && transfer.files.size() < 1) {
 									cleanup();
 								}
 							}
@@ -404,23 +399,7 @@ public class FileTransferEngine {
 
 							tmpBlobs.clear();
 							blobs.add(boo);
-							
-							try {
-								forceBlobProcess();
-							} catch (Exception e) {
-								service.log(e);
-							}
-							
-							/*new Thread("File transfer processor") {
-								@Override
-								public void run() {
-									try {
-										forceBlobProcess();
-									} catch (Exception e) {
-										service.log(e);
-									}
-								}
-							}.start();*/
+
 						}
 					}
 				} catch (IOException e) {
@@ -430,7 +409,6 @@ public class FileTransferEngine {
 				}
 			}
 			cleanup();
-			return false;
 		}
 
 		private synchronized void fileData(byte[] blob, int read, final long bytesLeft) {
@@ -476,14 +454,15 @@ public class FileTransferEngine {
 
 		private void cleanup() {
 			try {
-				socket.close();
 				transfers.remove(transfer);
 				activeTransfers.remove(transfer.messageId);
 				if (server != null) {
 					server.close();
 					server = null;
 				}
+				socket.close();
 			} catch (IOException e) {
+				service.log(e);
 			}
 		}
 
@@ -491,7 +470,7 @@ public class FileTransferEngine {
 			try {
 				OutputStream os = socket.getOutputStream();
 
-				service.log("-- FT To be sent " + ProtocolUtils.getSpacedHexString(out)+"/"+ new String(out));				
+				service.log("-- FT To be sent " + ProtocolUtils.getSpacedHexString(out) + "/" + new String(out));
 				os.write(out);
 
 			} catch (IOException e) {
@@ -501,59 +480,43 @@ public class FileTransferEngine {
 			return true;
 		}
 
-		protected void forceBlobProcess() throws Exception {
-			synchronized (blobs) {
-				while (blobs.size() > 0) {
-					byte[] blob = blobs.remove(0);
-					process(blob);
-				}
-			}
-		}
-
-		private void process(byte[] blob) {
-			if (blob.length < 1){
+		private void processHeader(byte[] blob) {
+			if (blob.length < 1) {
 				return;
 			}
-			switch (connectionState) {
-			case CONNSTATE_CONNECTED:
-			case CONNSTATE_HANDSHAKE:
-				
-				break;
-			case CONNSTATE_FILE_HEADER:
-				String str = ProtocolUtils.getEncodedString(blob, 0, blob.length - 1);
+			String str = ProtocolUtils.getEncodedString(blob, 0, blob.length - 1);
 
-				int index = str.indexOf(MRA_GET_FILE);
-				if (index < 0){
-					return;
-				}
-				
-				service.log("got header");
-				currentFileInfo = blob;
-
-				try {
-					String fileInfo = str.substring(index+MRA_GET_FILE.length());
-					service.log(transfer.buddyMrid + " asks for file " + fileInfo);
-
-					for (File fi : transfer.files) {
-						if (fi.getName().replaceAll(IN_DATA_DIVIDER, "_").replaceAll(LIST_DATA_DIVIDER, "_").equals(fileInfo)) {
-							sendFileToSocket(fi);
-							return;
-						}
-					}
-					transferFailed(transfer, "unknown file");
-					cleanup();
-					notifyFail(transfer);
-				} catch (Exception e) {
-					service.log(e);
-					transferFailed(transfer, e.getLocalizedMessage());
-					notifyFail(transfer);
-					cleanup();
-				}
-				break;
-			case CONNSTATE_FILE_BODY:
-				// fileData(blob);
-				break;
+			int index = str.indexOf(MRA_GET_FILE);
+			if (index < 0) {
+				return;
 			}
+
+			service.log("got header");
+			currentFileInfo = blob;
+
+			try {
+				String fileInfo = str.substring(index + MRA_GET_FILE.length());
+				service.log(transfer.buddyMrid + " asks for file " + fileInfo);
+
+				for (int i = 0; i < transfer.files.size(); i++) {
+					File fi = transfer.files.get(i);
+					if (fi.getName().replaceAll(IN_DATA_DIVIDER, "_").replaceAll(LIST_DATA_DIVIDER, "_").equals(fileInfo)) {
+						sendFileToSocket(fi);
+						transfer.files.remove(fi);
+						if (transfer.files.size() < 1) {
+							cleanup();
+						}
+						return;
+					}
+				}
+				transferFailed(transfer, "unknown file");
+
+			} catch (Exception e) {
+				service.log(e);
+				transferFailed(transfer, e.getLocalizedMessage());
+			}
+			cleanup();
+			notifyFail(transfer);
 		}
 
 		private void sendFileToSocket(final File file) {
@@ -624,15 +587,15 @@ public class FileTransferEngine {
 			public File getFile() {
 				return file;
 			}
-		}	
+		}
 	}
-	
+
 	public void parseFTRequest(MrimPacket packet) {
 		MrimFileTransfer transfer = new MrimFileTransfer();
 
 		int version = ProtocolUtils.bytes2IntLE(packet.rawData, 4);
-		
-		if (version > MrimConstants.PROTO_VERSION){
+
+		if (version > MrimConstants.PROTO_VERSION) {
 			int i = 44;
 			transfer.buddyMrid = MrimEntityAdapter.lpsa2String(packet.rawData, i);
 			i += 4 + transfer.buddyMrid.length();
@@ -644,35 +607,24 @@ public class FileTransferEngine {
 			String fileStr = MrimEntityAdapter.lpsa2String(packet.rawData, i);
 
 			parseFiles(fileStr, transfer);
-			
+
 			i += 4 + fileStr.length();
 
 			int nextPacket = ProtocolUtils.bytes2IntLE(packet.rawData, i);
 			i += 4;
-			if (nextPacket != 0){
+			if (nextPacket != 0) {
 				int count = ProtocolUtils.bytes2IntLE(packet.rawData, i);
 				i += 4;
-				for (int ii=0; ii<count; ii++){
+				for (int ii = 0; ii < count; ii++) {
 					fileStr = MrimEntityAdapter.lpsw2String(packet.rawData, i);
-					i+=4 + 2*fileStr.length();
-					
-					parseFiles(fileStr, transfer);					
+					i += 4 + 2 * fileStr.length();
+
+					parseFiles(fileStr, transfer);
 				}
-			} 
+			}
 
 			String ipData = MrimEntityAdapter.lpsa2String(packet.rawData, i);
-			String[] ipDataParts = ipData.split(LIST_DATA_DIVIDER);
-			for (String data : ipDataParts) {
-				if (data.length() < 1){
-					continue;
-				}
-				String[] connection = data.split(IN_DATA_DIVIDER);
-
-				transfer.host = connection[0];
-				transfer.port = Integer.parseInt(connection[1]);
-
-				break; // TODO do we need more?
-			}
+			parseIPString(transfer, ipData);
 
 			transfers.add(transfer);
 		} else {
@@ -689,34 +641,23 @@ public class FileTransferEngine {
 			String[] strFiles = fileStr.split(LIST_DATA_DIVIDER);
 			transfer.incomingFiles = new LinkedList<MrimIncomingFile>();
 			for (String file : strFiles) {
-				if (file.length() < 1){
+				if (file.length() < 1) {
 					continue;
 				}
-				
+
 				String[] attrs = file.split(IN_DATA_DIVIDER);
 				MrimIncomingFile ifile = new MrimIncomingFile();
 				ifile.filename = attrs[0];
 				ifile.filesize = Long.parseLong(attrs[1]);
 				transfer.incomingFiles.add(ifile);
 			}
-			
+
 			i += 4 + fileStr.length();
 
 			i += 4; // data divider
 
 			String ipData = MrimEntityAdapter.lpsa2String(packet.rawData, i);
-			String[] ipDataParts = ipData.split(LIST_DATA_DIVIDER);
-			for (String data : ipDataParts) {
-				if (data.length() < 1){
-					continue;
-				}
-				String[] connection = data.split(IN_DATA_DIVIDER);
-
-				transfer.host = connection[0];
-				transfer.port = Integer.parseInt(connection[1]);
-
-				break; // TODO do we need more?
-			}
+			parseIPString(transfer, ipData);
 
 			transfers.add(transfer);
 		}
@@ -727,8 +668,8 @@ public class FileTransferEngine {
 	private void parseFiles(String fileStr, MrimFileTransfer transfer) {
 		String[] strFiles = fileStr.split(LIST_DATA_DIVIDER);
 		transfer.incomingFiles = new LinkedList<MrimIncomingFile>();
-		
-		for (int ii=0; ii<strFiles.length; ){
+
+		for (int ii = 0; ii < strFiles.length;) {
 			MrimIncomingFile ifile = new MrimIncomingFile();
 			ifile.filename = strFiles[ii];
 			ii++;
@@ -746,8 +687,8 @@ public class FileTransferEngine {
 		i += from.length() + 4;
 		int msgId = ProtocolUtils.bytes2IntLE(packet.rawData, i);
 		i += 4;
-		
-		service.log("Ft response "+status+" from "+from+" for "+msgId);
+
+		service.log("Ft response " + status + " from " + from + " for " + msgId);
 		MrimFileTransfer transfer = findTransfer(msgId);
 
 		if (transfer == null)
@@ -757,7 +698,7 @@ public class FileTransferEngine {
 		case MrimConstants.FILE_TRANSFER_STATUS_OK:
 			break;
 		case MrimConstants.FILE_TRANSFER_STATUS_DECLINE: // here so far
-			transferFailed(transfer, "Cancelled");			
+			transferFailed(transfer, "Cancelled");
 			break;
 		case MrimConstants.FILE_TRANSFER_STATUS_INCOMPATIBLE_VERS:
 		case MrimConstants.FILE_TRANSFER_STATUS_ERROR:
@@ -767,7 +708,7 @@ public class FileTransferEngine {
 			String ipData = MrimEntityAdapter.lpsa2String(packet.rawData, i);
 			transfer.connection = MrimFileTransfer.CONN_MIRROR;
 			parseIPString(transfer, ipData);
-			connectPeer(transfer, null);			
+			connectPeer(transfer, null);
 			break;
 		}
 	}
@@ -775,12 +716,19 @@ public class FileTransferEngine {
 	private void parseIPString(MrimFileTransfer transfer, String ipData) {
 		String[] ipDataParts = ipData.split(LIST_DATA_DIVIDER);
 		for (String data : ipDataParts) {
+			if (data.length() < 1) {
+				continue;
+			}
+
 			String[] connection = data.split(IN_DATA_DIVIDER);
 
 			transfer.host = connection[0];
 			transfer.port = Integer.parseInt(connection[1]);
-			
-			break; // TODO do we need more?
+
+			if (transfer.port != 443) {// TODO do we need ssl? do we need more
+										// ips?
+				break;
+			}
 		}
 	}
 
@@ -821,8 +769,8 @@ public class FileTransferEngine {
 						service.log(e);
 					}
 				}
-				
-				if (runnable.socket != null){
+
+				if (runnable.socket != null) {
 					try {
 						runnable.socket.close();
 					} catch (IOException e) {
@@ -833,36 +781,35 @@ public class FileTransferEngine {
 
 			}
 			runnable.start();
-			
-			if (transfer.connection == MrimFileTransfer.CONN_MIRROR){
-				runnable.sendHandshake();		
+
+			if (transfer.connection == MrimFileTransfer.CONN_MIRROR) {
+				runnable.sendHandshake();
 			}
-			
-			if (transfer.connection == MrimFileTransfer.CONN_PROXY){
-				runnable.sendProxyHandshake();		
+
+			if (transfer.connection == MrimFileTransfer.CONN_PROXY) {
+				runnable.sendProxyHandshake();
 			}
-			
-			
+
 		} else {
-			if (runnable == null){
-				runnable = new FileRunnableService(socket, transfer);				
+			if (runnable == null) {
+				runnable = new FileRunnableService(socket, transfer);
 			}
-			
+
 			try {
-				if (runnable.server != null){
+				if (runnable.server != null) {
 					runnable.server.close();
 					runnable.server = null;
-				}				
+				}
 			} catch (IOException e) {
 				service.log(e);
 			}
-			
+
 			runnable.socket = socket;
-			
+
 			service.log("ft: no direct connection");
 			if (transfer.connection == MrimFileTransfer.CONN_PEER && transfer.files == null) {
 				createMirror(transfer);
-			} else if (transfer.connection == MrimFileTransfer.CONN_MIRROR && transfer.files != null){
+			} else if (transfer.connection == MrimFileTransfer.CONN_MIRROR && transfer.files != null) {
 				createProxyCall(transfer);
 			} else {
 				transferFailed(transfer, "no route to host");
@@ -870,16 +817,16 @@ public class FileTransferEngine {
 			}
 		}
 	}
-	
-	private void createProxyCall(MrimFileTransfer transfer){
-		try	{
+
+	private void createProxyCall(MrimFileTransfer transfer) {
+		try {
 			transfer.connection = MrimFileTransfer.CONN_PROXY;
 			InetAddress inetAdd = InetAddress.getByName(MrimProxyName);
 			transfer.host = inetAdd.getHostAddress();
 			transfer.port = 2041;
-			
+
 			service.getRunnableService().sendToSocket(getFTProxyRedirectCall(transfer));
-		} catch(Exception uhe) {
+		} catch (Exception uhe) {
 			service.log(uhe);
 		}
 	}
@@ -887,35 +834,41 @@ public class FileTransferEngine {
 	private MrimPacket getFTProxyRedirectCall(MrimFileTransfer transfer) throws IOException {
 		MrimPacket packet = new MrimPacket();
 		packet.type = MrimConstants.MRIM_CS_PROXY;
-		
+
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-		
+
 		stream.write(MrimEntityAdapter.string2lpsa(transfer.buddyMrid));
 		stream.write(ProtocolUtils.int2ByteLE(transfer.messageId));
 		stream.write(ProtocolUtils.int2ByteLE(MrimConstants.MRIM_PROXY_TYPE_FILES));
-		
+
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < transfer.files.size(); i++) {
 			File file = transfer.files.get(i);
-			
+
 			sb.append(file.getName().replaceAll(IN_DATA_DIVIDER, "_").replaceAll(LIST_DATA_DIVIDER, "_"));
-			//sb.append(IN_DATA_DIVIDER);
+			// sb.append(IN_DATA_DIVIDER);
 			sb.append(LIST_DATA_DIVIDER);
 			sb.append(file.length());
 			sb.append(LIST_DATA_DIVIDER);
 		}
-		
+
 		stream.write(MrimEntityAdapter.string2lpsa(sb.toString()));
 		stream.write(MrimEntityAdapter.string2lpsa(transfer.host + IN_DATA_DIVIDER + transfer.port + LIST_DATA_DIVIDER));
-		transfer.proxySessionId = new byte[16];
-		
-		Random random = new Random();
-		System.arraycopy(ProtocolUtils.long2ByteLE(random.nextLong()), 0, transfer.proxySessionId, 0, 8);
-		System.arraycopy(ProtocolUtils.long2ByteLE(random.nextLong()), 0, transfer.proxySessionId, 8, 8);
-		stream.write(transfer.proxySessionId);
-		
+		/*
+		 * transfer.proxySessionId = new byte[16];
+		 * 
+		 * Random random = new Random();
+		 * System.arraycopy(ProtocolUtils.long2ByteLE(random.nextLong()), 0,
+		 * transfer.proxySessionId, 0, 8);
+		 * System.arraycopy(ProtocolUtils.long2ByteLE(random.nextLong()), 0,
+		 * transfer.proxySessionId, 8, 8);
+		 * stream.write(transfer.proxySessionId);
+		 */
+
+		stream.write(new byte[16]);
+
 		packet.rawData = stream.toByteArray();
-		
+
 		return packet;
 	}
 
@@ -939,15 +892,15 @@ public class FileTransferEngine {
 		}
 	}
 
-	private void notifyFail(MrimFileTransfer transfer){
+	private void notifyFail(MrimFileTransfer transfer) {
 		service.getRunnableService().sendToSocket(getAnswerMessage(transfer, MrimConstants.FILE_TRANSFER_STATUS_ERROR));
 	}
-	
+
 	private void transferFailed(MrimFileTransfer transfer, String error) {
 		service.log(error);
 		transfers.remove(transfer);
 		activeTransfers.remove(transfer.messageId);
-		sendNotification(transfer.messageId, transfer.buddyMrid, 0L, 0L, false, error, transfer.buddyMrid);		
+		sendNotification(transfer.messageId, transfer.buddyMrid, 0L, 0L, false, error, transfer.buddyMrid);
 	}
 
 	@SuppressWarnings("unused")
@@ -992,7 +945,7 @@ public class FileTransferEngine {
 		synchronized (notifications) {
 			while (notifications.size() > 0) {
 				NotificationData data = notifications.remove(0);
-				service.getServiceResponse().respond(ICQServiceResponse.RES_FILEPROGRESS, (long)data.messageId, data.filePath, data.totalSize, data.sent, data.incoming, data.error, data.participantUid);
+				service.getServiceResponse().respond(MrimServiceResponse.RES_FILEPROGRESS, (long) data.messageId, data.filePath, data.totalSize, data.sent, data.incoming, data.error, data.participantUid);
 			}
 		}
 	}
@@ -1020,6 +973,13 @@ public class FileTransferEngine {
 
 	public void cancelAll() {
 		for (FileRunnableService runnable : activeTransfers.values()) {
+			if (runnable.server != null && !runnable.server.isClosed()) {
+				try {
+					runnable.server.close();
+				} catch (IOException e) {
+					service.log(e);
+				}
+			}
 			if (runnable.socket != null && !runnable.socket.isClosed()) {
 				try {
 					runnable.socket.close();
@@ -1031,76 +991,76 @@ public class FileTransferEngine {
 	}
 
 	public void fileReceiveResponse(Long msgId, Boolean accept, byte[] internalIp) {
-		MrimFileTransfer transfer = findTransfer(msgId.intValue());		
-		
+		MrimFileTransfer transfer = findTransfer(msgId.intValue());
+
 		if (transfer == null) {
 			service.log("ft: no message");
 			return;
 		}
-		
+
 		this.localIp = internalIp;
 		if (!accept) {
-			service.log("ft: reject "+transfer.messageId);
+			service.log("ft: reject " + transfer.messageId);
 			service.getRunnableService().sendToSocket(getAnswerMessage(transfer, MrimConstants.FILE_TRANSFER_STATUS_DECLINE));
 		} else {
-			service.log("ft: accept "+transfer.messageId);
+			service.log("ft: accept " + transfer.messageId);
 			connectPeer(transfer, null);
 		}
 	}
-	
+
 	public void parseFTProxyConnectionRequest(MrimPacket packet) {
 		int pos = 44;
-		
+
 		String email = MrimEntityAdapter.lpsa2String(packet.rawData, pos);
-		service.log("proxy "+email);
-		
-		pos+=email.length()+4;
-		
+		service.log("proxy " + email);
+
+		pos += email.length() + 4;
+
 		int id = ProtocolUtils.bytes2IntLE(packet.rawData, pos);
-		pos+=4;
-		
-		service.log("proxy id "+id);
-		
+		pos += 4;
+
+		service.log("proxy id " + id);
+
 		int dataType = ProtocolUtils.bytes2IntLE(packet.rawData, pos);
-		pos+=4;
-		
-		service.log("proxy type "+dataType);
-		
-		if (dataType != MrimConstants.MRIM_PROXY_TYPE_FILES){
+		pos += 4;
+
+		service.log("proxy type " + dataType);
+
+		if (dataType != MrimConstants.MRIM_PROXY_TYPE_FILES) {
 			return;
 		}
-		
+
 		MrimFileTransfer transfer = findTransfer(id);
-		if (transfer == null){
+		if (transfer == null) {
 			return;
 		}
-		
+
 		String rawdata = MrimEntityAdapter.lpsa2String(packet.rawData, pos);
-		service.log("proxy data "+rawdata);
-		
+		service.log("proxy data " + rawdata);
+
 		parseFiles(rawdata, transfer);
-		
-		pos+= rawdata.length()+4;
-		
+
+		pos += rawdata.length() + 4;
+
 		String iplist = MrimEntityAdapter.lpsa2String(packet.rawData, pos);
-		service.log("proxy iplist "+iplist);
-		
-		pos+=iplist.length()+4;
-		
+		service.log("proxy iplist " + iplist);
+
+		pos += iplist.length() + 4;
+
 		transfer.proxySessionId = new byte[16];
 		System.arraycopy(packet.rawData, pos, transfer.proxySessionId, 0, 16);
-		pos+=16; 
-		
+		pos += 16;
+
 		byte[] answerData = new byte[packet.rawData.length - 40];
 		System.arraycopy(ProtocolUtils.int2ByteLE(MrimConstants.PROXY_STATUS_OK), 0, answerData, 0, 4);
-		System.arraycopy(packet.rawData, 44, answerData, 4, packet.rawData.length-44);		
-		
+		System.arraycopy(packet.rawData, 44, answerData, 4, packet.rawData.length - 44);
+
 		MrimPacket ack = new MrimPacket();
 		ack.type = MrimConstants.MRIM_CS_PROXY_ACK;
 		ack.rawData = answerData;
-		
+
 		service.getRunnableService().sendToSocket(ack);
-		
+
 		transfer.connection = MrimFileTransfer.CONN_PROXY;
 		parseIPString(transfer, iplist);
 		connectPeer(transfer, activeTransfers.get(id));
@@ -1108,36 +1068,70 @@ public class FileTransferEngine {
 
 	public void parseFTProxyAck(MrimPacket packet) {
 		int pos = 44;
-		
+
 		int result = ProtocolUtils.bytes2IntLE(packet.rawData, pos);
-		pos+=4;
-		
+		pos += 4;
+
 		String email = MrimEntityAdapter.lpsa2String(packet.rawData, pos);
-		service.log("proxy "+email);
-		
-		pos+=email.length()+4;
-		
+		service.log("proxy " + email);
+
+		pos += email.length() + 4;
+
 		int id = ProtocolUtils.bytes2IntLE(packet.rawData, pos);
-		pos+=4;
-		
-		MrimFileTransfer transfer = findTransfer(id);
-		if (transfer == null){
+		pos += 4;
+
+		service.log("proxy id " + id);
+
+		int dataType = ProtocolUtils.bytes2IntLE(packet.rawData, pos);
+		pos += 4;
+
+		service.log("proxy type " + dataType);
+
+		if (dataType != MrimConstants.MRIM_PROXY_TYPE_FILES) {
 			return;
 		}
-		
+
+		MrimFileTransfer transfer = findTransfer(id);
+		if (transfer == null) {
+			return;
+		}
+
 		FileRunnableService frs = activeTransfers.get(id);
-		
-		service.log("proxy id "+id);
-		if (result != MrimConstants.PROXY_STATUS_OK){
-			service.log("Proxy error");
+
+		service.log("proxy id " + id);
+		if (result != MrimConstants.PROXY_STATUS_OK) {
+			service.log("Proxy error " + result);
 			transferFailed(transfer, "Proxy error");
 			notifyFail(transfer);
-			if (frs != null){
+			if (frs != null) {
 				frs.cleanup();
 			}
 			return;
 		}
-		
+
+		if (transfer.proxySessionId != null) {
+			service.log("proceed file send " + frs.connectionState);
+			return;
+		}
+
+		String rawdata = MrimEntityAdapter.lpsa2String(packet.rawData, pos);
+		service.log("proxy data " + rawdata);
+
+		parseFiles(rawdata, transfer);
+
+		pos += rawdata.length() + 4;
+
+		String iplist = MrimEntityAdapter.lpsa2String(packet.rawData, pos);
+		service.log("proxy iplist " + iplist);
+
+		pos += iplist.length() + 4;
+
+		transfer.proxySessionId = new byte[16];
+		System.arraycopy(packet.rawData, pos, transfer.proxySessionId, 0, 16);
+		pos += 16;
+
+		parseIPString(transfer, iplist);
+
 		connectPeer(transfer, frs);
 	}
 }

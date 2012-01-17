@@ -13,7 +13,6 @@ import ua.snuk182.asia.services.ServiceUtils;
 import ua.snuk182.asia.services.api.AccountService;
 import ua.snuk182.asia.services.api.IAccountServiceResponse;
 import ua.snuk182.asia.services.api.ProtocolException;
-import ua.snuk182.asia.services.api.ProtocolUtils;
 import ua.snuk182.asia.services.mrim.inner.MrimConstants;
 import ua.snuk182.asia.services.mrim.inner.MrimException;
 import ua.snuk182.asia.services.mrim.inner.MrimServiceInternal;
@@ -115,7 +114,7 @@ public class MrimService extends AccountService {
 				List<File> files = new ArrayList<File>();
 				files.add((File) args[1]);
 				
-				return ProtocolUtils.bytes2LongBE((byte[]) internal.request(MrimServiceInternal.REQ_SENDFILE, ((Buddy) args[0]).protocolUid, files, args[2]), 0);
+				return internal.request(MrimServiceInternal.REQ_SENDFILE, ((Buddy) args[0]).protocolUid, files, args[2]);
 			case AccountService.REQ_FILECANCEL:
 				internal.request(MrimServiceInternal.REQ_FILECANCEL, args[0]);
 				break;
