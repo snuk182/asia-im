@@ -203,7 +203,7 @@ public class ICQServiceInternal {
 				try {
 					InputStream is = socket.getInputStream();
 					if (is.available()>0){
-						Thread.sleep(1000);
+						Thread.sleep(200);
 					
 						byte[] head = new byte[6];
 						
@@ -240,7 +240,7 @@ public class ICQServiceInternal {
 						}.start();
 						tail = null;
 					} else {
-						Thread.sleep(300);
+						Thread.sleep(1000);
 					}				
 				}catch(IOException e){
 					log(e);
