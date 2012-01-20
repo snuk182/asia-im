@@ -86,6 +86,10 @@ public class PreferencesView extends PreferenceActivity implements ITabContent {
 					}
 					if (pref instanceof SeekBarPreference){
 						((SeekBarPreference)pref).setValue(value);
+						
+						if (pref.getKey().equals(getString(R.string.key_text_size))){
+							((SeekBarPreference)pref).resizeDialogLabelWithValue = true;
+						}
 					}
 					
 					fillSummary(pref, value);
