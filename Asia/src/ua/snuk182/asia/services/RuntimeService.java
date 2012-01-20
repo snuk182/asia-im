@@ -154,20 +154,15 @@ public class RuntimeService extends Service {
 
 		statusbarNotifyAccountChanged();
 
-		new Thread("Runtime service startup") {
-			@Override
-			public void run() {
-				PowerManager powerManager = (PowerManager) getApplicationContext().getSystemService(POWER_SERVICE);
-				powerLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "asia power lock");
-				powerLock.acquire();
+		PowerManager powerManager = (PowerManager) getApplicationContext().getSystemService(POWER_SERVICE);
+		powerLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "asia power lock");
+		powerLock.acquire();
 
-				WifiManager wlanManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
-				if (wlanManager != null) {
-					wifiLock = wlanManager.createWifiLock("asia wifi lock");
-					wifiLock.acquire();
-				}
-			}
-		}.start();
+		WifiManager wlanManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+		if (wlanManager != null) {
+			wifiLock = wlanManager.createWifiLock("asia wifi lock");
+			wifiLock.acquire();
+		}
 
 		String autoconnect = appOptions.getString(getResources().getString(R.string.key_autoconnect));
 		for (Account a : accounts) {
