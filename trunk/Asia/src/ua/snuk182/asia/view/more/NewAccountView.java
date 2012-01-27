@@ -23,7 +23,6 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
@@ -250,9 +249,9 @@ public class NewAccountView extends ScrollView implements ITabContent {
 	public TabWidgetLayout getTabWidgetLayout() {
 		TabWidgetLayout tabWidgetLayout = new TabWidgetLayout(getEntryPoint());
 		
-		tabWidgetLayout.getTabName().setText(R.string.label_new_account);
-		tabWidgetLayout.getTabIcon().setImageResource(R.drawable.dark_asia_32);
-		tabWidgetLayout.getTabIcon().setScaleType(ScaleType.FIT_XY);
+		tabWidgetLayout.setText(R.string.label_new_account);
+		tabWidgetLayout.setImageResource(R.drawable.dark_asia_32);
+		//tabWidgetLayout.setScaleType(ScaleType.FIT_XY);
 		
 		return tabWidgetLayout;
 	}
@@ -270,15 +269,7 @@ public class NewAccountView extends ScrollView implements ITabContent {
 	
 	@Override
 	public void visualStyleUpdated() {
-		String bgType;
-		
-		try {
-			bgType = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_bg_type));
-		} catch (NullPointerException npe) {	
-			bgType = null;
-			ServiceUtils.log(npe);
-		} 
-		if (bgType == null || bgType.equals("wallpaper")){
+		if (EntryPoint.bgColor == EntryPoint.BGCOLOR_WALLPAPER){
 			setBackgroundColor(0x60000000);
 			for (int i=0; i<customOptionsLayout.getChildCount(); i++){
 				if (customOptionsLayout.getChildAt(i).getTag().equals("")){
@@ -289,7 +280,7 @@ public class NewAccountView extends ScrollView implements ITabContent {
 			
 		}else {
 			try {
-				int color = (int) Long.parseLong(bgType);
+				int color = EntryPoint.bgColor;
 				setBackgroundColor(0);
 				for (int i=0; i<customOptionsLayout.getChildCount(); i++){
 					if (customOptionsLayout.getChildAt(i).getTag().equals("")){

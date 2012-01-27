@@ -21,7 +21,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
@@ -68,10 +67,10 @@ public class GroupChatsView extends RelativeLayout implements ITabContent {
 		setFocusable(false);
 		
 		int size = (int) (32*entryPoint.metrics.density);
-		tabWidgetLayout.getTabIcon().setLayoutParams(new LinearLayout.LayoutParams(size, size));
-		tabWidgetLayout.getTabIcon().setImageResource(R.drawable.logo_32px);
-		tabWidgetLayout.getTabIcon().setScaleType(ScaleType.CENTER_INSIDE);
-		tabWidgetLayout.getTabName().setText(account.getSafeName());
+		tabWidgetLayout.setLayoutParams(new LinearLayout.LayoutParams(size, size));
+		tabWidgetLayout.setImageResource(R.drawable.logo_32px);
+		//tabWidgetLayout.setScaleType(ScaleType.CENTER_INSIDE);
+		tabWidgetLayout.setText(account.getSafeName());
 		
 		searchBtn.setOnClickListener(new OnClickListener() {
 			
@@ -183,15 +182,7 @@ public class GroupChatsView extends RelativeLayout implements ITabContent {
 
 	@Override
 	public void visualStyleUpdated() {
-		String bgType;
-		
-		try {
-			bgType = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_bg_type));
-		} catch (NullPointerException npe) {	
-			bgType = null;
-			ServiceUtils.log(npe);
-		}
-		if (bgType == null || bgType.equals("wallpaper")){
+		if (EntryPoint.bgColor == EntryPoint.BGCOLOR_WALLPAPER){
 			setBackgroundColor(0x60000000);
 		 } else {
 			try {

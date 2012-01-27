@@ -41,8 +41,8 @@ public class TabsAdapter extends BaseAdapter {
         
         TextView textView = (TextView) convertView;
         textView.setTag(item);
-        textView.setText(item.tabWidgetLayout.getTabName().getText());
-        textView.setCompoundDrawablesWithIntrinsicBounds( item.tabWidgetLayout.getTabIcon().getDrawable(), null, null, null);
+        textView.setText(item.tabWidgetLayout.getText());
+        textView.setCompoundDrawablesWithIntrinsicBounds( item.tabWidgetLayout.getDrawable(), null, null, null);
               
         return textView;
     }

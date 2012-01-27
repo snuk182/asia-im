@@ -37,9 +37,15 @@
 	<string-array name="bg_type_names">
 		<item>"Чорний"</item>
 		<item>"Білий"</item>
-		<item>"Системні шпалери"</item>
+		<item>"Прозорий"</item>
 	</string-array>
 	
+	<string name="label_tab_style">Стиль вкладок</string>
+	<string-array name="list_tab_style_names">
+	    <item>"Плаский"</item>
+	    <item>"Системний"</item>
+	</string-array>
+	    
 	<string-array name="list_chat_date_names">
 		<item>"Не друкувати"</item>
 		<item>"Лише час"</item>

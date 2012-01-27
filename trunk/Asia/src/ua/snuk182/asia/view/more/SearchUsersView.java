@@ -129,8 +129,8 @@ public class SearchUsersView extends LinearLayout implements ITabContent, IHasAc
 	public TabWidgetLayout getTabWidgetLayout() {
 		TabWidgetLayout tabWidgetLayout = new TabWidgetLayout(entryPoint);
 		
-		tabWidgetLayout.getTabName().setText(R.string.label_search_buddies);
-		tabWidgetLayout.getTabIcon().setImageResource(android.R.drawable.ic_menu_search);
+		tabWidgetLayout.setText(R.string.label_search_buddies);
+		tabWidgetLayout.setImageResource(android.R.drawable.ic_menu_search);
 		
 		return tabWidgetLayout;
 	}
@@ -147,20 +147,12 @@ public class SearchUsersView extends LinearLayout implements ITabContent, IHasAc
 	
 	@Override
 	public void visualStyleUpdated() {
-		String bgType;
-		
-		try {
-			bgType = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_bg_type));
-		} catch (NullPointerException npe) {	
-			bgType = null;
-			ServiceUtils.log(npe);
-		}
-		if (bgType == null || bgType.equals("wallpaper")){
+		if (EntryPoint.bgColor == EntryPoint.BGCOLOR_WALLPAPER){
 			setBackgroundColor(0x60000000);
 			searchAdapter.setTextColor(0xff000000);			
 		}else {
 			try {
-				int color = (int) Long.parseLong(bgType);
+				int color = EntryPoint.bgColor;
 				setBackgroundColor(0);
 				searchAdapter.setTextColor((color-0xff000000)>0x777777?0xff000000:0xffffffff);						
 			} catch (NumberFormatException e) {				
