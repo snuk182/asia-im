@@ -39,10 +39,15 @@ public class TabInfo implements TabContentFactory, Parcelable{
 		tabSpec = entryPoint.mainScreen.getChatsTabHost().newTabSpec(tag).setContent(intent);		
 		
 		TabWidgetLayout indicator = new TabWidgetLayout(entryPoint);
-		indicator.getTabName().setText(title);
-		indicator.getTabIcon().setImageResource(iconId);
+		indicator.setText(title);
+		indicator.setImageResource(iconId);
 		tabWidgetLayout = indicator;
-		tabSpec.setIndicator(tabWidgetLayout);
+		if (EntryPoint.tabStyle.equals("system")){
+			tabWidgetLayout.spec = tabSpec;
+			tabSpec.setIndicator(tabWidgetLayout.getText(), tabWidgetLayout.getDrawable());
+		} else {
+			tabSpec.setIndicator(tabWidgetLayout);
+		}
 	}
 
 	private TabInfo(Parcel in) {
@@ -55,7 +60,14 @@ public class TabInfo implements TabContentFactory, Parcelable{
 		}
 		
 		tabWidgetLayout = content.getTabWidgetLayout();
-		tabSpec = host.newTabSpec(tag).setContent(this).setIndicator(tabWidgetLayout);		
+		tabSpec = host.newTabSpec(tag).setContent(this);
+		
+		if (EntryPoint.tabStyle.equals("system")){
+			tabWidgetLayout.spec = tabSpec;
+			tabSpec.setIndicator(tabWidgetLayout.getText(), tabWidgetLayout.getDrawable());
+		} else {
+			tabSpec.setIndicator(tabWidgetLayout);		
+		}		
 	}
 
 	@Override

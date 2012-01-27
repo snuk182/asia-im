@@ -7,6 +7,7 @@
 
         <ListPreference
             android:defaultValue="@string/value_view_type_plain"
+            android:summary="@string/value_view_type_plain"
             android:entries="@array/view_type_names"
             android:entryValues="@array/view_type_values"
             android:key="@string/key_view_type"
@@ -15,11 +16,21 @@
 
         <ListPreference
             android:defaultValue="wallpaper"
+            android:summary="wallpaper"
             android:entries="@array/bg_type_names"
             android:entryValues="@array/bg_type_values"
             android:key="@string/key_bg_type"
             android:persistent="false"
             android:title="@string/label_bg_type" />
+        
+        <ListPreference
+            android:defaultValue="slim"
+            android:summary="slim"
+            android:entries="@array/list_tab_style_names"
+            android:entryValues="@array/list_tab_style_values"
+            android:key="@string/key_tab_style"
+            android:persistent="false"
+            android:title="@string/label_tab_style" />
 
         <ListPreference
             android:defaultValue="@string/value_size_medium"

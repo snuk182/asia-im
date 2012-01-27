@@ -10,6 +10,10 @@
  	<string name="value_chat_date_full">dateFull</string>
 	<string name="key_chat_date">PrefChatDate</string>
 	
+	<string name="value_tab_style_slim">slim</string>
+	<string name="value_tab_style_system">system</string>
+	<string name="key_tab_style">PrefTabStyle</string>
+	    
 	<string name="key_view_type">PrefViewType</string>
 	
 	<string name="value_view_type_plain">plain</string>

@@ -96,7 +96,7 @@ public final class ServiceStoredPreferences {
 
 	public static String getOption(Context context, String key) {
 		SharedPreferences soptions = context.getSharedPreferences(SAVEDPARAMS_TOTAL, 0);
-		return soptions.getString(key, "false");
+		return soptions.getString(key, null);
 	}
 
 	public Bundle getApplicationOptions() {

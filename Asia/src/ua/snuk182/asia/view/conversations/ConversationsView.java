@@ -231,7 +231,7 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 		
 		tabWidgetLayout = new TabWidgetLayout(entryPoint);
 
-		tabWidgetLayout.getTabName().setText(buddy.getName());
+		tabWidgetLayout.setText(buddy.getName());
 		sendBtn = (ImageButton) findViewById(R.id.convsendbtn);
 		smileyBtn = (ImageButton) findViewById(R.id.convsmileybtn);
 
@@ -467,7 +467,7 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 				scroller.post(scrollToEnd);	
 			} else {
 				//if (!getEntryPoint().getTabHost().getCurrentTabTag().equals(ContactList.class.getSimpleName()+" "+getServiceId())){
-					tabWidgetLayout.getTabIcon().setImageResource(R.drawable.message_medium);
+					tabWidgetLayout.setImageResource(R.drawable.message_medium);
 				//}
 			}
 		}
@@ -613,7 +613,7 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 			this.buddy.merge(buddy);
 		}
 		
-		tabWidgetLayout.getTabName().setText(buddy.getName());
+		tabWidgetLayout.setText(buddy.getName());
 		statusIcon.setImageResource(ServiceUtils.getStatusResIdByBuddyTiny(getContext(), buddy));
 
 		switch (buddy.status) {
@@ -777,10 +777,8 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 
 	@Override
 	public void visualStyleUpdated() {
-		String bgType;
 		int textSize;
 		try {
-			bgType = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_bg_type));
 			textSize = Integer.parseInt(getEntryPoint().getApplicationOptions().getString((getResources().getString(R.string.key_text_size))));
 			try {
 				isImeFullScreen = Boolean.parseBoolean(getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_fullscreen_landscape_kb)));
@@ -798,17 +796,18 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 			} catch (Exception e) {
 			}
 		} catch (Exception npe) {
-			bgType = null;
 			textSize = 16;
 			ServiceUtils.log(npe);
-		} if (bgType == null || bgType.equals("wallpaper")) {
+		} 
+		
+		if (EntryPoint.bgColor == EntryPoint.BGCOLOR_WALLPAPER) {
 			setBackgroundColor(0x60000000);
 			this.textColor = 0xffffffff;
 			historyView.setBackgroundColor(0x60000000);
 			statusText.setTextColor(0xffffffff);
 		} else {
 			try {
-				int color = (int) Long.parseLong(bgType);
+				int color = EntryPoint.bgColor;
 				historyView.setBackgroundColor(0);
 				this.textColor = (color - 0xff000000) > 0x777777 ? 0xff000000 : 0xffffffff;
 				statusText.setTextColor((color - 0xff000000) > 0x777777 ? 0xff000000 : 0xffffffff);

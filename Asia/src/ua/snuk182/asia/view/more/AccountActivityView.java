@@ -16,7 +16,6 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ScrollView;
@@ -94,24 +93,16 @@ public class AccountActivityView extends ScrollView implements ITabContent, IHas
 	public TabWidgetLayout getTabWidgetLayout() {
 		TabWidgetLayout tabWidgetLayout = new TabWidgetLayout(getEntryPoint());
 
-		tabWidgetLayout.getTabName().setText(R.string.label_account_activity_log);
-		tabWidgetLayout.getTabIcon().setImageResource(R.drawable.contact_24px);
-		tabWidgetLayout.getTabIcon().setScaleType(ScaleType.FIT_XY);
+		tabWidgetLayout.setText(R.string.label_account_activity_log);
+		tabWidgetLayout.setImageResource(R.drawable.contact_24px);
+		//tabWidgetLayout.setScaleType(ScaleType.FIT_XY);
 
 		return tabWidgetLayout;
 	}
 
 	@Override
 	public void visualStyleUpdated() {
-		String bgType;
-
-		try {
-			bgType = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_bg_type));
-		} catch (NullPointerException npe) {
-			bgType = null;
-			ServiceUtils.log(npe);
-		}
-		if (bgType == null || bgType.equals("wallpaper")) {
+		if (EntryPoint.bgColor == EntryPoint.BGCOLOR_WALLPAPER) {
 			setBackgroundColor(0x60000000);
 			for (int i = 0; i < layout.getChildCount(); i++) {
 				TextView tv = (TextView) layout.getChildAt(i);
@@ -121,7 +112,7 @@ public class AccountActivityView extends ScrollView implements ITabContent, IHas
 
 		} else {
 			try {
-				int color = (int) Long.parseLong(bgType);
+				int color = EntryPoint.bgColor;
 				setBackgroundColor(0);
 				ColorStateList colorState = ColorStateList.valueOf((color - 0xff000000) > 0x777777 ? 0xff000000 : 0xffffffff);
 				for (int i = 0; i < layout.getChildCount(); i++) {

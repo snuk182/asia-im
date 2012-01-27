@@ -13,7 +13,6 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
-import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
@@ -37,10 +36,10 @@ public class FileTransferView extends ScrollView implements ITabContent, IHasFil
 		tabWidgetLayout = new TabWidgetLayout(entryPoint);
 		
 		int size = (int) (32*entryPoint.metrics.density);
-		tabWidgetLayout.getTabIcon().setLayoutParams(new LinearLayout.LayoutParams(size, size));
-		tabWidgetLayout.getTabIcon().setImageResource(android.R.drawable.ic_menu_save);
-		tabWidgetLayout.getTabIcon().setScaleType(ScaleType.FIT_XY);
-		tabWidgetLayout.getTabName().setText(account.getSafeName());
+		tabWidgetLayout.setLayoutParams(new LinearLayout.LayoutParams(size, size));
+		tabWidgetLayout.setImageResource(android.R.drawable.ic_menu_save);
+		//tabWidgetLayout.setScaleType(ScaleType.FIT_XY);
+		tabWidgetLayout.setText(account.getSafeName());
 		
 		visualStyleUpdated();
 	}
@@ -141,20 +140,13 @@ public class FileTransferView extends ScrollView implements ITabContent, IHasFil
 
 	@Override
 	public void visualStyleUpdated() {
-		String bgType;
 		int textColor = 0xffff;
-		try {
-			bgType = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_bg_type));
-		} catch (NullPointerException npe) {	
-			bgType = null;
-			ServiceUtils.log(npe);
-		} 
-		if (bgType == null || bgType.equals("wallpaper")) {
+		if (EntryPoint.bgColor == EntryPoint.BGCOLOR_WALLPAPER) {
 			setBackgroundColor(0x60000000);
 			textColor = 0xffffffff;
 		} else {
 			try {
-				int color = (int) Long.parseLong(bgType);
+				int color = EntryPoint.bgColor;
 				setBackgroundColor(0);
 				textColor = (color - 0xff000000) > 0x777777 ? 0xff000000 : 0xffffffff;
 			} catch (NumberFormatException e) {

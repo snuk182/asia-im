@@ -179,10 +179,16 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 		
 		if (EntryPoint.bgColor == 0xff7f7f80){
 			tabScroller.setBackgroundColor(0x0);
-		} else if (EntryPoint.bgColor < 0xff7f7f80){
-			tabScroller.setBackgroundColor(0xff808080);
 		} else {
-			tabScroller.setBackgroundColor(0xffd0d0d0);
+			if (EntryPoint.tabStyle.equals("system")){
+				tabScroller.setBackgroundColor(0);
+			} else {
+				if (EntryPoint.bgColor < 0xff7f7f80){
+					tabScroller.setBackgroundColor(0xff808080);
+				} else {
+					tabScroller.setBackgroundColor(0xffd0d0d0);
+				}
+			}
 		}
 		
 		for (TabInfo tab:tabs){
@@ -207,6 +213,9 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 		}
 		
 		addTab(info.tabSpec);
+		if (EntryPoint.tabStyle.equals("system")){
+			info.tabWidgetLayout.setFromView(getTabWidget().getChildTabViewAt(getTabWidget().getChildCount()-1));
+		}
 		
 		if (setAsCurrent){
 			setCurrentTabByTag(info.tag);
@@ -267,6 +276,9 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
     	for (TabInfo info:tabs){
     		try {
     			addTab(info.tabSpec);
+    			if (EntryPoint.tabStyle.equals("system")){
+    				info.tabWidgetLayout.setFromView(getTabWidget().getChildTabViewAt(getTabWidget().getChildCount()-1));
+    			}
 			} catch (Exception e) {
 				ServiceUtils.log(e);
 			}

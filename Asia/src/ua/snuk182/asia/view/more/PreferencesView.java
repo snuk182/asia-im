@@ -29,6 +29,8 @@ public class PreferencesView extends PreferenceActivity implements ITabContent {
 	Bundle options;
 	AccountView account;
 	
+	private boolean needRestart = false;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
@@ -65,6 +67,10 @@ public class PreferencesView extends PreferenceActivity implements ITabContent {
 							entryPoint.runtimeService.savePreference(pref.getKey(), arg1.toString(), account!=null ? account.serviceId : -1);
 							
 							fillSummary(pref, arg1.toString());
+							
+							needRestart = pref.getKey().equals(getString(R.string.key_bg_type))
+									|| pref.getKey().equals(getString(R.string.key_view_type))
+									|| pref.getKey().equals(getString(R.string.key_tab_style));
 						} catch (NullPointerException npe) {	
 							ServiceUtils.log(npe);
 						} catch (RemoteException e) {
@@ -97,8 +103,6 @@ public class PreferencesView extends PreferenceActivity implements ITabContent {
 			}
 		}
 		
-		final String bgType = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_bg_type));;
-		
 		getListView().setOnHierarchyChangeListener(new OnHierarchyChangeListener() {
 			
 			@Override
@@ -106,7 +110,7 @@ public class PreferencesView extends PreferenceActivity implements ITabContent {
 			
 			@Override
 			public void onChildViewAdded(View parent, View child) {
-				updateStyleForTitle(child, bgType);				
+				updateStyleForTitle(child);				
 			}
 		});
 	}
@@ -133,6 +137,10 @@ public class PreferencesView extends PreferenceActivity implements ITabContent {
 			if (account != null){
 				getEntryPoint().mainScreen.checkAndSetCurrentTabByTag(ContactList.class.getSimpleName() + " " + account.serviceId);
 			}
+			
+			if (needRestart){
+				getEntryPoint().restart();
+			}
 			return true;
 		}
 
@@ -156,23 +164,14 @@ public class PreferencesView extends PreferenceActivity implements ITabContent {
 
 	@Override
 	public void visualStyleUpdated() {
-		String bgType;
-		
-		try {
-			bgType = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_bg_type));
-		} catch (NullPointerException npe) {		
-			bgType = null;
-			ServiceUtils.log(npe);
-		} 
-		
 		for (int i=0; i<getListView().getChildCount(); i++){
 			View pre = getListView().getChildAt(i);
-			updateStyleForTitle(pre, bgType);
+			updateStyleForTitle(pre);
 		}
 	}
 	
-	private void updateStyleForTitle(View pre, String bgType) {
-		if (bgType == null || bgType.equals("wallpaper")){
+	private void updateStyleForTitle(View pre) {
+		if (EntryPoint.bgColor == EntryPoint.BGCOLOR_WALLPAPER){
 			getListView().setBackgroundColor(0x60000000);
 			TextView title = (TextView) pre.findViewById(android.R.id.title);
 				if (title != null){
@@ -183,7 +182,7 @@ public class PreferencesView extends PreferenceActivity implements ITabContent {
 		} else {
 			getListView().setBackgroundColor(0);
 			try {
-				int color = (int) Long.parseLong(bgType);
+				int color = EntryPoint.bgColor;
 				TextView title = (TextView) pre.findViewById(android.R.id.title);
 					if (title != null){
 						title.setTextColor(ColorStateList.valueOf((color-0xff000000)>0x777777?0xff000000:0xffffffff));

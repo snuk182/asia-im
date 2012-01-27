@@ -127,8 +127,8 @@ public class HistoryView extends ListView implements ITabContent, IHasMessages {
 	public TabWidgetLayout getTabWidgetLayout() {
 		TabWidgetLayout tabWidgetLayout = new TabWidgetLayout(getEntryPoint());
 		
-		tabWidgetLayout.getTabName().setText(getEntryPoint().getResources().getString(R.string.label_history)+" - "+buddy.name);
-		tabWidgetLayout.getTabIcon().setImageResource(R.drawable.history);
+		tabWidgetLayout.setText(getEntryPoint().getResources().getString(R.string.label_history)+" - "+buddy.name);
+		tabWidgetLayout.setImageResource(R.drawable.history);
 		return tabWidgetLayout;
 	}
 
@@ -141,23 +141,20 @@ public class HistoryView extends ListView implements ITabContent, IHasMessages {
 	public void visualStyleUpdated() {
 		HistoryViewAdapter historyAdapter = (HistoryViewAdapter) getAdapter();
 		
-		String bgType;
 		int textSize;
 		try {
-			bgType = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_bg_type));
 			textSize = Integer.parseInt(getEntryPoint().getApplicationOptions().getString((getResources().getString(R.string.key_text_size))));
 		} catch (Exception npe) {	
-			bgType = null;
 			textSize = 16;
 			ServiceUtils.log(npe);
 		} 
-		if (bgType == null || bgType.equals("wallpaper")) {
+		if (EntryPoint.bgColor == EntryPoint.BGCOLOR_WALLPAPER) {
 			setBackgroundColor(0x60000000);
 			historyAdapter.setBgColor(0x60000000);
 			historyAdapter.setTextColor(0xffffffff);
 		} else {
 			try {
-				int color = (int) Long.parseLong(bgType);
+				int color = EntryPoint.bgColor;
 				setBackgroundColor(0);
 				historyAdapter.setBgColor(0);
 				historyAdapter.setTextColor((color - 0xff000000) > 0x777777 ? 0xff000000 : 0xffffffff);

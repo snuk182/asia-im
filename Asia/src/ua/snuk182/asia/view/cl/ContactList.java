@@ -72,20 +72,13 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 		public void run() {
 			updateView(true);	
 			
-			String bgType;
-			
-			try {
-				bgType = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_bg_type));
-			} catch (NullPointerException npe) {
-				bgType = null;
-				ServiceUtils.log(npe);
-			} if (bgType == null || bgType.equals("wallpaper")){
+			if (EntryPoint.bgColor == EntryPoint.BGCOLOR_WALLPAPER){
 				notificationText.setBackgroundColor(0x60000000);
 				notificationText.setTextColor(0xffffffff);
 				((View) contactList).setBackgroundColor(0x60000000);
 			}else {
 				try {
-					int color = (int) Long.parseLong(bgType);
+					int color = EntryPoint.bgColor;
 					notificationText.setBackgroundColor(0);
 					notificationText.setTextColor((color-0xff000000)>0x777777?0xff000000:0xffffffff);
 					((View) contactList).setBackgroundColor(0);
@@ -108,7 +101,7 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 		@Override
 		public void onTabChanged(String tabId) {
 			if (tabId.equals(ContactList.class.getSimpleName()+" "+account.protocolServiceId)){
-				tabWidgetLayout.getTabIcon().setImageResource(ServiceUtils.getStatusResIdByAccount(account, 32, false));
+				tabWidgetLayout.setImageResource(ServiceUtils.getStatusResIdByAccount(account, 32, false));
 			}			
 		}
 		
@@ -126,7 +119,7 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 	
 		this.account = account;
 		
-		tabWidgetLayout.getTabName().setText(account.ownName == null ? account.protocolUid : account.ownName);
+		tabWidgetLayout.setText(account.ownName == null ? account.protocolUid : account.ownName);
 		
 		statusPanel = (LinearLayout) findViewById(R.id.statuspanel);
 		
@@ -368,7 +361,7 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 			}
 		}		
 		
-		tabWidgetLayout.getTabName().setText(account.getSafeName());
+		tabWidgetLayout.setText(account.getSafeName());
 		
 		if (refreshContacts){
 			contactList.updateView();
@@ -390,7 +383,7 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 		if (message==null || message.from==null) return;
 		
 		if (activeTab || (!getEntryPoint().mainScreen.getCurrentChatsTabTag().equals(ConversationsView.class.getSimpleName() + " " + getServiceId() + " " + message.from))){
-			tabWidgetLayout.getTabIcon().setImageResource(R.drawable.message_medium);
+			tabWidgetLayout.setImageResource(R.drawable.message_medium);
 			contactList.messageReceived(message);
 		}
 	}
@@ -411,9 +404,9 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 					checkBuddyStateCache();
 					
 					if (contactList.hasUnreadMessages()){
-						tabWidgetLayout.getTabIcon().setImageResource(R.drawable.message_medium);
+						tabWidgetLayout.setImageResource(R.drawable.message_medium);
 					} else {
-						tabWidgetLayout.getTabIcon().setImageResource(ServiceUtils.getStatusResIdByAccountMedium(getContext(), account, false));
+						tabWidgetLayout.setImageResource(ServiceUtils.getStatusResIdByAccountMedium(getContext(), account, false));
 					}					
 				}
 			});
@@ -497,7 +490,7 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 		this.account.merge(account);
 		statusPanel.setVisibility(View.VISIBLE);
 		progressBar.setVisibility(View.GONE);
-		tabWidgetLayout.getTabIcon().setImageResource(ServiceUtils.getStatusResIdByAccountMedium(getContext(), ContactList.this.account, false));
+		tabWidgetLayout.setImageResource(ServiceUtils.getStatusResIdByAccountMedium(getContext(), ContactList.this.account, false));
 		
 	}
 
@@ -516,7 +509,7 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 		progressBar.setVisibility(View.VISIBLE);
 		progressBar.setProgress(state);
 		account.setConnectionState(AccountService.STATE_CONNECTING);
-		tabWidgetLayout.getTabIcon().setImageResource(ServiceUtils.getStatusResIdByAccountMedium(getContext(), account, false));
+		tabWidgetLayout.setImageResource(ServiceUtils.getStatusResIdByAccountMedium(getContext(), account, false));
 	}
 
 	@Override
@@ -551,12 +544,12 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 	public void setClReady(boolean clReady) {
 		this.clReady = clReady;
 		if (clReady){
-			tabWidgetLayout.getTabIcon().setImageResource(ServiceUtils.getStatusResIdByAccountMedium(getContext(), account, false));
-			tabWidgetLayout.getTabName().setText(account.getSafeName());
+			tabWidgetLayout.setImageResource(ServiceUtils.getStatusResIdByAccountMedium(getContext(), account, false));
+			tabWidgetLayout.setText(account.getSafeName());
 			getEntryPoint().threadMsgHandler.post(checkCachedBuddyStatesRunnable );
 		} else {
-			tabWidgetLayout.getTabIcon().setImageResource(R.drawable.logo_32px);
-			tabWidgetLayout.getTabName().setText(R.string.label_wait);
+			tabWidgetLayout.setImageResource(R.drawable.logo_32px);
+			tabWidgetLayout.setText(R.string.label_wait);
 		}
 	}	
 }

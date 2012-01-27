@@ -70,7 +70,10 @@ public class EntryPoint extends ActivityGroup {
 	
 	private Bundle appOptions;
 	
+	public static String tabStyle = "slim";
+	
 	public static int bgColor = 0xff7f7f80;
+	
 	public DisplayMetrics metrics = new DisplayMetrics();
 	
 	public boolean dontDrawSmileys = false;
@@ -113,6 +116,8 @@ public class EntryPoint extends ActivityGroup {
 		
 		@Override
 		public void run() {
+			updateStyle();
+			
 			String view;
 			
 			try {
@@ -160,7 +165,7 @@ public class EntryPoint extends ActivityGroup {
 			String dontDrawSmileysStr = getApplicationOptions().getString(getResources().getString(R.string.key_dont_draw_smileys));
 			dontDrawSmileys = dontDrawSmileysStr!=null ? Boolean.parseBoolean(dontDrawSmileysStr) : false;
 			
-			updateBackground();	
+			updateWallpaper();	
 			
 			mainScreen.visualStyleUpdated();
 		}
@@ -182,18 +187,42 @@ public class EntryPoint extends ActivityGroup {
         });
     }
 	
-    private void updateBackground() {
-    	String bgType;
-		
-		try {
-			bgType = getApplicationOptions().getString(getResources().getString(R.string.key_bg_type));
-		} catch (NullPointerException npe) {	
-			bgType = null;
-			ServiceUtils.log(npe);
-		}
+	private void updateStyle() {
+		String bgType = ServiceStoredPreferences.getOption(getApplicationContext(), getResources().getString(R.string.key_bg_type));	
+    	
 		if (bgType == null || bgType.equals("wallpaper")){
+			bgColor = BGCOLOR_WALLPAPER;
+		}else {
 			try {
-				bgColor = BGCOLOR_WALLPAPER;
+				bgColor = (int) Long.parseLong(bgType);
+			} catch (NumberFormatException e) {				
+				ServiceUtils.log(e);
+			}
+		}
+		
+		if (bgColor < BGCOLOR_WALLPAPER){
+			setTheme(android.R.style.Theme_Black_NoTitleBar);	    	
+		}
+		
+		if (bgColor > BGCOLOR_WALLPAPER){
+			setTheme(android.R.style.Theme_Light_NoTitleBar);	    	
+		}
+		
+		if (bgColor == BGCOLOR_WALLPAPER){
+			setTheme(android.R.style.Theme_Translucent_NoTitleBar);	    	
+		}
+		
+		tabStyle = ServiceStoredPreferences.getOption(getApplicationContext(), getResources().getString(R.string.key_tab_style));		
+    	if (tabStyle == null) {	
+			tabStyle = "slim";
+		}
+    	
+    	getMetrics();    	
+	}
+	
+    private void updateWallpaper() {
+    	if (bgColor == BGCOLOR_WALLPAPER){
+			try {
 				int heightPx = (int) (metrics.heightPixels * metrics.density);
 				int widthPx = (int) (metrics.widthPixels * metrics.density);
 				
@@ -206,16 +235,10 @@ public class EntryPoint extends ActivityGroup {
 				wallpaper.setDither(false);
 				mainScreen.setBackgroundDrawable(wallpaper);
 			} catch (Exception e) {
-				bgColor = 0xff000000;
 				mainScreen.setBackgroundColor(bgColor);		
 			}
-		}else {
-			try {
-				bgColor = (int) Long.parseLong(bgType);
-				mainScreen.setBackgroundColor(bgColor);											
-			} catch (NumberFormatException e) {				
-				ServiceUtils.log(e);
-			}
+		} else {
+			mainScreen.setBackgroundColor(bgColor);					
 		}
 	}
 
@@ -234,7 +257,7 @@ public class EntryPoint extends ActivityGroup {
     	setContentView(R.layout.dummy);
     	
     	savedState = savedInstanceState;
-    	getMetrics();
+    	
     	toggleWaitscreen(true);
         
     	threadMsgHandler.post(startRunnable);	
@@ -886,7 +909,7 @@ public class EntryPoint extends ActivityGroup {
 	@Override
 	public void onRestart(){
 		super.onRestart();
-		updateBackground();
+		updateWallpaper();
 		if (runtimeService!=null){
 			try {
 				runtimeService.setAppVisible(true);
@@ -947,6 +970,7 @@ public class EntryPoint extends ActivityGroup {
 	@Override
 	public void onDestroy(){
 		super.onDestroy();
+		unbindService(serviceConnection);
 		ServiceUtils.log("entry point destroyed");
 		mainScreen.onDestroy();
 	}
@@ -1041,5 +1065,11 @@ public class EntryPoint extends ActivityGroup {
 
 	public void refreshAccounts() {
 		mainScreen.refreshAccounts();
+	}
+
+	public void restart() {
+		Intent intent = getIntent();
+		finish();
+		startActivity(intent);
 	}
 }

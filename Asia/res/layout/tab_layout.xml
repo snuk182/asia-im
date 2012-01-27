@@ -23,7 +23,7 @@
 
 				<TabWidget android:id="@android:id/tabs"
 					android:layout_width="wrap_content" android:layout_height="wrap_content"
-					android:background="#00000000" android:gravity="left"/>
+					android:background="#00000000" android:gravity="left" android:paddingLeft="2dip" android:paddingRight="2dip"/>
 			</HorizontalScrollView>
 			
 		</LinearLayout>

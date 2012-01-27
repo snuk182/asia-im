@@ -91,8 +91,8 @@ public class AccountManagerView extends ListView implements ITabContent {
 	public TabWidgetLayout getTabWidgetLayout() {
 		TabWidgetLayout tabWidgetLayout = new TabWidgetLayout(getEntryPoint());
 		
-		tabWidgetLayout.getTabName().setText(R.string.label_accounts);
-		tabWidgetLayout.getTabIcon().setImageResource(R.drawable.accounts);
+		tabWidgetLayout.setText(R.string.label_accounts);
+		tabWidgetLayout.setImageResource(R.drawable.accounts);
 		
 		return tabWidgetLayout;
 	}
@@ -106,20 +106,12 @@ public class AccountManagerView extends ListView implements ITabContent {
 
 	@Override
 	public void visualStyleUpdated() {
-		String bgType;
-		
-		try {
-			bgType = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_bg_type));
-		} catch (NullPointerException npe) {	
-			bgType = null;
-			ServiceUtils.log(npe);
-		} 
-		if (bgType == null || bgType.equals("wallpaper")){
+		if (EntryPoint.bgColor == EntryPoint.BGCOLOR_WALLPAPER){
 			setBackgroundColor(0x60000000);
 			adapter.setTextColor(0xff000000);			
 		}else {
 			try {
-				int color = (int) Long.parseLong(bgType);
+				int color = EntryPoint.bgColor;
 				setBackgroundColor(0);
 				adapter.setTextColor((color-0xff000000)>0x777777?0xff000000:0xffffffff);						
 			} catch (NumberFormatException e) {				

@@ -6,6 +6,11 @@
 		<item>"wallpaper"</item>
 	</string-array>
 	
+	<string-array name="list_tab_style_values">
+	    <item>@string/value_tab_style_slim</item>
+	    <item>@string/value_tab_style_system</item>
+	</string-array>
+	
 	<string-array name="list_screen_orientation_values">
 		<item>@string/value_screen_orientation_system</item>
 		<item>@string/value_screen_orientation_portrait</item>

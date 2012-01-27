@@ -295,6 +295,10 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
 				removeTabAt(0, tabsChat, tabHostChat);
 			} else {
 				tabHostChat.addTab(info.tabSpec);
+				if (EntryPoint.tabStyle.equals("system")){
+					info.tabWidgetLayout.setFromView(tabHostChat.getTabWidget().getChildTabViewAt(tabHostChat.getTabWidget().getChildCount()-1));
+				}
+				
 				if (setAsCurrent){
 					tabHostChat.setCurrentTabByTag(info.tag);
 				}
@@ -302,6 +306,9 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
 		} else {
 			tabsAccount.add(info);
 			tabHostAccount.addTab(info.tabSpec);
+			if (EntryPoint.tabStyle.equals("system")){
+				info.tabWidgetLayout.setFromView(tabHostAccount.getTabWidget().getChildTabViewAt(tabHostAccount.getTabWidget().getChildCount()-1));
+			}
 			if (setAsCurrent){
 				tabHostAccount.setCurrentTabByTag(info.tag);
 			}
@@ -335,8 +342,7 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
     		tabs.remove(pos);	
     	} catch (Exception e) {
 			ServiceUtils.log(e);
-		}	
-		
+		}			
     	
     	if (tabs.size()<1){
     		if (tabs == tabsAccount){
@@ -349,6 +355,9 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
     	for (TabInfo info:tabs){
     		try {
     			host.addTab(info.tabSpec);
+    			if (EntryPoint.tabStyle.equals("system")){
+    				info.tabWidgetLayout.setFromView(host.getTabWidget().getChildTabViewAt(host.getTabWidget().getChildCount()-1));
+    			}
 			} catch (Exception e) {
 				ServiceUtils.log(e);
 			}

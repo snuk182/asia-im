@@ -58,7 +58,7 @@ public class Splashscreen extends RelativeLayout implements ITabContent{
 	public TabWidgetLayout getTabWidgetLayout() {
 		TabWidgetLayout tabWidgetLayout = new TabWidgetLayout(getEntryPoint());
 		
-		tabWidgetLayout.getTabName().setText(R.string.label_wait_starting);
+		tabWidgetLayout.setText(R.string.label_wait_starting);
 		return tabWidgetLayout;
 	}
 
@@ -69,14 +69,7 @@ public class Splashscreen extends RelativeLayout implements ITabContent{
 
 	@Override
 	public void visualStyleUpdated() {
-		String bgType;
-		
-		try {
-			bgType = getEntryPoint().getApplicationOptions().getString(getResources().getString(R.string.key_bg_type));
-		} catch (NullPointerException npe) {
-			bgType = null;
-			ServiceUtils.log(npe);
-		} if (bgType == null || bgType.equals("wallpaper")){
+		if (EntryPoint.bgColor == EntryPoint.BGCOLOR_WALLPAPER){
 			setBackgroundColor(0x60000000);
 		}else {
 			try {
