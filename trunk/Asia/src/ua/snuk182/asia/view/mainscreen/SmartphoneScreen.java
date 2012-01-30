@@ -28,6 +28,7 @@ import ua.snuk182.asia.view.more.AsiaCoreException;
 import ua.snuk182.asia.view.more.HistoryView;
 import ua.snuk182.asia.view.more.PreferencesView;
 import ua.snuk182.asia.view.more.SearchUsersView;
+import ua.snuk182.asia.view.more.TabWidgetLayout;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.RemoteException;
@@ -94,15 +95,19 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 				if (desiredTab == null){
 					return;
 				}
-				View tabWidget = desiredTab.tabWidgetLayout;
+				TabWidgetLayout tabWidget = desiredTab.tabWidgetLayout;
 				Rect rect = new Rect();
 				tabScroller.getDrawingRect(rect);
-				if (rect.left > tabWidget.getLeft()){
-					tabScroller.scrollTo(tabWidget.getLeft(),0);	
+				
+				int leftBound = tabWidget.getLeftBound();
+				int rightBound = tabWidget.getRightBound();
+				
+				if (rect.left > leftBound){
+					tabScroller.scrollTo(leftBound,0);	
 					return;
 				}
-				if (rect.right < tabWidget.getRight()){
-					tabScroller.scrollTo(tabWidget.getRight(),0);	
+				if (rect.right < rightBound){
+					tabScroller.scrollTo(rightBound,0);	
 					return;
 				}
 			}				
@@ -214,7 +219,7 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 		
 		addTab(info.tabSpec);
 		if (EntryPoint.tabStyle.equals("system")){
-			info.tabWidgetLayout.setFromView(getTabWidget().getChildTabViewAt(getTabWidget().getChildCount()-1));
+			info.tabWidgetLayout.setFromView(getTabWidget().getChildTabViewAt(getTabWidget().getChildCount()-1), this);
 		}
 		
 		if (setAsCurrent){
@@ -277,7 +282,7 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
     		try {
     			addTab(info.tabSpec);
     			if (EntryPoint.tabStyle.equals("system")){
-    				info.tabWidgetLayout.setFromView(getTabWidget().getChildTabViewAt(getTabWidget().getChildCount()-1));
+    				info.tabWidgetLayout.setFromView(getTabWidget().getChildTabViewAt(getTabWidget().getChildCount()-1), this);
     			}
 			} catch (Exception e) {
 				ServiceUtils.log(e);

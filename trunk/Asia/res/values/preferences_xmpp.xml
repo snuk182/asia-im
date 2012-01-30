@@ -16,10 +16,9 @@
 	</string-array>
 	
 	<string-array name="xmpp_contact_menu_names">
+		<item>@string/menu_value_view_info</item>
 		<item>@string/menu_value_join_chat</item>
 		<item>@string/menu_value_leave_chat</item>
-		<item>@string/label_edit</item>
-		<item>@string/label_remove</item>
 	</string-array>
 	
 	<string-array name="xmpp_status_icons">

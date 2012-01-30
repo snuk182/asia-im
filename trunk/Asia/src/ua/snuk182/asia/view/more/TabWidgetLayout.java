@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TabHost;
 import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 
@@ -54,7 +55,7 @@ public class TabWidgetLayout extends LinearLayout {
 		setGravity(Gravity.CENTER);
 	}
 	
-	public void setFromView(View parent) {
+	public void setFromView(final View parent, final TabHost host) {
 		tabIcon = (ImageView) parent.findViewById(android.R.id.icon);
 		tabName = (TextView) parent.findViewById(android.R.id.title);
 		
@@ -66,6 +67,15 @@ public class TabWidgetLayout extends LinearLayout {
 		int iconPadding = (int) (15*getEntryPoint().metrics.density);
 		tabName.setPadding(5, tabName.getPaddingTop(), 5, tabName.getPaddingBottom());
 		tabIcon.setPadding(iconPadding, tabIcon.getPaddingTop(), iconPadding, tabIcon.getPaddingBottom());
+		
+		parent.setOnFocusChangeListener(new OnFocusChangeListener(){
+
+			@Override
+			public void onFocusChange(View v, boolean hasFocus) {
+				host.scrollTo(parent.getRight(), parent.getTop());				
+			}
+			
+		});
 	}
 
 	public void setText(CharSequence text) {
@@ -131,7 +141,7 @@ public class TabWidgetLayout extends LinearLayout {
 
 	public void color() {
 		
-		if (EntryPoint.tabStyle.equals("system")){
+		if (spec != null){
 			return;
 		}
 		
@@ -168,5 +178,21 @@ public class TabWidgetLayout extends LinearLayout {
 
 	public Drawable getDrawable() {
 		return iconCache;
+	}
+	
+	public int getLeftBound(){
+		if (spec != null){
+			return ((View) tabName.getParent()).getLeft();
+		} else {
+			return super.getLeft();
+		}
+	}
+	
+	public int getRightBound(){
+		if (spec != null){
+			return ((View) tabName.getParent()).getRight();
+		} else {
+			return super.getRight();
+		}
 	}
 }
