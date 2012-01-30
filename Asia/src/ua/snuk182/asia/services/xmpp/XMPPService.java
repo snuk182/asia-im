@@ -331,7 +331,8 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 		case AccountService.REQ_GET_CHAT_ROOM_OCCUPANTS:
 			return getChatRoomOccupants((String) args[0], (Boolean) args[1]);
 		case AccountService.REQ_GETFULLBUDDYINFO:
-			return getFullInfo((String) args[0]);
+			getFullInfo((String) args[0]);
+			break;
 		}
 		return null;
 	}
@@ -409,37 +410,48 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 		}.start();
 	}
 
-	private PersonalInfo getFullInfo(String uid) throws ProtocolException {
-		PersonalInfo info = new PersonalInfo();
-		info.protocolUid = uid;
+	private void getFullInfo(final String uid) throws ProtocolException {
+		new Thread(){
+			
+			@Override 
+			public void run(){
+				PersonalInfo info = new PersonalInfo();
+				info.protocolUid = uid;
 
-		if (uid.indexOf(groupchatService) > -1) {
-			try {
-				RoomInfo room = MultiUserChat.getRoomInfo(connection, uid);
-				info.properties.putCharSequence(PersonalInfo.INFO_CHAT_DESCRIPTION, room.getDescription());
-				info.properties.putCharSequence(PersonalInfo.INFO_CHAT_OCCUPANTS, room.getOccupantsCount() + "");
-				info.properties.putCharSequence(PersonalInfo.INFO_CHAT_SUBJECT, room.getSubject());
-				return info;
-			} catch (XMPPException e) {
-				throw new ProtocolException(e.getLocalizedMessage());
+				if (groupchatService != null && uid.indexOf(groupchatService) > -1) {
+					try {
+						RoomInfo room = MultiUserChat.getRoomInfo(connection, uid);
+						info.properties.putCharSequence(PersonalInfo.INFO_CHAT_DESCRIPTION, room.getDescription());
+						info.properties.putCharSequence(PersonalInfo.INFO_CHAT_OCCUPANTS, room.getOccupantsCount() + "");
+						info.properties.putCharSequence(PersonalInfo.INFO_CHAT_SUBJECT, room.getSubject());						
+					} catch (XMPPException e) {
+						log(e);
+					}
+				} else {
+					VCard card = new VCard();
+					try {
+						card.load(connection, uid);
+						info.properties.putCharSequence(PersonalInfo.INFO_FIRST_NAME, card.getFirstName());
+						info.properties.putCharSequence(PersonalInfo.INFO_LAST_NAME, card.getLastName());
+						info.properties.putCharSequence(PersonalInfo.INFO_NICK, card.getNickName());
+						info.properties.putCharSequence(PersonalInfo.INFO_EMAIL, card.getEmailHome());
+
+						for (String prop: card.otherSimpleFields.keySet()){
+							info.properties.putCharSequence(prop, card.getField(prop));							
+						}
+					} catch (XMPPException e) {
+						log(e);
+					}					
+				}
+				
+				try {
+					serviceResponse.respond(IAccountServiceResponse.RES_USERINFO, serviceId, info);
+				} catch (ProtocolException e) {
+					log(e);
+				}				
 			}
-		} else {
-			VCard card = new VCard();
-			try {
-				card.load(connection, uid);
-				info.properties.putCharSequence(PersonalInfo.INFO_FIRST_NAME, card.getFirstName());
-				info.properties.putCharSequence(PersonalInfo.INFO_LAST_NAME, card.getLastName());
-				info.properties.putCharSequence(PersonalInfo.INFO_NICK, card.getNickName());
-				info.properties.putCharSequence(PersonalInfo.INFO_EMAIL, card.getEmailHome());
-
-				info.properties.putCharSequence("Organization", card.getOrganization());
-				info.properties.putCharSequence("Work email", card.getEmailWork());
-
-				return info;
-			} catch (XMPPException e) {
-				throw new ProtocolException(e.getLocalizedMessage());
-			}
-		}
+			
+		}.start();
 	}
 
 	private MultiChatRoomOccupants getChatRoomOccupants(String chatId, boolean loadOccupantIcons) throws ProtocolException {

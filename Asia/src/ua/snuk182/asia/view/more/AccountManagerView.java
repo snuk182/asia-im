@@ -49,8 +49,8 @@ public class AccountManagerView extends ListView implements ITabContent {
 		case R.id.menuitem_add:
 			try {
 				if (getEntryPoint().runtimeService.getAccounts(true).size() < 126){
-					getEntryPoint().addAccountEditorTab(null);
 					getEntryPoint().mainScreen.removeTabByTag(AccountManagerView.class.getSimpleName());
+					getEntryPoint().addAccountEditorTab(null);					
 				} else {
 					Toast.makeText(getEntryPoint(), R.string.label_too_many_accounts, Toast.LENGTH_LONG);
 				}

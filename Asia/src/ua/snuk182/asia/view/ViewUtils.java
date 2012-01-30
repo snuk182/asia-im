@@ -191,12 +191,12 @@ public final class ViewUtils {
 				}
 			}
 			if (item.equals(res.getString(R.string.menu_value_join_chat))){
-				if (buddy.visibility == Buddy.VIS_GROUPCHAT && buddy.status == Buddy.ST_ONLINE){
+				if (buddy.visibility != Buddy.VIS_GROUPCHAT || buddy.status != Buddy.ST_OFFLINE){
 					continue;
 				}
 			}
 			if (item.equals(res.getString(R.string.menu_value_leave_chat))){
-				if (buddy.visibility == Buddy.VIS_GROUPCHAT && buddy.status == Buddy.ST_OFFLINE){
+				if (buddy.visibility != Buddy.VIS_GROUPCHAT || buddy.status == Buddy.ST_OFFLINE){
 					continue;
 				}
 			}
@@ -1191,7 +1191,8 @@ public final class ViewUtils {
 		Collections.sort(keys);
 		
 		for (String key: keys){
-			if (info.properties.get(key).toString().equals("-1")){
+			Object value = info.properties.get(key);
+			if (value == null || value.toString().equals("-1")){
 				continue;
 			}
 			

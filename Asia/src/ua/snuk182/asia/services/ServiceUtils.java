@@ -34,8 +34,8 @@ import android.util.Log;
 
 public final class ServiceUtils {
 
-	final static DateFormat DATE_FORMATTER = new SimpleDateFormat("dd/MM/yy HH:mm:ss");	
-	
+	final static DateFormat DATE_FORMATTER = new SimpleDateFormat("dd/MM/yy HH:mm:ss");
+
 	public static final Set<String> GROUPCHAT_PREFERENCE_MAP;
 	public static boolean logToFile = false;
 
@@ -54,11 +54,9 @@ public final class ServiceUtils {
 		buddy.externalIP = info.extIP;
 		// buddy.capabilities = info.capabilities;
 		buddy.canFileShare = info.canFileShare;
-		// if (buddy.visibility==Buddy.VIS_NOT_AUTHORIZED &&
-		// info.visibility!=Buddy.VIS_NOT_AUTHORIZED && info.userStatus !=
-		// Buddy.ST_OFFLINE){
-		buddy.visibility = info.visibility;
-		// }
+		if (buddy.visibility == Buddy.VIS_NOT_AUTHORIZED && info.visibility != Buddy.VIS_NOT_AUTHORIZED && info.userStatus != Buddy.ST_OFFLINE) {
+			buddy.visibility = info.visibility;
+		}
 		buddy.signonTime = info.signonTime;
 		buddy.onlineTime = info.onlineTime;
 		buddy.xstatus = info.xstatus;
@@ -525,7 +523,7 @@ public final class ServiceUtils {
 			log(e, account);
 		}
 	}
-	
+
 	public static synchronized List<ServiceMessage> getAccountActivity(AccountView account) {
 		File root = Environment.getExternalStorageDirectory();
 		File downloads = new File(root, "Asia");
@@ -538,29 +536,29 @@ public final class ServiceUtils {
 		}
 
 		List<ServiceMessage> messages = new LinkedList<ServiceMessage>();
-		
-		if (!file.exists()){
+
+		if (!file.exists()) {
 			return messages;
 		}
-		
+
 		try {
 			FileInputStream fis = new FileInputStream(file);
-			
+
 			String strLine = "";
 			BufferedReader br = new BufferedReader(new InputStreamReader(new DataInputStream(fis)));
-			
-			while ((strLine = br.readLine()) != null){
-				 ServiceMessage msg = new ServiceMessage(account.getAccountId());
-				 msg.serviceId = account.serviceId;
-				 msg.text = strLine;
-				 messages.add(msg);
-			 }
-			
+
+			while ((strLine = br.readLine()) != null) {
+				ServiceMessage msg = new ServiceMessage(account.getAccountId());
+				msg.serviceId = account.serviceId;
+				msg.text = strLine;
+				messages.add(msg);
+			}
+
 			fis.close();
-		} catch (IOException e) {	
+		} catch (IOException e) {
 			log(e, account);
 		}
-		
+
 		return messages;
 	}
 
@@ -597,5 +595,4 @@ public final class ServiceUtils {
 
 	static final int DEFAULT_SKIP_AMOUNT = 1500;
 
-	
 }

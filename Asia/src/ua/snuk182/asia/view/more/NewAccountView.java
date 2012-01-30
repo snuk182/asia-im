@@ -1,5 +1,7 @@
 package ua.snuk182.asia.view.more;
 
+import java.util.Random;
+
 import ua.snuk182.asia.EntryPoint;
 import ua.snuk182.asia.R;
 import ua.snuk182.asia.core.dataentity.AccountView;
@@ -49,13 +51,10 @@ public class NewAccountView extends ScrollView implements ITabContent {
 			tag = NewAccountView.class.getSimpleName()+" "+account.serviceId;
 		} else {
 			try {
-				tag = NewAccountView.class.getSimpleName()+" "+entryPoint.runtimeService.getAccounts(true).size();
+				tag = NewAccountView.class.getSimpleName()+" "+new Random().nextInt();
 			} catch (NullPointerException npe) {	
 				ServiceUtils.log(npe);
-			} catch (RemoteException e) {
-				ServiceUtils.log(e);
-				tag = NewAccountView.class.getSimpleName();
-			}
+			} 
 		}
 		
 		protocolChooser = (Spinner) findViewById(R.id.newaccountprotocolchooser);
@@ -177,7 +176,8 @@ public class NewAccountView extends ScrollView implements ITabContent {
 	public boolean onKeyDown(int i, KeyEvent event) {
 
 		  if (i == KeyEvent.KEYCODE_BACK) {
-		    Toast.makeText(getEntryPoint(), getResources().getString(R.string.label_sorry_back_button), Toast.LENGTH_LONG).show();
+		    //Toast.makeText(getEntryPoint(), getResources().getString(R.string.label_sorry_back_button), Toast.LENGTH_LONG).show();
+			  removeMe();
 		    return true; 
 		  }
 

@@ -970,7 +970,6 @@ public class EntryPoint extends ActivityGroup {
 	@Override
 	public void onDestroy(){
 		super.onDestroy();
-		unbindService(serviceConnection);
 		ServiceUtils.log("entry point destroyed");
 		mainScreen.onDestroy();
 	}
