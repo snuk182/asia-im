@@ -1,5 +1,6 @@
 package ua.snuk182.asia;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,6 +42,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -52,6 +54,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
@@ -79,6 +82,8 @@ public class EntryPoint extends ActivityGroup {
 	public boolean dontDrawSmileys = false;
 	
 	public BitmapDrawable wallpaper = null;
+	
+	private Method invalidateOptionsMenuMethod = null;
 	
 	private Bundle savedState;
 	private ServiceConnection serviceConnection = new ServiceConnection(){
@@ -201,15 +206,15 @@ public class EntryPoint extends ActivityGroup {
 		}
 		
 		if (bgColor < BGCOLOR_WALLPAPER){
-			setTheme(android.R.style.Theme_Black_NoTitleBar);	    	
+			setTheme(R.style.DarkTheme);	  				
 		}
 		
 		if (bgColor > BGCOLOR_WALLPAPER){
-			setTheme(android.R.style.Theme_Light_NoTitleBar);	    	
+			setTheme(R.style.LightTheme);
 		}
 		
 		if (bgColor == BGCOLOR_WALLPAPER){
-			setTheme(android.R.style.Theme_Translucent_NoTitleBar);	    	
+			setTheme(R.style.TransparentTheme);	    	
 		}
 		
 		tabStyle = ServiceStoredPreferences.getOption(getApplicationContext(), getResources().getString(R.string.key_tab_style));		
@@ -252,7 +257,14 @@ public class EntryPoint extends ActivityGroup {
     	
     	//getSharedPreferences("AsiaTotalParams", 0).edit().clear().commit();    
     	
-    	super.onCreate(savedInstanceState);  
+    	super.onCreate(savedInstanceState);  		
+    	if (!ServiceUtils.isTablet(getApplicationContext())){
+    		requestWindowFeature(Window.FEATURE_NO_TITLE);
+    	}
+    	
+    	//Log.w("asia", Resources.getSystem().getConfiguration().toString());
+    	
+    	getNonVersionedMethods();
     	
     	setContentView(R.layout.dummy);
     	
@@ -263,7 +275,13 @@ public class EntryPoint extends ActivityGroup {
     	threadMsgHandler.post(startRunnable);	
     }
     
-    public void toggleWaitscreen(final boolean show) {
+    private void getNonVersionedMethods() {
+		try {
+			invalidateOptionsMenuMethod = getClass().getMethod("invalidateOptionsMenu", new Class[] {});
+		} catch (NoSuchMethodException e) {}
+	}
+
+	public void toggleWaitscreen(final boolean show) {
     	
     	if (show){
     		try {
@@ -319,7 +337,12 @@ public class EntryPoint extends ActivityGroup {
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu){
-    	return mainScreen.onPrepareOptionsMenu(menu);
+    	if (mainScreen != null){
+    		boolean result = mainScreen.onPrepareOptionsMenu(menu);
+    		return result;
+    	} else {
+    		return false;
+    	}
     }
     
     @Override
@@ -1070,5 +1093,15 @@ public class EntryPoint extends ActivityGroup {
 		Intent intent = getIntent();
 		finish();
 		startActivity(intent);
+	}
+	
+	public void refreshMenu() {
+		if (Build.VERSION.SDK_INT > 10 && invalidateOptionsMenuMethod != null){
+			try {
+				invalidateOptionsMenuMethod.invoke(this);
+			} catch (Exception e) {
+				ServiceUtils.log(e);
+			}
+		}
 	}
 }

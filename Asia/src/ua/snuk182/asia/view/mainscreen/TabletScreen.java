@@ -84,6 +84,7 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
 		public void onTabChanged(String tabId) {
 			for (OnTabChangeListener listener:tabChangeListenersAccount){
 				listener.onTabChanged(tabId);
+				getEntryPoint().refreshMenu();
 			}		
 		}
 	};
@@ -93,6 +94,7 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
 		public void onTabChanged(String tabId) {
 			for (OnTabChangeListener listener:tabChangeListenersChat){
 				listener.onTabChanged(tabId);
+				getEntryPoint().refreshMenu();
 			}		
 		}
 	};
@@ -348,7 +350,7 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
     		if (tabs == tabsAccount){
         		getEntryPoint().finish();
         	} else {
-        		addTab(splash, true);
+        		tabs.add(splash);
         	} 
     	}
     	    	
@@ -438,8 +440,15 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
     	
     	MenuInflater inflater = getEntryPoint().getMenuInflater();
 		
+    	int currentTab = -1;
 		if (!isChatMenu){
-			info = tabsAccount.get(tabHostAccount.getCurrentTab());
+			currentTab = tabHostAccount.getCurrentTab();
+			
+			if (currentTab < 0){
+				return false;
+			}
+			
+			info = tabsAccount.get(currentTab);
 			boolean addChatMenu = false;
 			
 			TabInfo chatInfo = tabsChat.get(tabHostChat.getCurrentTab());
@@ -453,7 +462,12 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
 				menu.add(Menu.NONE, Menu.NONE, 0, "Chat Menu");
 			}
 		} else {
-			info = tabsChat.get(tabHostChat.getCurrentTab());
+			currentTab = tabHostChat.getCurrentTab();
+			
+			if (currentTab < 0){
+				return false;
+			}
+			info = tabsChat.get(currentTab);
 			inflater.inflate(info.content.getMainMenuId(), menu);
 		}
 		

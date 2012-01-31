@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Xml;
 
@@ -83,7 +84,7 @@ public final class ServiceStoredPreferences {
 		new Thread("Preference saver " + storageName) {
 			@Override
 			public void run() {
-				SharedPreferences.Editor preferences = context.getSharedPreferences(storageName, 0).edit();
+				SharedPreferences.Editor preferences = context.getSharedPreferences(storageName, getAccessMode()).edit();
 
 				for (String key : map.keySet()) {
 					preferences.putString(key, map.get(key));
@@ -95,7 +96,7 @@ public final class ServiceStoredPreferences {
 	}
 
 	public static String getOption(Context context, String key) {
-		SharedPreferences soptions = context.getSharedPreferences(SAVEDPARAMS_TOTAL, 0);
+		SharedPreferences soptions = context.getSharedPreferences(SAVEDPARAMS_TOTAL, getAccessMode());
 		return soptions.getString(key, null);
 	}
 
@@ -112,7 +113,7 @@ public final class ServiceStoredPreferences {
 			storageName = SAVEDPARAMS_TOTAL;
 		}
 		Map<String, String> map = new HashMap<String, String>();
-		SharedPreferences preferences = context.getSharedPreferences(storageName, 0);
+		SharedPreferences preferences = context.getSharedPreferences(storageName, getAccessMode());
 
 		for (String key : keys) {
 			map.put(key, preferences.getString(key, null));
@@ -124,7 +125,7 @@ public final class ServiceStoredPreferences {
 	public List<AccountView> getAccounts() throws Exception {
 		List<AccountView> accounts;
 
-		SharedPreferences preferences = context.getSharedPreferences(SAVEDPARAMS_TOTAL, 0);
+		SharedPreferences preferences = context.getSharedPreferences(SAVEDPARAMS_TOTAL, getAccessMode());
 		String accs = preferences.getString(SAVEDPARAM_ACCOUNTS, null);
 
 		if (accs != null) {
@@ -133,7 +134,7 @@ public final class ServiceStoredPreferences {
 				saveAccountHeaders(accounts);
 				for (AccountView account : accounts) {
 					saveAccount(account);
-					SharedPreferences ipreferences = context.getSharedPreferences(account.getAccountId(), 0);
+					SharedPreferences ipreferences = context.getSharedPreferences(account.getAccountId(), getAccessMode());
 					SharedPreferences.Editor ieditor = ipreferences.edit();
 					ieditor.clear();
 					ieditor.commit();
@@ -148,8 +149,8 @@ public final class ServiceStoredPreferences {
 		} else {
 			accounts = getAccountHeaders();
 			for (AccountView account : accounts) {
-				try {				
-					getAccount(account, true);					
+				try {
+					getAccount(account, true);
 				} catch (Exception e) {
 					ServiceUtils.log(e, account);
 				}
@@ -159,8 +160,9 @@ public final class ServiceStoredPreferences {
 		return accounts;
 	}
 
+	@Deprecated
 	public List<AccountView> getAccountsOld() {
-		SharedPreferences preferences = context.getSharedPreferences(SAVEDPARAMS_TOTAL, 0);
+		SharedPreferences preferences = context.getSharedPreferences(SAVEDPARAMS_TOTAL, getAccessMode());
 		List<AccountView> protocols = new ArrayList<AccountView>();
 		String[] accounts = preferences.getString(SAVEDPARAM_ACCOUNTS, "").split(CONTACT_ITEM_DIVIDER);
 		if (accounts == null) {
@@ -176,11 +178,11 @@ public final class ServiceStoredPreferences {
 
 		return protocols;
 	}
-	
+
 	public void saveAccounts(List<Account> accounts) {
 		for (Account account : accounts) {
 			saveAccount(account.accountView, false);
-		}		
+		}
 	}
 
 	public void saveServiceState(List<Account> accounts) {
@@ -195,6 +197,7 @@ public final class ServiceStoredPreferences {
 		}
 	}
 
+	@Deprecated
 	public void saveAccountOld(final AccountView account) {
 		if (account == null) {
 			return;
@@ -204,7 +207,7 @@ public final class ServiceStoredPreferences {
 
 			@Override
 			public void run() {
-				SharedPreferences preferences = context.getSharedPreferences(account.getAccountId(), 0);
+				SharedPreferences preferences = context.getSharedPreferences(account.getAccountId(), getAccessMode());
 				SharedPreferences.Editor editor = preferences.edit();
 
 				// editor.putString(account.getAccountId()+" "+SAVEDPARAM_ACCOUNT_PW,
@@ -269,6 +272,7 @@ public final class ServiceStoredPreferences {
 		}.start();
 	}
 
+	@Deprecated
 	private AccountView getAccountOld(String accountId, byte serviceId) {
 		if (accountId == null)
 			return null;
@@ -289,7 +293,7 @@ public final class ServiceStoredPreferences {
 			account.setConnectionState(connState);
 		}
 
-		SharedPreferences preferences = context.getSharedPreferences(account.getAccountId(), 0);
+		SharedPreferences preferences = context.getSharedPreferences(account.getAccountId(), getAccessMode());
 
 		/*
 		 * String optionNames =
@@ -400,6 +404,15 @@ public final class ServiceStoredPreferences {
 
 		return account;
 	}
+	
+	private static final int getAccessMode(){
+		int mode = Context.MODE_PRIVATE;
+		if (Build.VERSION.SDK_INT > 10){
+			mode = Context.MODE_MULTI_PROCESS;
+		}
+		
+		return mode;
+	}
 
 	private Bundle getOptions(AccountView account, Context context) {
 		String file;
@@ -408,7 +421,10 @@ public final class ServiceStoredPreferences {
 		} else {
 			file = SAVEDPARAMS_TOTAL;
 		}
-		SharedPreferences soptions = context.getSharedPreferences(file, 0);
+		
+		
+		
+		SharedPreferences soptions = context.getSharedPreferences(file, getAccessMode());
 		Bundle bbu = new Bundle();
 		Map<String, ?> map = soptions.getAll();
 		for (String key : map.keySet()) {
@@ -471,8 +487,8 @@ public final class ServiceStoredPreferences {
 		}
 	}
 
-	public void savePreference(final String key, final String value, final AccountView account) {
-		new Thread("Single preference saver") {
+	public boolean savePreference(final String key, final String value, final AccountView account) {
+		/*new Thread("Single preference saver") {
 
 			@Override
 			public void run() {
@@ -486,7 +502,22 @@ public final class ServiceStoredPreferences {
 				editor.putString(key, value);
 				editor.commit();
 			}
-		}.start();
+		}.start();*/
+		
+		return savePreference(context, key, value, account);
+	}
+
+	public static boolean savePreference(Context context, final String key, final String value, final AccountView account) {
+		SharedPreferences preferences;
+		
+		if (account != null) {
+			preferences = context.getSharedPreferences(account.getAccountId(), getAccessMode());
+		} else {
+			preferences = context.getSharedPreferences(SAVEDPARAMS_TOTAL, getAccessMode());
+		}
+		SharedPreferences.Editor editor = preferences.edit();
+		editor.putString(key, value);
+		return editor.commit();
 	}
 
 	public void removeAccount(AccountView account) throws XmlPullParserException, IOException {
@@ -502,7 +533,7 @@ public final class ServiceStoredPreferences {
 		}
 		saveAccountHeaders(acco);
 	}
-	
+
 	public void saveAccount(final AccountView account) {
 		saveAccount(account, false);
 	}
@@ -519,7 +550,7 @@ public final class ServiceStoredPreferences {
 
 				XmlSerializer serializer = Xml.newSerializer();
 				try {
-					serializer.setOutput(new BufferedOutputStream(context.openFileOutput(account.getFilename() + PREFERENCES_FILEEXT, 0)), XML_ENCODING);
+					serializer.setOutput(new BufferedOutputStream(context.openFileOutput(account.getFilename() + PREFERENCES_FILEEXT, getAccessMode())), XML_ENCODING);
 					serializer.startDocument(XML_ENCODING, true);
 					serializer.startTag(XML_NAMESPACE, TAG_ACCOUNT);
 					serializer.attribute(XML_NAMESPACE, ATTR_PROTOCOL_NAME, account.protocolName.trim());
@@ -550,7 +581,7 @@ public final class ServiceStoredPreferences {
 						serializer.attribute(XML_NAMESPACE, ATTR_ID, Integer.toString(buddy.id));
 						serializer.attribute(XML_NAMESPACE, ATTR_UNREAD, Byte.toString(buddy.unread));
 						serializer.attribute(XML_NAMESPACE, ATTR_VISIBILITY, Integer.toString(buddy.visibility));
-						
+
 						serializer.startTag(XML_NAMESPACE, TAG_BUDDY_NAME);
 						serializer.text(buddy.getName().trim());
 						serializer.endTag(XML_NAMESPACE, TAG_BUDDY_NAME);
@@ -565,7 +596,7 @@ public final class ServiceStoredPreferences {
 						serializer.startTag(XML_NAMESPACE, TAG_GROUP);
 						serializer.attribute(XML_NAMESPACE, ATTR_ID, Integer.toString(group.id));
 						serializer.attribute(XML_NAMESPACE, ATTR_COLLAPSED, Boolean.toString(group.isCollapsed));
-						
+
 						serializer.startTag(XML_NAMESPACE, TAG_GROUP_NAME);
 						serializer.text(group.name.trim());
 						serializer.endTag(XML_NAMESPACE, TAG_GROUP_NAME);
@@ -576,13 +607,13 @@ public final class ServiceStoredPreferences {
 					serializer.endTag(XML_NAMESPACE, TAG_ACCOUNT);
 					serializer.endDocument();
 
-					if (saveHeaders){
+					if (saveHeaders) {
 						List<AccountView> accounts = getAccountHeaders();
 
 						boolean found = false;
 						for (AccountView acco : accounts) {
 							if (acco.protocolUid.equalsIgnoreCase(account.protocolUid)) {
-								//acco.merge(account);
+								// acco.merge(account);
 								found = true;
 							}
 						}
@@ -602,7 +633,7 @@ public final class ServiceStoredPreferences {
 
 	private void saveAccountHeaders(List<AccountView> accounts) throws IllegalArgumentException, IllegalStateException, FileNotFoundException, IOException {
 		XmlSerializer serializer = Xml.newSerializer();
-		serializer.setOutput(new BufferedOutputStream(context.openFileOutput(XMLPARAMS_TOTAL, 0)), XML_ENCODING);
+		serializer.setOutput(new BufferedOutputStream(context.openFileOutput(XMLPARAMS_TOTAL, getAccessMode())), XML_ENCODING);
 		serializer.startDocument(XML_ENCODING, true);
 
 		serializer.startTag(XML_NAMESPACE, TAG_ACCOUNTS);
@@ -717,12 +748,12 @@ public final class ServiceStoredPreferences {
 			case XmlPullParser.END_TAG:
 				name = parser.getName();
 				if (name.equalsIgnoreCase(TAG_BUDDY)) {
-					if (buddy != null){
+					if (buddy != null) {
 						account.getBuddyList().add(buddy);
 						buddy = null;
 					}
 				} else if (name.equalsIgnoreCase(TAG_GROUP)) {
-					if (group != null){
+					if (group != null) {
 						account.getBuddyGroupList().add(group);
 						group = null;
 					}
@@ -735,7 +766,7 @@ public final class ServiceStoredPreferences {
 		}
 
 		account.options = getOptions(account, context);
-		
+
 		return account;
 	}
 

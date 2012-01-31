@@ -226,7 +226,7 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
 		final int width = getWidth();
 		//System.out.println("exist "+width);
-		//boolean diff = getWidth() != width;
+		//boolean diff = getWidth() != width; 
 		super.onLayout(changed, left, top, right, bottom);
 		if ((width-oldWidth) != 0) {
 			getEntryPoint().threadMsgHandler.post(new Runnable() {

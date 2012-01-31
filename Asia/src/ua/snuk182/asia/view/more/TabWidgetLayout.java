@@ -6,6 +6,7 @@ import ua.snuk182.asia.view.ViewUtils;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -59,14 +60,27 @@ public class TabWidgetLayout extends LinearLayout {
 		tabIcon = (ImageView) parent.findViewById(android.R.id.icon);
 		tabName = (TextView) parent.findViewById(android.R.id.title);
 		
-		LinearLayout.LayoutParams layout = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, parent.getLayoutParams().height);
-		layout.setMargins((int) (-3 * getEntryPoint().metrics.density), 0, (int) (-3 * getEntryPoint().metrics.density), 0);
-		parent.setLayoutParams(layout);
-		parent.setPadding(0, parent.getPaddingTop(), 0, parent.getPaddingBottom());
+		if (textCache != null){
+			tabName.setText(textCache);
+		}
 		
-		int iconPadding = (int) (15*getEntryPoint().metrics.density);
+		if (iconCache != null){
+			tabIcon.setImageDrawable(iconCache);
+		}
+		
+		LinearLayout.LayoutParams layout = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, parent.getLayoutParams().height);
+		if (EntryPoint.bgColor == EntryPoint.BGCOLOR_WALLPAPER || Build.VERSION.SDK_INT < 11){
+			//layout.setMargins((int) (-3 * getEntryPoint().metrics.density), 0, (int) (-3 * getEntryPoint().metrics.density), 0);
+			
+			int iconPadding = (int) (15*getEntryPoint().metrics.density);
+			int namePadding = (int) (5*getEntryPoint().metrics.density);
+			tabName.setPadding(namePadding, tabName.getPaddingTop(), namePadding, tabName.getPaddingBottom());
+			tabIcon.setPadding(iconPadding, tabIcon.getPaddingTop(), iconPadding, tabIcon.getPaddingBottom());
+		}
 		tabName.setPadding(5, tabName.getPaddingTop(), 5, tabName.getPaddingBottom());
-		tabIcon.setPadding(iconPadding, tabIcon.getPaddingTop(), iconPadding, tabIcon.getPaddingBottom());
+		tabIcon.setVisibility(VISIBLE);
+		parent.setPadding(0, parent.getPaddingTop(), 0, parent.getPaddingBottom());
+		parent.setLayoutParams(layout);
 		
 		parent.setOnFocusChangeListener(new OnFocusChangeListener(){
 
@@ -100,6 +114,7 @@ public class TabWidgetLayout extends LinearLayout {
 		iconCache = dr;
 		
 		if (tabIcon != null){
+			tabIcon.setVisibility(VISIBLE);
 			tabIcon.setImageDrawable(iconCache);
 		} else if (spec != null){
 			spec.setIndicator(textCache, iconCache);
@@ -110,6 +125,7 @@ public class TabWidgetLayout extends LinearLayout {
 		iconCache = new BitmapDrawable(bitmap);
 		
 		if (tabIcon != null){
+			tabIcon.setVisibility(VISIBLE);
 			tabIcon.setImageDrawable(iconCache);
 		} else if (spec != null){
 			spec.setIndicator(textCache, iconCache);
@@ -120,6 +136,7 @@ public class TabWidgetLayout extends LinearLayout {
 		iconCache = getContext().getResources().getDrawable(resId);
 		
 		if (tabIcon != null){
+			tabIcon.setVisibility(VISIBLE);
 			tabIcon.setImageDrawable(iconCache);
 		} else if (spec != null){
 			spec.setIndicator(textCache, iconCache);
@@ -127,8 +144,12 @@ public class TabWidgetLayout extends LinearLayout {
 	}
 	
 	public void setScaledBitmap(Bitmap bmp){
-		if (bmp == null){
-			tabIcon.setImageResource(R.drawable.dummy_32);
+		if (bmp == null){			
+			iconCache = getContext().getResources().getDrawable(R.drawable.dummy_32);
+			if (tabIcon != null){
+				tabIcon.setVisibility(VISIBLE);
+				tabIcon.setImageDrawable(iconCache);
+			}
 			return;
 		}
 		

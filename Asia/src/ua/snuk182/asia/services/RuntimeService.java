@@ -89,7 +89,7 @@ public class RuntimeService extends Service {
 			} catch (RemoteException e) {
 				ServiceUtils.log(e);
 			}
-			setForeground(false);
+			stopForegroundCompat(R.string.label_wait);
 			removeStatusbarNotification();
 			stopSelfResult(startId);
 		}
