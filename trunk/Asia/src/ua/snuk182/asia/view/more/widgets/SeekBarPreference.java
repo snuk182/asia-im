@@ -21,7 +21,7 @@ public class SeekBarPreference extends DialogPreference implements SeekBar.OnSee
 	private Context mContext;
 
 	private String mDialogMessage, mSuffix, mDefault;
-	private int mMin, mMax, mValue = 0;
+	private int mMin, mMax, mValue, mCachedValue = 0;
 
 	public boolean resizeDialogLabelWithValue = false;
 
@@ -101,9 +101,21 @@ public class SeekBarPreference extends DialogPreference implements SeekBar.OnSee
 	@Override
 	protected void onBindDialogView(View v) {
 		super.onBindDialogView(v);
+		mCachedValue = mValue;
 		mSeekBar.setMax(mMax);
 		mSeekBar.setProgress(mValue - mMin);
 	}
+	
+	@Override
+	protected void onDialogClosed(boolean positiveResult) {
+		if (!positiveResult){
+			mValue = mCachedValue;
+		} else {
+			if (shouldPersist())
+				persistInt(mValue);			
+		}
+		callChangeListener(new Integer(mValue));
+    }
 
 	@Override
 	protected void onSetInitialValue(boolean restore, Object defaultValue) {
@@ -124,10 +136,7 @@ public class SeekBarPreference extends DialogPreference implements SeekBar.OnSee
 
 		if (resizeDialogLabelWithValue) {
 			mValueText.setTextSize(mValue * density);
-		}
-		if (shouldPersist())
-			persistInt(mValue);
-		callChangeListener(new Integer(mValue));
+		}		
 	}
 
 	public void onStartTrackingTouch(SeekBar seek) {

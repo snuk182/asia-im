@@ -29,7 +29,9 @@ import ua.snuk182.asia.services.xmpp.XMPPServiceUtils;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Environment;
+import android.util.DisplayMetrics;
 import android.util.Log;
 
 public final class ServiceUtils {
@@ -595,4 +597,24 @@ public final class ServiceUtils {
 
 	static final int DEFAULT_SKIP_AMOUNT = 1500;
 
+	public static boolean isTablet(Context context) {
+		if (Build.VERSION.SDK_INT < 11){
+			return false;
+		} else if (Build.VERSION.SDK_INT < 14) {
+			return true;
+		} else {
+			try {
+				// Compute screen size
+				DisplayMetrics dm = context.getResources().getDisplayMetrics();
+				float screenWidth = dm.widthPixels / dm.xdpi;
+				float screenHeight = dm.heightPixels / dm.ydpi;
+				double size = Math.sqrt(Math.pow(screenWidth, 2) + Math.pow(screenHeight, 2));
+				// Tablet devices should have a screen size greater than 6 inches
+				return size >= 6;
+			} catch (Throwable t) {
+				log(t);
+				return false;
+			}
+		}
+	}
 }

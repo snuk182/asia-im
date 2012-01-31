@@ -40,6 +40,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.TabHost;
@@ -58,6 +59,7 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 		public void onTabChanged(String tabId) {
 			for (OnTabChangeListener listener:tabChangeListeners){
 				listener.onTabChanged(tabId);
+				getEntryPoint().refreshMenu();
 			}		
 		}
 	};
@@ -218,7 +220,7 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 		}
 		
 		addTab(info.tabSpec);
-		if (EntryPoint.tabStyle.equals("system")){
+		if (info.tabWidgetLayout.spec != null){
 			info.tabWidgetLayout.setFromView(getTabWidget().getChildTabViewAt(getTabWidget().getChildCount()-1), this);
 		}
 		
@@ -231,7 +233,7 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 	public void onStart() {
 		if (tabs.size() > 0 && getSelectedTab().content != null){
 			getSelectedTab().content.onStart();
-		}
+		}		
 	}
 	
 	@Override 
@@ -281,7 +283,7 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
     	for (TabInfo info:tabs){
     		try {
     			addTab(info.tabSpec);
-    			if (EntryPoint.tabStyle.equals("system")){
+    			if (info.tabWidgetLayout.spec != null){
     				info.tabWidgetLayout.setFromView(getTabWidget().getChildTabViewAt(getTabWidget().getChildCount()-1), this);
     			}
 			} catch (Exception e) {
@@ -435,7 +437,7 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		if (getSelectedTab().content != null && getSelectedTab().content.getMainMenuId() > 0){
+		if (getSelectedTab() != null && getSelectedTab().content != null && getSelectedTab().content.getMainMenuId() > 0){
     		menu.clear();
         	
         	MenuInflater inflater = getEntryPoint().getMenuInflater();
@@ -458,7 +460,8 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 		try {
 			return tabs.get(getCurrentTab());
 		} catch (Exception e) {
-			return tabs.get(0);
+			//return tabs.get(0);
+			return null;
 		}
 	}
 	
