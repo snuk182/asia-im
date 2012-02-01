@@ -1047,6 +1047,7 @@ public class EntryPoint extends ActivityGroup {
 					((IHasAccount)tab.content).stateChanged(account);
 				}
 			}*/
+			refreshMenu();
 		} catch (NullPointerException npe) {	
 			ServiceUtils.log(npe);
 		} catch (RemoteException e) {
