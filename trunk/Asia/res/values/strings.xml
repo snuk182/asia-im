@@ -231,5 +231,7 @@
     <string formatted="false" name="logparam_ask_for_auth">"%s asks for authorization: %s"</string>
     <string formatted="false" name="logparam_file_request">"%s sends you files: %s"</string>
     <string formatted="false" name="logparam_default">"%s"</string>
+    <string name="label_chat_menu">Chat menu</string>
+    <string name="label_account_menu">Account menu</string>
 
 </resources>

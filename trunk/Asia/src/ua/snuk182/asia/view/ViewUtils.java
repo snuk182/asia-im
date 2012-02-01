@@ -685,6 +685,7 @@ public final class ViewUtils {
 			public void onClick(DialogInterface dialog, int which) {
 				try {
 					entryPoint.runtimeService.setStatus(account.serviceId, ServiceUtils.getStatusValueByCount(entryPoint, account, which));
+					entryPoint.refreshMenu();
 				} catch (NullPointerException npe) {
 					ServiceUtils.log(npe);
 				} catch (RemoteException e) {
@@ -884,6 +885,7 @@ public final class ViewUtils {
 			public void onClick(DialogInterface dialog, int which) {
 				try {
 					entryPoint.runtimeService.editMyVisibility(account.serviceId, ServiceUtils.getAccountVisibilityIdByVisibilityArrayId(which));
+					entryPoint.refreshMenu();
 				} catch (RemoteException e) {
 					entryPoint.onRemoteCallFailed(e);
 				}

@@ -28,13 +28,13 @@
         <item>"Белый"</item>
         <item>"Прозрачный"</item>
     </string-array>
-    
+
     <string name="label_tab_style">Стиль вкладок</string>
+
     <string-array name="list_tab_style_names">
         <item>"Плоский"</item>
         <item>"Системный"</item>
     </string-array>
-    
     <string-array name="list_chat_date_names">
         <item>"Не печатать"</item>
         <item>"Только время"</item>
@@ -223,5 +223,7 @@
     <string formatted="false" name="logparam_ask_for_auth">"%s просит авторизацию: %s"</string>
     <string formatted="false" name="logparam_file_request">"%s отправляет вам файл: %s"</string>
     <string formatted="false" name="logparam_default">"%s"</string>
+    <string name="label_chat_menu">Меню чата</string>
+    <string name="label_account_menu">Меню учетной записи</string>
 
 </resources>

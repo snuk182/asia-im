@@ -155,6 +155,15 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
 		}
 	};
 
+	private Runnable callMenuRunnable = new Runnable(){
+
+		@Override
+		public void run() {
+			getEntryPoint().getWindow().openPanel(Window.FEATURE_OPTIONS_PANEL, new	KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MENU)); 
+		}
+		
+	};
+
 	public TabletScreen(EntryPoint entryPoint, AttributeSet attrs) {
 		super(entryPoint, attrs);
 		
@@ -459,7 +468,7 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
 			inflater.inflate(info.content.getMainMenuId(), menu);
 			
 			if (addChatMenu){
-				menu.add(Menu.NONE, Menu.NONE, 0, "Chat Menu");
+				menu.add(Menu.NONE, R.string.label_chat_menu, 0, R.string.label_chat_menu);
 			}
 		} else {
 			currentTab = tabHostChat.getCurrentTab();
@@ -469,6 +478,10 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
 			}
 			info = tabsChat.get(currentTab);
 			inflater.inflate(info.content.getMainMenuId(), menu);
+			
+			if (ServiceUtils.isTablet(getContext())) {
+				menu.add(Menu.NONE, R.string.label_account_menu, 0, R.string.label_account_menu);
+			}
 		}
 		
     	return info.content.onPrepareOptionsMenu(menu);
@@ -476,17 +489,15 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		
-		if (item.getTitle().equals("Chat Menu")){
+		if (item.getItemId() == R.string.label_chat_menu){
 			isChatMenu = true;
-			getEntryPoint().threadMsgHandler.post(new Runnable(){
-
-				@Override
-				public void run() {
-					getEntryPoint().getWindow().openPanel(Window.FEATURE_OPTIONS_PANEL, new	KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MENU)); 
-				}
-				
-			});
+			getEntryPoint().threadMsgHandler.post(callMenuRunnable);
+			return true;
+		}
+		
+		if (item.getItemId() == R.string.label_account_menu){
+			isChatMenu = false;
+			getEntryPoint().threadMsgHandler.post(callMenuRunnable);
 			return true;
 		}
 		
