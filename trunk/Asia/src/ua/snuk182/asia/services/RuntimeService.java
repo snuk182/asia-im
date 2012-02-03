@@ -160,7 +160,7 @@ public class RuntimeService extends Service {
 
 		WifiManager wlanManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
 		if (wlanManager != null) {
-			wifiLock = wlanManager.createWifiLock("asia wifi lock");
+			wifiLock = wlanManager.createWifiLock(WifiManager.WIFI_MODE_FULL, "asia wifi lock");
 			wifiLock.acquire();
 		}
 
@@ -234,11 +234,11 @@ public class RuntimeService extends Service {
 	private void wipe() {
 		// removeStatusbarNotification();
 		ServiceUtils.log("wipe service data");
-		if (wifiLock != null) {
+		if (wifiLock != null && wifiLock.isHeld()) {
 			wifiLock.release();
 			wifiLock = null;
 		}
-		if (powerLock != null) {
+		if (powerLock != null && powerLock.isHeld()) {
 			powerLock.release();
 			powerLock = null;
 		}
