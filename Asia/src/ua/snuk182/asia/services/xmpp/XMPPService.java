@@ -19,7 +19,6 @@ import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterListener;
-import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.SmackConfiguration;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
@@ -79,7 +78,6 @@ import org.jivesoftware.smackx.provider.StreamInitiationProvider;
 import org.jivesoftware.smackx.provider.VCardProvider;
 import org.jivesoftware.smackx.provider.XHTMLExtensionProvider;
 import org.jivesoftware.smackx.search.UserSearch;
-import org.jivesoftware.spark.util.DummySSLSocketFactory;
 
 import ua.snuk182.asia.R;
 import ua.snuk182.asia.core.dataentity.Buddy;
@@ -821,10 +819,14 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 				SmackConfiguration.setPacketReplyTimeout(120000);
 				ConnectionConfiguration config = new ConnectionConfiguration(loginHost, loginPort);
 				String login;
+				
+				//goddamn gtalk, i dunno what he wants...
 				if (isGmail()) {
-					SASLAuthentication.supportSASLMechanism("PLAIN", 0);
-					config.setSocketFactory(new DummySSLSocketFactory());
-					login = getJID();
+					//SASLAuthentication.supportSASLMechanism("PLAIN", 0);
+					//config.setSocketFactory(new DummySSLSocketFactory());
+					config.setSASLAuthenticationEnabled(false);
+					//login = getJID();
+					login = un;
 				} else {
 					login = un;
 				}
