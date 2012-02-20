@@ -202,7 +202,7 @@ public class TabWidgetLayout extends LinearLayout {
 	}
 	
 	public int getLeftBound(){
-		if (spec != null){
+		if (spec != null && tabName != null){
 			return ((View) tabName.getParent()).getLeft();
 		} else {
 			return super.getLeft();
@@ -210,7 +210,7 @@ public class TabWidgetLayout extends LinearLayout {
 	}
 	
 	public int getRightBound(){
-		if (spec != null){
+		if (spec != null && tabName != null){
 			return ((View) tabName.getParent()).getRight();
 		} else {
 			return super.getRight();
