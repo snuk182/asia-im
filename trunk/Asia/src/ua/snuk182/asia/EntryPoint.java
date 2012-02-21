@@ -935,14 +935,17 @@ public class EntryPoint extends ActivityGroup {
 	public boolean onKeyDown(int i, KeyEvent event){
 		if (mainScreen.onKeyDown(i, event)){
 			return true;
-		} else {
-			
-			String masterPw = ServiceStoredPreferences.getOption(getApplicationContext(), getResources().getString(R.string.key_master_password));
-			Boolean needPassword = masterPw != null && !masterPw.isEmpty();
-			
-			if (i == KeyEvent.KEYCODE_BACK && needPassword){
-				finish();
-				return true;
+		} else {			
+			if (i == KeyEvent.KEYCODE_BACK){
+				String masterPw = ServiceStoredPreferences.getOption(getApplicationContext(), getResources().getString(R.string.key_master_password));
+				Boolean needPassword = masterPw != null && !masterPw.isEmpty();
+				
+				if (needPassword){
+					finish();
+					return true;
+				} else {
+					return super.onKeyDown(i, event);
+				}
 			} else {
 				return super.onKeyDown(i, event);
 			}

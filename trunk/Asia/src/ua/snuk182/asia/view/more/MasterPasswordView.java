@@ -70,7 +70,12 @@ public class MasterPasswordView extends RelativeLayout implements ITabContent {
 
 	@Override
 	public boolean onKeyDown(int i, KeyEvent event) {
-		return false;
+		if (i == KeyEvent.KEYCODE_BACK) {
+		    getEntryPoint().mainScreen.removeTabByTag(MasterPasswordView.class.getSimpleName());
+		    return true; 
+		  }
+
+		  return false;
 	}
 
 	@Override
