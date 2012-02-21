@@ -7,6 +7,7 @@ import ua.snuk182.asia.services.ServiceConstants;
 import ua.snuk182.asia.services.ServiceUtils;
 import ua.snuk182.asia.view.ITabContent;
 import ua.snuk182.asia.view.cl.ContactList;
+import ua.snuk182.asia.view.more.widgets.EditablePasswordPreference;
 import ua.snuk182.asia.view.more.widgets.SeekBarPreference;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
@@ -52,7 +53,7 @@ public class PreferencesView extends PreferenceActivity implements ITabContent {
 			} 
 		}
 		
-		PreferenceScreen screen = getPreferenceScreen();
+		final PreferenceScreen screen = getPreferenceScreen();
 		
 		for (int k=0; k<screen.getPreferenceCount(); k++){
 			PreferenceCategory category = (PreferenceCategory) getPreferenceScreen().getPreference(k);
@@ -76,6 +77,7 @@ public class PreferencesView extends PreferenceActivity implements ITabContent {
 						} catch (RemoteException e) {
 							getEntryPoint().onRemoteCallFailed(e);
 						}
+						
 						return true;
 					}
 				});
@@ -115,10 +117,15 @@ public class PreferencesView extends PreferenceActivity implements ITabContent {
 		});
 	}
 	
-	private void fillSummary(Preference pref, String value){
-		if (pref instanceof EditTextPreference){
+	private void fillSummary(Preference pref, String value){		
+		if (pref instanceof EditTextPreference && !(pref instanceof EditablePasswordPreference)){
 			pref.setSummary(value);
 		}
+		
+		if (pref instanceof EditablePasswordPreference){
+			pref.setSummary(Boolean.toString(value!=null && !value.isEmpty()));
+		}
+		
 		if (pref instanceof ListPreference){
 			((ListPreference)pref).setValue( value);
 			pref.setSummary(((ListPreference)pref).getEntry());

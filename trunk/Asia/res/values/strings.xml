@@ -1,7 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="version">0.8.2</string>
+    <string name="version">0.8.4</string>
+    
+    <string name="label_ok">Ok</string>
+    <string name="label_pw_cannot_be_empty">Password cannot be empty</string>
+    <string name="label_wrong_pw">Wrong password</string>
+    <string name="label_use_master_password">Use Master Password</string>    
+    <string name="label_pls_enter_master_password">Please enter the Master Password</string>
+    <string name="label_old_pw">Old Password</string>
+    <string name="label_new_pw">New Password (leave blank for removing)</string>
+    <string name="label_master_password">Master Password</string>
+    
     <string name="label_create_groupchat">Create group chat</string>
     <string name="label_connect_to_chat">Connect to chat</string>
     <string name="label_refresh_chat_list">Refresh chats list</string>
@@ -88,6 +98,8 @@
         <item>"Time only"</item>
         <item>"Full date"</item>
     </string-array>
+    
+    <string name="label_security_preferences">Security preferences</string>
 
     <string name="label_delete_history">"Delete history"</string>
     <string name="label_grid">Grid</string>

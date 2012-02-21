@@ -2,6 +2,15 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:asia="http://ua.snuk182.asia/res"
     android:persistent="false" >
+    <PreferenceCategory android:title="@string/label_security_preferences">
+        
+        <ua.snuk182.asia.view.more.widgets.EditablePasswordPreference
+            android:key="@string/key_master_password"
+            android:persistent="false"
+            android:title="@string/label_master_password"
+            />
+        
+    </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/label_appearance_prefs" >
 

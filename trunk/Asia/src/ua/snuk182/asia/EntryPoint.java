@@ -30,6 +30,7 @@ import ua.snuk182.asia.view.more.AccountActivityView;
 import ua.snuk182.asia.view.more.AccountManagerView;
 import ua.snuk182.asia.view.more.AsiaCoreException;
 import ua.snuk182.asia.view.more.HistoryView;
+import ua.snuk182.asia.view.more.MasterPasswordView;
 import ua.snuk182.asia.view.more.PreferencesView;
 import ua.snuk182.asia.view.more.SearchUsersView;
 import android.app.ActivityGroup;
@@ -139,9 +140,15 @@ public class EntryPoint extends ActivityGroup {
 			
 			setContentView((View)mainScreen);
 			
-	    	//addTab(TabInfoFactory.createSplashscreenTab(this));  
-	    	
-	        getRuntimeService();	
+			String masterPw = ServiceStoredPreferences.getOption(getApplicationContext(), getResources().getString(R.string.key_master_password));
+			Boolean needPassword = masterPw != null && !masterPw.isEmpty();
+			if (needPassword){
+				addMasterPasswordRequestTab();
+				toggleWaitscreen(false);				
+			} else {
+				getRuntimeService();	
+			}			
+	    	//addTab(TabInfoFactory.createSplashscreenTab(this));          
 		}
 	};
 	
@@ -192,6 +199,17 @@ public class EntryPoint extends ActivityGroup {
         });
     }
 	
+	private void addMasterPasswordRequestTab() {
+		String tag = MasterPasswordView.class.getSimpleName();
+		
+		if (mainScreen.checkAndSetCurrentTabByTag(tag)){
+			return;
+		} 
+		
+		TabInfo info = TabInfoFactory.createMasterPasswordTab(this);		
+		mainScreen.addTab(info, true);
+	}
+
 	private void updateStyle() {
 		String bgType = ServiceStoredPreferences.getOption(getApplicationContext(), getResources().getString(R.string.key_bg_type));	
     	
@@ -425,7 +443,16 @@ public class EntryPoint extends ActivityGroup {
 			
 			//checkShowTabs();
 			
-			serviceCallback.visualStyleUpdated();			
+			serviceCallback.visualStyleUpdated();	
+			
+			threadMsgHandler.post(new Runnable(){
+
+				@Override
+				public void run() {
+					mainScreen.removeTabByTag(MasterPasswordView.class.getSimpleName());
+				}
+				
+			});
 		} catch (NullPointerException npe) {	
 			npe.printStackTrace();
 			ServiceUtils.log(npe);
@@ -909,7 +936,16 @@ public class EntryPoint extends ActivityGroup {
 		if (mainScreen.onKeyDown(i, event)){
 			return true;
 		} else {
-			return super.onKeyDown(i, event);
+			
+			String masterPw = ServiceStoredPreferences.getOption(getApplicationContext(), getResources().getString(R.string.key_master_password));
+			Boolean needPassword = masterPw != null && !masterPw.isEmpty();
+			
+			if (i == KeyEvent.KEYCODE_BACK && needPassword){
+				finish();
+				return true;
+			} else {
+				return super.onKeyDown(i, event);
+			}
 		}
 	}
 	
@@ -1104,5 +1140,10 @@ public class EntryPoint extends ActivityGroup {
 				ServiceUtils.log(e);
 			}
 		}
+	}
+
+	public void proceedLoading() {
+		toggleWaitscreen(true);
+		getRuntimeService();	
 	}
 }

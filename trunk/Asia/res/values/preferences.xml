@@ -31,6 +31,8 @@
 	<string name="key_fullscreen_landscape_kb">PrefFullscreenLandscapeKb</string>
 	<string name="key_blink_led">PrefBlinkLed</string>
 	
+	<string name="key_master_password">PrefMasterPw</string>
+	
 	<string name="key_dont_draw_smileys">PrefDontDrawSmileys</string>
 	
 	<string name="value_screen_orientation_system">PrefScreenSystem</string>
