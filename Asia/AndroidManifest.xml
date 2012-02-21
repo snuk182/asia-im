@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="ua.snuk182.asia" android:versionCode="7" android:versionName="@string/version">
+	package="ua.snuk182.asia" android:versionCode="8" android:versionName="@string/version">
 	<uses-permission android:name="android.permission.INTERNET" />
 	<uses-permission android:name="android.permission.VIBRATE" />
 	<uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -9,7 +9,7 @@
 	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 	
-	<application android:icon="@drawable/logo_96px" android:label="@string/app_name" android:name=".AsiaApplication" android:hardwareAccelerated="true">
+	<application android:icon="@drawable/launcher" android:label="@string/app_name" android:name=".AsiaApplication" android:hardwareAccelerated="true">
 		<activity android:name=".EntryPoint" 
 			android:multiprocess="false"
 			android:label="@string/app_name" 

@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="label_pls_enter_master_password">Введите Главный Пароль</string>
+    <string name="label_use_master_password">Использовать Главный Пароль</string>    
+    <string name="label_pw_cannot_be_empty">Пароль не может быть пустым</string>
+    <string name="label_wrong_pw">Неправильный пароль</string>
+    <string name="label_old_pw">Старый Пароль</string>
+    <string name="label_new_pw">Новый Пароль (пустой для снятия)</string>
+    <string name="label_master_password">Главный Пароль</string>
+    
     <string name="label_view_type">Вид программы (нужен перезапуск)</string>
     <string name="label_view_type_plain">Обычный</string>
     <string name="label_view_type_notabs">Без вкладок</string>
@@ -226,4 +234,6 @@
     <string name="label_chat_menu">Меню чата</string>
     <string name="label_account_menu">Меню учетной записи</string>
 
+    <string name="label_security_preferences">Настойки безопасности</string>
+    
 </resources>

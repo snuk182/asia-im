@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="label_pls_enter_master_password">Введіть Головний Пароль</string>
+    <string name="label_use_master_password">Використати Головний Пароль</string>    
+    <string name="label_pw_cannot_be_empty">Пароль не може бути порожнім</string>
+    <string name="label_wrong_pw">Невірний пароль</string>
+    <string name="label_old_pw">Старий Пароль</string>
+    <string name="label_new_pw">Новий Пароль (порожній для зняття)</string>
+    <string name="label_master_password">Головний Пароль</string>
+    
     <string name="label_view_type">Вигляд програми (потрібен перезапуск)</string>
     <string name="label_view_type_plain">Звичайний</string>
     <string name="label_view_type_notabs">Без вкладок</string>
@@ -18,8 +26,8 @@
     <string name="label_fullscreen_landscape_kb">Повноекранна горизонтальна клавіатура</string>
     <string name="label_export">"Експорт на карту пам'яті"</string>
     <string name="label_secure_login">Безпечний вхід</string>
-    <string name="label_poweramp_playing_to_status">"Зараз грає..." із PowerAMP</string>
-    <string name="label_androidmusic_playing_to_status">"Зараз грає..." з Музичного програвача</string>
+    <string name="label_poweramp_playing_to_status">"Зараз грає" із PowerAMP</string>
+    <string name="label_androidmusic_playing_to_status">"Зараз грає" з Музичного програвача</string>
     <string name="label_dont_draw_smileys">Не малювати смайли</string>
     <string name="label_account_activity_log">Журнал активності</string>
     <string name="label_size_big">Великий</string>
@@ -199,7 +207,7 @@
     <string name="menu_value_from_permits">Видалити з дозволених</string>
     <string name="menu_value_to_denys">До списку недозволених</string>
     <string name="menu_value_from_denys">Видалити з недозволених</string>
-    <string name="menu_value_add_group">"Створити нову групу..."</string>
+    <string name="menu_value_add_group">"Створити нову групу"</string>
     <string name="menu_value_delete_group">"Видалити групу"</string>
     <string name="label_too_many_accounts">Забагато облікових записів!</string>
     <string name="menu_value_join_chat">Ввійти до чату</string>
@@ -226,4 +234,6 @@
     <string name="label_chat_menu">Меню чата</string>
     <string name="label_account_menu">Меню облікового запису</string>
 
+    <string name="label_security_preferences">Налаштування безпеки</string>
+    
 </resources>

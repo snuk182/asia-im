@@ -15,6 +15,7 @@ import ua.snuk182.asia.view.more.AccountManagerView;
 import ua.snuk182.asia.view.more.AsiaCoreException;
 import ua.snuk182.asia.view.more.FileTransferView;
 import ua.snuk182.asia.view.more.HistoryView;
+import ua.snuk182.asia.view.more.MasterPasswordView;
 import ua.snuk182.asia.view.more.NewAccountView;
 import ua.snuk182.asia.view.more.PersonalInfoView;
 import ua.snuk182.asia.view.more.PreferencesView;
@@ -220,6 +221,13 @@ public final class TabInfoFactory {
 		GroupChatsView view = new GroupChatsView(entryPoint, account);
 		String tag = GroupChatsView.class.getSimpleName() + " " + account.serviceId;
 		TabInfo tab = new TabInfo(tag, view, entryPoint.mainScreen.getChatsTabHost());
+
+		return tab;
+	}
+
+	public static final TabInfo createMasterPasswordTab(EntryPoint entryPoint) {
+		MasterPasswordView view = new MasterPasswordView(entryPoint);
+		TabInfo tab = new TabInfo(MasterPasswordView.class.getSimpleName(), view, entryPoint.mainScreen.getAccountsTabHost());
 
 		return tab;
 	}
