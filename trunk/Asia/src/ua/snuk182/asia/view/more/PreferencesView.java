@@ -123,7 +123,7 @@ public class PreferencesView extends PreferenceActivity implements ITabContent {
 		}
 		
 		if (pref instanceof EditablePasswordPreference){
-			pref.setSummary(Boolean.toString(value!=null && !value.isEmpty()));
+			pref.setSummary((value!=null && !value.isEmpty()) ? R.string.label_yes : R.string.label_no);
 		}
 		
 		if (pref instanceof ListPreference){
