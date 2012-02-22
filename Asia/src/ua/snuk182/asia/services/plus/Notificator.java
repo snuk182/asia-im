@@ -29,6 +29,8 @@ import android.net.Uri;
 import android.os.Vibrator;
 
 public class Notificator {
+	
+	public float volume = 1f;
 
 	private Context context;
 	private NotificationManager notificator;
@@ -344,6 +346,7 @@ public class Notificator {
 			@Override
 			public void run() {
 				MediaPlayer mp = MediaPlayer.create(context, res);
+				mp.setVolume(volume, volume);
 				mp.start();
 			}
 		}.start();

@@ -30,7 +30,8 @@
     <string name="label_export">Экспорт на карту памяти"</string>
     <string name="label_account_activity_log">Журнал активности</string>
     <string name="label_blink_led">Мигать индикатором при новом сообщении</string>
-
+	<string name="label_sound_volume">Громкость уведомлений</string>
+	
     <string-array name="bg_type_names">
         <item>"Черный"</item>
         <item>"Белый"</item>

@@ -130,6 +130,25 @@ public class RuntimeService extends Service {
 		storage = new ServiceStoredPreferences(getApplicationContext());
 		notificator = new Notificator(getApplicationContext());
 
+		appOptions = storage.getApplicationOptions();
+		String logToFile = appOptions.getString(getResources().getString(R.string.key_log_to_file));
+		if (logToFile != null) {
+			try {
+				ServiceUtils.logToFile = Boolean.parseBoolean(logToFile);
+			} catch (Exception e) {
+				ServiceUtils.log(e);
+			}
+		}
+		
+		String volume = appOptions.getString(getResources().getString(R.string.key_sound_volume));
+		if (volume != null) {
+			try {
+				notificator.volume = Integer.parseInt(volume)/30f;
+			} catch (Exception e) {
+				ServiceUtils.log(e);
+			}
+		}
+
 		List<AccountView> acViews;
 		try {
 			acViews = storage.getAccounts();
@@ -142,16 +161,6 @@ public class RuntimeService extends Service {
 			Account a = new Account(getApplicationContext(), aView, protocolResponse);
 			accounts.add(a);
 		}
-		appOptions = storage.getApplicationOptions();
-		String logToFile = appOptions.getString(getResources().getString(R.string.key_log_to_file));
-		if (logToFile != null) {
-			try {
-				ServiceUtils.logToFile = Boolean.parseBoolean(logToFile);
-			} catch (Exception e) {
-				ServiceUtils.log(e);
-			}
-		}
-
 		statusbarNotifyAccountChanged();
 
 		PowerManager powerManager = (PowerManager) getApplicationContext().getSystemService(POWER_SERVICE);
@@ -1279,6 +1288,13 @@ public class RuntimeService extends Service {
 				if (key.equals(getResources().getString(R.string.key_log_to_file))) {
 					try {
 						ServiceUtils.logToFile = Boolean.parseBoolean(value);
+					} catch (Exception e) {
+						ServiceUtils.log(e);
+					}
+				}
+				if (key.equals(getResources().getString(R.string.key_sound_volume))) {
+					try {
+						notificator.volume = Integer.parseInt(value)/30f;
 					} catch (Exception e) {
 						ServiceUtils.log(e);
 					}

@@ -22,8 +22,16 @@ public class SeekBarPreference extends DialogPreference implements SeekBar.OnSee
 
 	private String mDialogMessage, mSuffix, mDefault;
 	private int mMin, mMax, mValue, mCachedValue = 0;
+	
+	public final Runnable resizeDialogLabelRunnable = new Runnable() {
+		
+		@Override
+		public void run() {
+			mValueText.setTextSize(mValue * density);
+		}
+	};
 
-	public boolean resizeDialogLabelWithValue = false;
+	public Runnable onProgressChangedRunnable = null;
 
 	private static float density = 0f;
 
@@ -134,8 +142,8 @@ public class SeekBarPreference extends DialogPreference implements SeekBar.OnSee
 		String t = String.valueOf(mValue);
 		mValueText.setText(mSuffix == null ? t : t.concat(mSuffix));
 
-		if (resizeDialogLabelWithValue) {
-			mValueText.setTextSize(mValue * density);
+		if (onProgressChangedRunnable != null) {
+			onProgressChangedRunnable.run();
 		}		
 	}
 

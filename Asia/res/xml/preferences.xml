@@ -85,6 +85,14 @@
             android:key="@string/key_sound_type"
             android:persistent="false"
             android:title="@string/label_sound_type" />
+        
+        <ua.snuk182.asia.view.more.widgets.SeekBarPreference
+            android:defaultValue="30"
+            android:key="@string/key_sound_volume"
+            android:max="30"
+            asia:min="0"
+            android:persistent="false"
+            android:title="@string/label_sound_volume" />
 
         <CheckBoxPreference
             android:defaultValue="false"
