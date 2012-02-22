@@ -10,6 +10,7 @@ import ua.snuk182.asia.view.cl.ContactList;
 import ua.snuk182.asia.view.more.widgets.EditablePasswordPreference;
 import ua.snuk182.asia.view.more.widgets.SeekBarPreference;
 import android.content.res.ColorStateList;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.preference.CheckBoxPreference;
@@ -58,7 +59,7 @@ public class PreferencesView extends PreferenceActivity implements ITabContent {
 		for (int k=0; k<screen.getPreferenceCount(); k++){
 			PreferenceCategory category = (PreferenceCategory) getPreferenceScreen().getPreference(k);
 			for (int i=0; i<category.getPreferenceCount(); i++){
-				Preference pref = category.getPreference(i);
+				final Preference pref = category.getPreference(i);
 				pref.setOnPreferenceChangeListener(new OnPreferenceChangeListener(){
 
 					@Override
@@ -81,6 +82,31 @@ public class PreferencesView extends PreferenceActivity implements ITabContent {
 						return true;
 					}
 				});
+				
+				if (pref.getKey().equals(getString(R.string.key_text_size))){
+					((SeekBarPreference)pref).onProgressChangedRunnable = ((SeekBarPreference)pref).resizeDialogLabelRunnable;
+				}
+				
+				if (pref.getKey().equals(getString(R.string.key_sound_volume))){
+					((SeekBarPreference)pref).onProgressChangedRunnable = new Runnable() {
+						
+						@Override
+						public void run() {
+							new Thread("Sound play") {
+
+								@Override
+								public void run() {
+									float volume = ((SeekBarPreference)pref).getProgress()/30f;
+									
+									MediaPlayer mp = MediaPlayer.create(getEntryPoint(), R.raw.message);
+									mp.setVolume(volume, volume);
+									mp.start();
+								}
+							}.start();
+						}
+					};
+				}
+				
 				String value = (String) options.get(pref.getKey());
 				if (value!=null){
 					if (pref instanceof CheckBoxPreference){
@@ -93,11 +119,7 @@ public class PreferencesView extends PreferenceActivity implements ITabContent {
 						((ListPreference)pref).setValue( value);
 					}
 					if (pref instanceof SeekBarPreference){
-						((SeekBarPreference)pref).setValue(value);
-						
-						if (pref.getKey().equals(getString(R.string.key_text_size))){
-							((SeekBarPreference)pref).resizeDialogLabelWithValue = true;
-						}
+						((SeekBarPreference)pref).setValue(value);						
 					}
 					
 					fillSummary(pref, value);

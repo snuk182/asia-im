@@ -3,6 +3,7 @@
 	<string name="description">TextDescr</string>
 	
 	<string name="key_disabled">PrefAccDisabled</string>	
+	<string name="key_sound_volume">PrefNotificationVolume</string>
 	<string name="key_account_activity_log">PrefAccActivityLog</string>	
 	    
 	<string name="value_chat_date_none">dateNone</string>

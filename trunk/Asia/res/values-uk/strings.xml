@@ -34,7 +34,8 @@
     <string name="label_size_medium">Середній</string>
     <string name="label_size_small">Маленький</string>
     <string name="label_size_smallest">Найменший</string>
-
+	<string name="label_sound_volume">Гучність повідомлень</string>
+	
     <string-array name="bg_type_names">
         <item>"Чорний"</item>
         <item>"Білий"</item>
