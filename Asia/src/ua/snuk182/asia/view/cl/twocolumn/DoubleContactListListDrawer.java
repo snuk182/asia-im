@@ -17,6 +17,7 @@ import ua.snuk182.asia.view.ViewUtils;
 import ua.snuk182.asia.view.cl.ContactList;
 import ua.snuk182.asia.view.cl.IContactListDrawer;
 import ua.snuk182.asia.view.cl.list.ContactListListItem;
+import ua.snuk182.asia.view.conversations.ConversationsView;
 import android.os.RemoteException;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -284,7 +285,8 @@ public class DoubleContactListListDrawer extends ScrollView implements IContactL
 			item.refresh(false);
 		}
 
-		/*if (getEntryPoint().mainScreen.getCurrentAccountsTabTag().equals(ContactList.class.getSimpleName()+" "+parent.account.serviceId)){
+		/*String tag = ConversationsView.class.getSimpleName()+" "+message.serviceId+" "+message.from;
+		if (getEntryPoint().mainScreen.getCurrentChatsTabTag().equals(tag)) {
 			try {
 				Buddy budddy = getEntryPoint().runtimeService.getBuddy(parent.account.serviceId, message.from);
 				budddy.unread++;

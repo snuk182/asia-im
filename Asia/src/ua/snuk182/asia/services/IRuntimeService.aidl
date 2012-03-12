@@ -20,7 +20,6 @@ interface IRuntimeService{
 	void deleteAccount(in AccountView account);
 	void editAccount(in AccountView account);
 	
-	//Bitmap getIcon(String filename);
 	List<AccountView> getAccounts(boolean disabledToo);
 	Buddy getBuddy(byte serviceId, String buddyProtocolUid);
 	List<Buddy> getBuddies(byte serviceId, in List<String> buddyProtocolUid);
@@ -28,7 +27,7 @@ interface IRuntimeService{
 	void saveTabs(in List<TabInfo> tabInfos);
 	AccountView getAccountView(byte serviceId);
 	void connect(byte serviceId);
-	void setAppVisible(boolean visible);
+	//void setAppVisible(boolean visible);
 	boolean isDataSetInvalid(byte serviceId, long lastUpdateTime);
 	void connectAll();
 	void disconnectAll();
@@ -82,4 +81,5 @@ interface IRuntimeService{
 	boolean checkGroupChatsAvailability(byte serviceId);
 	MultiChatRoomOccupants getChatRoomOccupants(byte serviceId, String chatId);
 	PersonalInfo getChatInfo(byte serviceId, String chatId);
+	void setCurrentTabs(in List<String> tabs);
 }

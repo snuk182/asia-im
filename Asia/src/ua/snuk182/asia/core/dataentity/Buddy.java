@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import ua.snuk182.asia.services.HistorySaver;
+import ua.snuk182.asia.view.conversations.ConversationsView;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -241,5 +242,9 @@ public class Buddy implements Parcelable, Comparable<Buddy> {
 		options.inPreferredConfig = Bitmap.Config.ARGB_8888;
 
 		return BitmapFactory.decodeStream(fis, null, options);
+	}
+
+	public String getChatTag() {
+		return ConversationsView.class.getSimpleName()+" "+serviceId+" "+protocolUid;
 	}
 }

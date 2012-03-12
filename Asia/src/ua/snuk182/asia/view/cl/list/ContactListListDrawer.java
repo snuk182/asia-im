@@ -16,6 +16,7 @@ import ua.snuk182.asia.services.api.AccountService;
 import ua.snuk182.asia.view.ViewUtils;
 import ua.snuk182.asia.view.cl.ContactList;
 import ua.snuk182.asia.view.cl.IContactListDrawer;
+import ua.snuk182.asia.view.conversations.ConversationsView;
 import android.os.RemoteException;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -268,16 +269,18 @@ public class ContactListListDrawer extends ScrollView implements IContactListDra
 			item.refresh();
 		}
 
-		/*
-		 * if
-		 * (getEntryPoint().mainScreen.getCurrentAccountsTabTag().equals(ContactList
-		 * .class.getSimpleName()+" "+parent.account.serviceId)){ try { Buddy budddy =
-		 * getEntryPoint().runtimeService.getBuddy(parent.account.serviceId,
-		 * message.from); budddy.unread++;
-		 * getEntryPoint().runtimeService.setUnread(budddy, message); } catch
-		 * (NullPointerException npe) { ServiceUtils.log(npe); } catch
-		 * (RemoteException e) { getEntryPoint().onRemoteCallFailed(e); } }
-		 */
+		/*String tag = ConversationsView.class.getSimpleName()+" "+message.serviceId+" "+message.from;
+		if (getEntryPoint().mainScreen.getCurrentChatsTabTag().equals(tag)) {
+			try {
+				Buddy budddy = getEntryPoint().runtimeService.getBuddy(parent.account.serviceId, message.from);
+				budddy.unread++;
+				getEntryPoint().runtimeService.setUnread(budddy, message);
+			} catch (NullPointerException npe) {
+				ServiceUtils.log(npe);
+			} catch (RemoteException e) {
+				getEntryPoint().onRemoteCallFailed(e);
+			}
+		}*/
 	}
 
 	@Override

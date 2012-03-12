@@ -33,7 +33,7 @@ public class MasterPasswordView extends RelativeLayout implements ITabContent {
 			public void onClick(View v) {
 				String pw = pwText.getText().toString();
 				
-				if (pw == null || pw.isEmpty()){
+				if (pw == null || pw.length()<1){
 					Toast.makeText(context, R.string.label_pw_cannot_be_empty, Toast.LENGTH_LONG).show();
 					return;
 				}

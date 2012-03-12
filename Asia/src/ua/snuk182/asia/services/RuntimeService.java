@@ -67,9 +67,13 @@ public class RuntimeService extends Service {
 	private ServiceStoredPreferences storage;
 	private List<TabInfo> tabInfos = null;
 	private Notificator notificator = null;
-	private boolean isAppVisible = true;
+	//private boolean isAppVisible = true;
 	private Handler handler = new Handler();
 	private Bundle appOptions;
+	
+	//also indicates wheter app view is visible (value > 0)
+	private List<String> openedTabs = new ArrayList<String>();
+	
 	private Map<String, AbstractPlayerStateListener> playerStateListeners = new HashMap<String, AbstractPlayerStateListener>();
 
 	private int startId;
@@ -184,9 +188,9 @@ public class RuntimeService extends Service {
 					a.accountView.setConnectionState(AccountService.STATE_CONNECTING);
 					serviceBinder.connect(a.accountView.serviceId);
 				} catch (NullPointerException npe) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (DeadObjectException de) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (RemoteException e) {
 					ServiceUtils.log(e);
 				}
@@ -296,9 +300,9 @@ public class RuntimeService extends Service {
 						ServiceUtils.storeAccountActivity(account, getString(R.string.logparam_typing), args[0]);
 					}
 				} catch (NullPointerException npe) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (DeadObjectException de) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (RemoteException e2) {
 					ServiceUtils.log(e2);
 				}
@@ -311,9 +315,9 @@ public class RuntimeService extends Service {
 
 					storage.saveServiceState(accounts);
 				} catch (NullPointerException npe) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (DeadObjectException de) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (RemoteException e2) {
 					ServiceUtils.log(e2);
 				}
@@ -395,9 +399,9 @@ public class RuntimeService extends Service {
 						try {
 							uiCallback.icon(serviceId, (String) args[1]);
 						} catch (NullPointerException npe) {
-							isAppVisible = false;
+							openedTabs.clear();
 						} catch (DeadObjectException de) {
-							isAppVisible = false;
+							openedTabs.clear();
 						} catch (RemoteException e2) {
 							ServiceUtils.log(e2);
 						}
@@ -444,9 +448,9 @@ public class RuntimeService extends Service {
 				try {
 					uiCallback.contactListUpdated(account);
 				} catch (NullPointerException npe) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (DeadObjectException de) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (RemoteException e2) {
 					ServiceUtils.log(e2);
 				}
@@ -517,9 +521,9 @@ public class RuntimeService extends Service {
 				try {
 					uiCallback.buddyStateChanged(buddy);
 				} catch (NullPointerException npe) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (DeadObjectException de) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (RemoteException e2) {
 					ServiceUtils.log(e2);
 				}
@@ -535,9 +539,9 @@ public class RuntimeService extends Service {
 				try {
 					uiCallback.connecting(serviceId, (Integer) args[0]);
 				} catch (NullPointerException npe) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (DeadObjectException de) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (RemoteException e2) {
 					ServiceUtils.log(e2);
 				}
@@ -564,9 +568,9 @@ public class RuntimeService extends Service {
 					try {
 						uiCallback.accountUpdated(account);
 					} catch (NullPointerException npe) {
-						isAppVisible = false;
+						openedTabs.clear();
 					} catch (DeadObjectException de) {
-						isAppVisible = false;
+						openedTabs.clear();
 					} catch (RemoteException e) {
 						ServiceUtils.log(e);
 					}
@@ -584,9 +588,9 @@ public class RuntimeService extends Service {
 					try {
 						uiCallback.accountUpdated(account);
 					} catch (NullPointerException npe) {
-						isAppVisible = false;
+						openedTabs.clear();
 					} catch (DeadObjectException de) {
-						isAppVisible = false;
+						openedTabs.clear();
 					} catch (RemoteException e) {
 						ServiceUtils.log(e);
 					}
@@ -609,9 +613,9 @@ public class RuntimeService extends Service {
 						try {
 							uiCallback.buddyStateChanged(buddy);
 						} catch (NullPointerException npe) {
-							isAppVisible = false;
+							openedTabs.clear();
 						} catch (DeadObjectException de) {
-							isAppVisible = false;
+							openedTabs.clear();
 						} catch (RemoteException e) {
 							ServiceUtils.log(e);
 						}
@@ -620,9 +624,9 @@ public class RuntimeService extends Service {
 						try {
 							uiCallback.personalInfo(buddy, pinfo);
 						} catch (NullPointerException npe) {
-							isAppVisible = false;
+							openedTabs.clear();
 						} catch (DeadObjectException de) {
-							isAppVisible = false;
+							openedTabs.clear();
 						} catch (RemoteException e) {
 							ServiceUtils.log(e);
 						}
@@ -646,9 +650,9 @@ public class RuntimeService extends Service {
 				try {
 					uiCallback.serviceMessage(sm);
 				} catch (NullPointerException npe) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (DeadObjectException de) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (RemoteException e) {
 					ServiceUtils.log(e);
 				}
@@ -661,9 +665,9 @@ public class RuntimeService extends Service {
 				try {
 					uiCallback.searchResult(serviceId, infos);
 				} catch (NullPointerException npe) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (DeadObjectException de) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (RemoteException e) {
 					ServiceUtils.log(e);
 				}
@@ -676,9 +680,9 @@ public class RuntimeService extends Service {
 				try {
 					uiCallback.groupAdded(group, account);
 				} catch (NullPointerException npe) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (DeadObjectException de) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (RemoteException e) {
 					ServiceUtils.log(e);
 				}
@@ -690,9 +694,9 @@ public class RuntimeService extends Service {
 				try {
 					uiCallback.buddyAdded(uddy, account);
 				} catch (NullPointerException npe) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (DeadObjectException de) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (RemoteException e) {
 					ServiceUtils.log(e);
 				}
@@ -705,9 +709,9 @@ public class RuntimeService extends Service {
 				try {
 					uiCallback.buddyRemoved(ddy, account);
 				} catch (NullPointerException npe) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (DeadObjectException de) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (RemoteException e) {
 					ServiceUtils.log(e);
 				}
@@ -720,9 +724,9 @@ public class RuntimeService extends Service {
 				try {
 					uiCallback.groupRemoved(roup, account);
 				} catch (NullPointerException npe) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (DeadObjectException de) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (RemoteException e) {
 					ServiceUtils.log(e);
 				}
@@ -735,9 +739,9 @@ public class RuntimeService extends Service {
 				try {
 					uiCallback.buddyEdited(dy, account);
 				} catch (NullPointerException npe) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (DeadObjectException de) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (RemoteException e) {
 					ServiceUtils.log(e);
 				}
@@ -750,9 +754,9 @@ public class RuntimeService extends Service {
 				try {
 					uiCallback.groupEdited(oup, account);
 				} catch (NullPointerException npe) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (DeadObjectException de) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (RemoteException e) {
 					ServiceUtils.log(e);
 				}
@@ -859,9 +863,9 @@ public class RuntimeService extends Service {
 		try {
 			uiCallback.disconnected(account);
 		} catch (NullPointerException npe) {
-			isAppVisible = false;
+			openedTabs.clear();
 		} catch (DeadObjectException de) {
-			isAppVisible = false;
+			openedTabs.clear();
 		} catch (RemoteException e) {
 			ServiceUtils.log(e);
 		}
@@ -886,8 +890,17 @@ public class RuntimeService extends Service {
 			}
 			budddy = buddyNotFromList(message, account);
 		}
+		
+		boolean hasOpenedChat = false;
+		
+		for (String tab: openedTabs){
+			if (tab.equals(budddy.getChatTag())){
+				hasOpenedChat = true;
+				break;
+			}
+		}
 
-		if (!isAppVisible) {
+		if (!hasOpenedChat) {
 			budddy.unread++;
 		}
 
@@ -896,10 +909,10 @@ public class RuntimeService extends Service {
 		try {
 			uiCallback.textMessage(message);
 		} catch (NullPointerException npe) {
-			isAppVisible = false;
+			openedTabs.clear();
 			budddy.unread++;
 		} catch (DeadObjectException de) {
-			isAppVisible = false;
+			openedTabs.clear();
 			budddy.unread++;
 		} catch (RemoteException e) {
 			ServiceUtils.log(e);
@@ -923,7 +936,7 @@ public class RuntimeService extends Service {
 			notificator.playMessage(true, false);
 		}
 
-		if (!isAppVisible) {
+		if (openedTabs.size()<1) {
 			String statusbarNotification = appOptions.getString(getApplicationContext().getResources().getString(R.string.key_statusbar_type));
 			if (statusbarNotification == null) {
 				statusbarNotification = getApplicationContext().getResources().getString(R.string.value_statusbar_type_messages);
@@ -1148,7 +1161,7 @@ public class RuntimeService extends Service {
 							notificator.notifyMessageReceived(message, buddy, false, blinkLed);
 						}
 					}
-					if (statusbarNotification != null && !isAppVisible && statusbarNotification.equals(getApplicationContext().getResources().getString(R.string.value_statusbar_type_icon))) {
+					if (statusbarNotification != null && openedTabs.size()<1 && statusbarNotification.equals(getApplicationContext().getResources().getString(R.string.value_statusbar_type_icon))) {
 						if (buddy != null) {
 							notificator.notifyMessageReceived(message, buddy, true, blinkLed);
 						}
@@ -1174,7 +1187,7 @@ public class RuntimeService extends Service {
 
 		@Override
 		public List<TabInfo> getSavedTabs() throws RemoteException {
-			isAppVisible = true;
+			//isAppVisible = true;
 			return tabInfos;
 		}
 
@@ -1368,19 +1381,6 @@ public class RuntimeService extends Service {
 		public boolean isDataSetInvalid(byte serviceId, long lastUpdateTime) throws RemoteException {
 			AccountView account = getAccountInternal(serviceId).accountView;
 			return account.lastUpdateTime != lastUpdateTime;
-		}
-
-		@Override
-		public void setAppVisible(boolean visible) throws RemoteException {
-			isAppVisible = visible;
-			if (isAppVisible) {
-				String statusbarNotification = appOptions.getString(getApplicationContext().getResources().getString(R.string.key_statusbar_type));
-				if (statusbarNotification != null && statusbarNotification.equals(getApplicationContext().getResources().getString(R.string.value_statusbar_type_icon))) {
-					notificator.showAppIcon();
-				} else {
-					notificator.removeAppIcon();
-				}
-			}
 		}
 
 		@Override
@@ -1753,9 +1753,9 @@ public class RuntimeService extends Service {
 				try {
 					uiCallback.buddyAdded(chat, account);
 				} catch (NullPointerException npe) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (DeadObjectException de) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (RemoteException e) {
 					ServiceUtils.log(e);
 				}
@@ -1805,9 +1805,9 @@ public class RuntimeService extends Service {
 						uiCallback.buddyAdded(chat, account);
 					}
 				} catch (NullPointerException npe) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (DeadObjectException de) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (RemoteException e) {
 					ServiceUtils.log(e);
 				}
@@ -1838,9 +1838,9 @@ public class RuntimeService extends Service {
 				try {
 					uiCallback.buddyStateChanged(buddy);
 				} catch (NullPointerException npe) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (DeadObjectException de) {
-					isAppVisible = false;
+					openedTabs.clear();
 				} catch (RemoteException e) {
 					ServiceUtils.log(e);
 				}
@@ -1878,6 +1878,21 @@ public class RuntimeService extends Service {
 			} catch (ProtocolException e) {
 				ServiceUtils.log(e);
 				return null;
+			}
+		}
+
+		@Override
+		public void setCurrentTabs(List<String> tabs) throws RemoteException {
+			openedTabs.clear();
+			openedTabs.addAll(tabs);	
+			
+			if (openedTabs.size()>0) {
+				String statusbarNotification = appOptions.getString(getApplicationContext().getResources().getString(R.string.key_statusbar_type));
+				if (statusbarNotification != null && statusbarNotification.equals(getApplicationContext().getResources().getString(R.string.value_statusbar_type_icon))) {
+					notificator.showAppIcon();
+				} else {
+					notificator.removeAppIcon();
+				}
 			}
 		}
 	};

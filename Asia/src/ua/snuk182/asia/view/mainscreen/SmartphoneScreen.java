@@ -252,7 +252,7 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 	public void removeTabByTag(String tag){
     	String currentTag = getCurrentTabTag();
     	
-    	if (currentTag.equals(tag)){
+    	if (currentTag!=null && currentTag.equals(tag)){
     		setCurrentTab(0);
     	} 
     	
@@ -629,5 +629,12 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 		} catch (AsiaCoreException e) {
 			ServiceUtils.log(e);
 		}		
+	}
+
+	@Override
+	public List<String> getCurrentTabs() {
+		List<String> list = new ArrayList<String>();
+		list.add(getCurrentTabTag());
+		return list;
 	}	
 }
