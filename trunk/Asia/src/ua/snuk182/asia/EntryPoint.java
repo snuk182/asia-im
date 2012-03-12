@@ -141,7 +141,7 @@ public class EntryPoint extends ActivityGroup {
 			setContentView((View)mainScreen);
 			
 			String masterPw = ServiceStoredPreferences.getOption(getApplicationContext(), getResources().getString(R.string.key_master_password));
-			Boolean needPassword = masterPw != null && !masterPw.isEmpty();
+			Boolean needPassword = masterPw != null && masterPw.length()>0;
 			if (needPassword){
 				addMasterPasswordRequestTab();
 				toggleWaitscreen(false);				
@@ -399,7 +399,6 @@ public class EntryPoint extends ActivityGroup {
     
     private void continueCreating() {
     	try {
-    		runtimeService.setAppVisible(true);
     		appOptions = runtimeService.getApplicationOptions();
     		
     		ArrayList<TabInfo> savedTabs;
@@ -441,7 +440,7 @@ public class EntryPoint extends ActivityGroup {
 			mainScreen.setCurrentAccountsTab(selectedAccTab);
 			mainScreen.setCurrentChatsTab(selectedChatTab);
 			
-			//checkShowTabs();
+			runtimeService.setCurrentTabs(mainScreen.getCurrentTabs());    		
 			
 			serviceCallback.visualStyleUpdated();	
 			
@@ -481,7 +480,7 @@ public class EntryPoint extends ActivityGroup {
 	}
     
     public void getConversationTab(Buddy buddy){
-    	String tag = ConversationsView.class.getSimpleName()+" "+buddy.serviceId+" "+buddy.protocolUid;
+    	String tag = buddy.getChatTag();
     	
     	if (mainScreen.checkAndSetCurrentTabByTag(tag)){
     		return;
@@ -938,7 +937,7 @@ public class EntryPoint extends ActivityGroup {
 		} else {			
 			if (i == KeyEvent.KEYCODE_BACK){
 				String masterPw = ServiceStoredPreferences.getOption(getApplicationContext(), getResources().getString(R.string.key_master_password));
-				Boolean needPassword = masterPw != null && !masterPw.isEmpty();
+				Boolean needPassword = masterPw != null && masterPw.length()>0;
 				
 				if (needPassword){
 					finish();
@@ -974,7 +973,7 @@ public class EntryPoint extends ActivityGroup {
 		updateWallpaper();
 		if (runtimeService!=null){
 			try {
-				runtimeService.setAppVisible(true);
+				runtimeService.setCurrentTabs(mainScreen.getCurrentTabs());
 			} catch (RemoteException e) {
 				ServiceUtils.log(e);
 				runtimeService = null;
@@ -1020,7 +1019,7 @@ public class EntryPoint extends ActivityGroup {
 		
 		if(runtimeService!=null){
 			try {
-				runtimeService.setAppVisible(false);
+				runtimeService.setCurrentTabs(new ArrayList<String>());
 			} catch (NullPointerException npe) {
 				ServiceUtils.log(npe);
 			} catch (RemoteException e) {

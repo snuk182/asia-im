@@ -28,7 +28,7 @@ public class EditablePasswordPreference extends EditTextPreference {
 		
 		
 		String oldPw = getText();
-		if (oldPw == null || oldPw.isEmpty()) {
+		if (oldPw == null || oldPw.length()<1) {
 			return super.onCreateDialogView();
 		} else {
 			LinearLayout layout = new LinearLayout(getContext());

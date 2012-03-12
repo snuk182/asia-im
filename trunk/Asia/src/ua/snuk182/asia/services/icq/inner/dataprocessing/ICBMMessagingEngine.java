@@ -1,7 +1,10 @@
 package ua.snuk182.asia.services.icq.inner.dataprocessing;
 
 import java.io.UnsupportedEncodingException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.ScheduledFuture;
@@ -23,6 +26,8 @@ import ua.snuk182.asia.services.icq.inner.dataentity.TLV;
 public class ICBMMessagingEngine {
 	private ICQServiceInternal service;
 	private MessageParser parser;
+	
+	private static final DateFormat OFFLINE_DATE_FORMATTER = new SimpleDateFormat("dd MMMM yyyy, HH:mm:ss");
 
 	private static final Random random = new Random();
 
@@ -570,8 +575,9 @@ public class ICBMMessagingEngine {
 			byte day = tailData[7];
 			byte hour = tailData[8];
 			byte minute = tailData[9];
-			Date sendingDate = new Date(year, month, day, hour, minute, 0);
-			message.sendingTime = sendingDate;
+			Calendar sendingDate = Calendar.getInstance();
+			sendingDate.set(year, month, day, hour, minute);
+			message.sendingTime = sendingDate.getTime();
 			message.receivingTime = new Date();
 
 			byte mType = tailData[10];
@@ -589,8 +595,11 @@ public class ICBMMessagingEngine {
 					text = new String(tailData, 14, textLength);
 				}
 
-				message.text = text;
+				message.text = "(Sent at "+OFFLINE_DATE_FORMATTER.format(message.sendingTime)+") "+text;
 				service.log(message.senderId + " says: " + text);
+				
+				if (text.length() > 0)
+					notifyMessageReceived(message);
 				break;
 			}
 		}

@@ -846,4 +846,12 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
 			ServiceUtils.log(e);
 		}
 	}
+
+	@Override
+	public List<String> getCurrentTabs() {
+		List<String> list = new ArrayList<String>();
+		list.add(tabHostAccount.getCurrentTabTag());
+		list.add(tabHostChat.getCurrentTabTag());
+		return list;
+	}
 }

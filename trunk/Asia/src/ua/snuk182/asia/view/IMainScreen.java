@@ -64,4 +64,5 @@ public interface IMainScreen {
 	void chatRoomOccupants(byte serviceId, String chatId, MultiChatRoomOccupants occupants);
 	void serviceMessage(ServiceMessage msg);
 	void refreshAccounts();
+	List<String> getCurrentTabs();
 }
