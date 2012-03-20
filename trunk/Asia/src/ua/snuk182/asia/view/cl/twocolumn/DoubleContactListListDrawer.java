@@ -17,7 +17,6 @@ import ua.snuk182.asia.view.ViewUtils;
 import ua.snuk182.asia.view.cl.ContactList;
 import ua.snuk182.asia.view.cl.IContactListDrawer;
 import ua.snuk182.asia.view.cl.list.ContactListListItem;
-import ua.snuk182.asia.view.conversations.ConversationsView;
 import android.os.RemoteException;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,6 +43,8 @@ public class DoubleContactListListDrawer extends ScrollView implements IContactL
 	
 	private boolean clInited = false;
 	private int oldWidth = 0; 
+	
+	private final List<ContactListListItem> tmpItems = new ArrayList<ContactListListItem>();	
 	
 	private final Runnable updateViewRunnable = new Runnable() {
 		
@@ -72,6 +73,14 @@ public class DoubleContactListListDrawer extends ScrollView implements IContactL
 				size = 24;
 			}
 			ContactListListItem.resize(size);
+			
+			for (DoubleContactListGroupItem group: groups){
+				tmpItems.addAll(group.getBuddyList());
+			}
+			
+			for (ContactListListItem item: tmpItems) {
+				item.removeFromParent();
+			}
 			
 			groups.clear();
 			// items.clear();
@@ -116,7 +125,7 @@ public class DoubleContactListListDrawer extends ScrollView implements IContactL
 			}
 
 			for (Buddy buddy : parent.account.getBuddyList()) {
-					ContactListListItem item = getItem(buddy, getEntryPoint(), showIcons);
+					ContactListListItem item = getItem(buddy, showIcons);
 					item.color();
 					// items.add(item);
 					if (showGroups && parent.account.getBuddyGroupList().size() > 0) {
@@ -183,6 +192,7 @@ public class DoubleContactListListDrawer extends ScrollView implements IContactL
 			clInited = true;
 			parent.setClReady(true);
 			
+			tmpItems.clear();
 		}
 	};
 	
@@ -312,9 +322,13 @@ public class DoubleContactListListDrawer extends ScrollView implements IContactL
 			}
 		}
 		
-		if (item == null){
-			ServiceUtils.log("no item found - "+buddy.protocolUid);
-			return;
+		if (item == null){			
+			if (!showOffline && buddy.status != Buddy.ST_OFFLINE){
+				item = getItem(buddy, showIcons);
+			} else {
+				ServiceUtils.log("no item found - "+buddy.protocolUid);
+				return;
+			}
 		}
 
 		item.populate(buddy);
@@ -369,10 +383,16 @@ public class DoubleContactListListDrawer extends ScrollView implements IContactL
 	}
 	
 	private ContactListListItem findExistingItem(String buddyUid){
+		for (ContactListListItem item: tmpItems){
+			if (item.getTag().equals(buddyUid)){
+				return item;
+			}
+		}
+		
 		return (ContactListListItem) this.findViewWithTag(buddyUid);
 	}
 
-	private ContactListListItem getItem(final Buddy buddy, final EntryPoint entryPoint, boolean showIcons) {
+	private ContactListListItem getItem(final Buddy buddy, boolean showIcons) {
 		ContactListListItem item;
 		if ((item = findExistingItem(buddy.protocolUid)) == null){			
 			final ContactListListItem cli = new ContactListListItem(getEntryPoint(), buddy.protocolUid);
@@ -386,7 +406,7 @@ public class DoubleContactListListDrawer extends ScrollView implements IContactL
 						@Override
 						public void run() {
 							try {
-								entryPoint.getConversationTab(getEntryPoint().runtimeService.getBuddy(buddy.serviceId, buddy.protocolUid));
+								getEntryPoint().getConversationTab(getEntryPoint().runtimeService.getBuddy(buddy.serviceId, buddy.protocolUid));
 								cli.setBackgroundColor(0x00ffffff);
 							} catch (NullPointerException npe) {	
 								ServiceUtils.log(npe);
@@ -403,7 +423,7 @@ public class DoubleContactListListDrawer extends ScrollView implements IContactL
 				public boolean onLongClick(View v) {
 					if (parent.account.getConnectionState() == AccountService.STATE_CONNECTED) {
 						try {
-							ViewUtils.contactMenu(entryPoint, parent.account, getEntryPoint().runtimeService.getBuddy(buddy.serviceId, buddy.protocolUid));
+							ViewUtils.contactMenu(getEntryPoint(), parent.account, getEntryPoint().runtimeService.getBuddy(buddy.serviceId, buddy.protocolUid));
 						} catch (NullPointerException npe) {	
 							ServiceUtils.log(npe);
 						} catch (RemoteException e) {
