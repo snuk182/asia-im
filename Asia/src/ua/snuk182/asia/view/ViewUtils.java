@@ -1,11 +1,16 @@
 package ua.snuk182.asia.view;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import ua.snuk182.asia.EntryPoint;
 import ua.snuk182.asia.R;
@@ -52,6 +57,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public final class ViewUtils {
+	public static final VMRuntimeHack VMRUNTIME = new VMRuntimeHack();
 
 	private static final Map<String, IconMenuAdapter> iconMenuAdapters = new HashMap<String, IconMenuAdapter>();
 
@@ -1226,4 +1232,94 @@ public final class ViewUtils {
 		}
 		
 	}
+	
+	public static class VMRuntimeHack {
+        private Object runtime = null;
+        private Method trackAllocation = null;
+        private Method trackFree = null;
+        
+        public boolean trackAlloc(long size) {
+            if (runtime == null)
+                return false;
+            try {
+                Object res = trackAllocation.invoke(runtime, Long.valueOf(size));
+                return (res instanceof Boolean) ? (Boolean)res : true;
+            } catch (IllegalArgumentException e) {
+                return false;
+            } catch (IllegalAccessException e) {
+                return false;
+            } catch (InvocationTargetException e) {
+                return false;
+            }
+        }
+
+        public boolean trackFree(long size) {
+            if (runtime == null)
+                return false;
+            try {
+                Object res = trackFree.invoke(runtime, Long.valueOf(size));
+                return (res instanceof Boolean) ? (Boolean)res : true;
+            } catch (IllegalArgumentException e) {
+                return false;
+            } catch (IllegalAccessException e) {
+                return false;
+            } catch (InvocationTargetException e) {
+                return false;
+            }
+        }
+        
+        public Bitmap allocBitmap(Bitmap bmp) {
+            if (useHack) {
+                trackFree(bmp.getRowBytes() * bmp.getHeight());
+                hackedBitmaps.add(bmp);
+            }
+            allocatedBitmaps.add(bmp);
+            return bmp;
+    	}
+
+    	public void freeBitmap(Bitmap bmp) {
+   			bmp.recycle();
+            if (hackedBitmaps.contains(bmp)) {
+                trackAlloc(bmp.getRowBytes() * bmp.getHeight());
+                hackedBitmaps.remove(bmp);
+            }
+            allocatedBitmaps.remove(bmp);
+    	}
+
+    	public void freeAll() {
+    		for (Bitmap bmp : new LinkedList<Bitmap>(allocatedBitmaps))
+    			freeBitmap(bmp);
+    	}
+
+    	//may be turned to changeable
+    	private final boolean useHack = true;
+    	
+    	private Set<Bitmap> allocatedBitmaps = new HashSet<Bitmap>(); 
+    	private Set<Bitmap> hackedBitmaps = new HashSet<Bitmap>(); 
+        
+        
+        public VMRuntimeHack() {
+            boolean success = false;
+            try {
+                Class<?> cl = Class.forName("dalvik.system.VMRuntime");
+                Method getRt = cl.getMethod("getRuntime", new Class[0]);
+                runtime = getRt.invoke(null, new Object[0]);
+                trackAllocation = cl.getMethod("trackExternalAllocation", new Class[] {long.class});
+                trackFree = cl.getMethod("trackExternalFree", new Class[] {long.class});
+                success = true;
+            } catch (ClassNotFoundException e) {
+            } catch (SecurityException e) {
+            } catch (NoSuchMethodException e) {
+            } catch (IllegalArgumentException e) {
+            } catch (IllegalAccessException e) {
+            } catch (InvocationTargetException e) {
+            }
+            if (!success) {
+                ServiceUtils.log("VMRuntime hack does not work!");
+                runtime = null;
+                trackAllocation = null;
+                trackFree = null;
+            }
+        }
+    }
 }

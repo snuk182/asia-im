@@ -16,7 +16,6 @@ import ua.snuk182.asia.services.api.AccountService;
 import ua.snuk182.asia.view.ViewUtils;
 import ua.snuk182.asia.view.cl.ContactList;
 import ua.snuk182.asia.view.cl.IContactListDrawer;
-import ua.snuk182.asia.view.conversations.ConversationsView;
 import android.os.RemoteException;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,7 +44,7 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 	private boolean clInited = false;
 	private int oldWidth = 0;
 	
-	//paging
+	private final List<ContactListGridItem> tmpItems = new ArrayList<ContactListGridItem>();
 	
 	private final Runnable updateViewRunnable = new Runnable() {
 		
@@ -75,8 +74,15 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 			
 			COLUMN_COUNT = ContactListGridDrawer.this.getWidth() / ContactListGridItem.itemSize;
 			
-			groups.clear();
-			// items.clear();
+			for (ContactListGridGroupItem group: groups){
+				tmpItems.addAll(group.getBuddyList());
+			}
+			
+			for (ContactListGridItem item: tmpItems) {
+				item.removeFromParent();
+			}
+			
+			groups.clear();			
 
 			unreadGroup.getBuddyList().clear();
 			offlineGroup.getBuddyList().clear();
@@ -125,7 +131,7 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 			}
 
 			for (Buddy buddy : parent.account.getBuddyList()) {
-				ContactListGridItem item = getItem(buddy, getEntryPoint(), showIcons);
+				ContactListGridItem item = getItem(buddy, showIcons);
 				// items.add(item);
 				item.color();
 				
@@ -193,6 +199,7 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 			clInited = true;
 			parent.setClReady(true);
 			
+			tmpItems.clear();
 		}
 	};
 	
@@ -319,9 +326,13 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 			}
 		}
 
-		if (item == null) {
-			ServiceUtils.log("no item found - " + buddy.protocolUid);
-			return;
+		if (item == null){			
+			if (!showOffline && buddy.status != Buddy.ST_OFFLINE){
+				item = getItem(buddy, showIcons);
+			} else {
+				ServiceUtils.log("no item found - "+buddy.protocolUid);
+				return;
+			}
 		}
 
 		item.populate(buddy);
@@ -378,11 +389,17 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 		if (buddyUid == null || buddyUid.length() < 1) {
 			return null;
 		}
+		for (ContactListGridItem item: tmpItems){
+			if (item.getTag().equals(buddyUid)){
+				return item;
+			}
+		}
+		
 		View view = this.findViewWithTag(buddyUid);
 		return (ContactListGridItem) view;
 	}
 
-	private ContactListGridItem getItem(final Buddy buddy, final EntryPoint entryPoint, boolean showIcons) {
+	private ContactListGridItem getItem(final Buddy buddy, boolean showIcons) {
 		ContactListGridItem item;
 		if ((item = findExistingItem(buddy.protocolUid)) == null) {
 			final ContactListGridItem cli = new ContactListGridItem(getEntryPoint(), buddy.protocolUid);
@@ -396,7 +413,7 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 						@Override
 						public void run() {
 							try {
-								entryPoint.getConversationTab(getEntryPoint().runtimeService.getBuddy(buddy.serviceId, buddy.protocolUid));
+								getEntryPoint().getConversationTab(getEntryPoint().runtimeService.getBuddy(buddy.serviceId, buddy.protocolUid));
 								cli.buddyImage.onFocusChange(null, false);
 							} catch (NullPointerException npe) {
 								ServiceUtils.log(npe);
@@ -417,7 +434,7 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 						public void run() {
 							if (parent.account.getConnectionState() == AccountService.STATE_CONNECTED) {
 								try {
-									ViewUtils.contactMenu(entryPoint, parent.account, getEntryPoint().runtimeService.getBuddy(buddy.serviceId, buddy.protocolUid));
+									ViewUtils.contactMenu(getEntryPoint(), parent.account, getEntryPoint().runtimeService.getBuddy(buddy.serviceId, buddy.protocolUid));
 								} catch (NullPointerException npe) {
 									ServiceUtils.log(npe);
 								} catch (RemoteException e) {

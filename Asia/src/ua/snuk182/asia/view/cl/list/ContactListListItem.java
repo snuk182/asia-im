@@ -271,7 +271,12 @@ public class ContactListListItem extends RelativeLayout implements ContactListIt
 			new Thread("CL list item icon request"){
 				@Override
 				public void run(){
+					finalizeBitmap();
+					
 					icon = Buddy.getIcon(getEntryPoint(), buddy.getFilename());
+					if (icon != null){
+						ViewUtils.VMRUNTIME.allocBitmap(icon);
+					}
 					getEntryPoint().threadMsgHandler.post(iconGot);
 				}
 			}.start();
@@ -321,5 +326,21 @@ public class ContactListListItem extends RelativeLayout implements ContactListIt
 	@Override
 	public void setTag(String tag) {
 		super.setTag(tag);
+	}
+	
+	@Override
+	protected void finalize() throws Throwable{
+		try {
+			finalizeBitmap();
+		} finally {
+			super.finalize();
+		}		
+	}
+
+	private void finalizeBitmap() {
+		if (icon != null){
+			ViewUtils.VMRUNTIME.freeBitmap(icon);
+			ServiceUtils.log("Bitmap for "+getTag()+" finalized");
+		}
 	}
 }
