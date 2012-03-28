@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- TabHost -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@android:id/tabhost" android:layout_width="fill_parent"
+	android:layout_height="fill_parent" android:background="#00000000"
+	android:fadingEdge="none" android:fadingEdgeLength="0px">
+
+	<LinearLayout android:orientation="vertical"
+		android:layout_width="fill_parent" android:layout_height="fill_parent"
+		android:background="#00000000">
+		<LinearLayout android:id="@+id/tabWidgetContainer"
+			android:orientation="horizontal" android:layout_width="fill_parent"
+			android:layout_height="wrap_content" android:background="#00000000"
+			android:gravity="center_vertical" >
+			
+			<HorizontalScrollView android:id="@+id/tabContainer" android:fillViewport="true"
+				android:layout_width="fill_parent" android:layout_height="wrap_content"
+				android:scrollbars="none" android:background="#00000000"
+				android:paddingTop="4dip" android:paddingLeft="0px"
+				android:paddingBottom="0px" android:paddingRight="0px"
+				android:layout_weight="5" android:foregroundGravity="center_vertical"
+				android:fadingEdge="none" android:fadingEdgeLength="0px">
+
+				<TabWidget android:id="@android:id/tabs"
+					android:layout_width="wrap_content" android:layout_height="wrap_content"
+					android:background="#00000000" android:gravity="left" android:paddingLeft="2dip" android:paddingRight="2dip"/>
+			</HorizontalScrollView>
+			
+		</LinearLayout>
+		<FrameLayout android:id="@android:id/tabcontent"
+			android:layout_width="fill_parent" android:layout_height="fill_parent"
+			android:layout_weight="1" android:fadingEdge="none" android:background="#0000"
+			android:fadingEdgeLength="0px" />
+	</LinearLayout>
+</merge>
+

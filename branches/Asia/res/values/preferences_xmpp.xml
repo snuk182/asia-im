@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string-array name="xmpp_preference_names">
+		<item>jid</item>
+		<item>password</item>
+		<item>loginhost</item>
+		<item>loginport</item>
+		<item>pingtimeout</item>
+	</string-array>
+	<string-array name="xmpp_preference_defaults">
+		<item></item>
+		<item></item>
+		<item>jabber.ru</item>
+		<item>5222</item>
+		<item>200</item>
+	</string-array>
+	
+	<string-array name="xmpp_contact_menu_names">
+		<item>@string/menu_value_view_info</item>
+		<item>@string/menu_value_join_chat</item>
+		<item>@string/menu_value_leave_chat</item>
+	</string-array>
+	
+	<string-array name="xmpp_status_icons">
+		<item>@drawable/xmpp_online_medium</item>
+		<item>@drawable/xmpp_away_medium</item>
+		<item>@drawable/xmpp_na_medium</item>
+		<item>@drawable/xmpp_dnd_medium</item>
+		<item>@drawable/xmpp_free4chat_medium</item>
+		<item>@drawable/xmpp_invisible_medium</item>
+	</string-array>
+	
+	<string-array name="xmpp_status_strings">
+		<item>@string/label_st_online</item>
+		<item>@string/label_st_away</item>
+		<item>@string/label_st_na</item>
+		<item>@string/label_st_dnd</item>
+		<item>@string/label_st_free4chat</item>
+		<item>@string/label_st_invisible</item>
+	</string-array>
+
+</resources>
