@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-
-    <style name="LightTheme" parent="android:Theme.Light.NoTitleBar" />
-    <style name="DarkTheme" parent="android:Theme.Black.NoTitleBar" />
-    <style name="TransparentTheme" parent="android:Theme.Translucent.NoTitleBar" />
-    
-</resources>
