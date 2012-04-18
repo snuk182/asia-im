@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string-array name="icq_preference_strings">
+		<item>ICQ UIN</item>
+		<item>Пароль</item>
+		<item>Адрес сервера</item>
+		<item>Порт сервера</item>
+		<item>Таймаут пинга (секунды)</item>
+	</string-array>
+	
+	<string-array name="icq_visibility_descr">
+		<item>"Видимый всем"</item>
+		<item>"Всем, кроме запрещенных"</item>
+		<item>"Видимый только списку контактов"</item>
+		<item>"Видимый только разрешенным"</item>
+		<item>"Невидимый всем"</item>
+	</string-array>
+	
+	<string-array name="icq_xstatus_descr">	
+		<item>"Магазин"</item>
+		<item>"Плаваю"</item>
+		<item>"Устал"</item>
+		<item>"Праздник"</item>
+		<item>"Пиво"</item>
+		<item>"Раздумья"</item>
+		<item>"Питание"</item>
+		<item>"Телевизор"</item>
+		<item>"Друзья"</item>
+		<item>"Кофе"</item>
+		<item>"Музыка"</item>
+		<item>"Работа"</item>
+		<item>"Кино"</item>
+		<item>"Веселье"</item>
+		<item>"Телефон"</item>
+		<item>"Играю"</item>
+		<item>"Учеба"</item>
+		<item>"Нездоров"</item>
+		<item>"Сон"</item>
+		<item>"Экстрим"</item>
+		<item>"Интернет"</item>
+		<item>"Инженер"</item>
+		<item>"Печатаю"</item>
+		<item>"Ярость"</item>
+		<item>"Сладости"</item>
+		<item>"Смартфон"</item>
+		<item>"Мобильник"</item>
+		<item>"Отключился"</item>
+		<item>"Туалет"</item>
+		<item>"Вопросы"</item>
+		<item>"Дорога"</item>
+		<item>"Сердце"</item>
+		<item>"Страсть"</item>
+		<item>"Курю"</item>
+		<item>"Секс"</item>
+		<item>"В поиске"</item>
+		<item>"Дневник"</item>
+		<item>"Без статуса"</item>
+	</string-array>
+	
+	<string-array name="icq_marital_names">
+		<item>Один</item>
+		<item>Отношения</item>
+		<item>Помолвлен</item>
+		<item>Женат/Замужем</item>
+		<item>Развод</item>
+		<item>Живу отдельно</item>
+		<item>Вдовец</item>
+	</string-array>
+</resources>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+	<item android:id="@+id/menuitem_close" android:title="@string/label_close" />
+	<item android:id="@+id/menuitem_return" android:title="@string/label_return_to_buddylist" />
+	<item android:id="@+id/menuitem_delete" android:title="@string/label_delete_history" />
+	<item android:id="@+id/menuitem_export" android:title="@string/label_export" />
+</menu>

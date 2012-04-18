@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:focusable="false"
+	android:clickable="true"
+  	android:longClickable="true">
+ <!-- ImageView android:id="@+id/contactlistitem"
+  	android:layout_width="fill_parent"
+  	android:layout_height="fill_parent"
+  	android:layout_alignParentTop="true" 
+  	android:layout_alignParentBottom="true" 
+  	android:layout_alignParentLeft="true" 
+  	android:layout_alignParentRight="true" 
+  	android:src="@drawable/logo_48px"
+  	android:scaleType="center"
+  	android:padding="5dip"
+  	android:focusable="false"/>
+  <ImageView android:id="@+id/toplayout"
+  	android:layout_width="fill_parent"
+  	android:layout_height="fill_parent"
+  	android:layout_alignParentTop="true" 
+  	android:layout_alignParentBottom="true" 
+  	android:layout_alignParentLeft="true" 
+  	android:layout_alignParentRight="true" 
+  	android:src="@drawable/contact_64px"
+  	android:scaleType="fitXY"
+  	android:focusable="false"/ -->
+  <ua.snuk182.asia.view.more.BuddyImage 
+  	android:id="@+id/buddyimage"
+  	android:layout_width="fill_parent"
+  	android:layout_height="fill_parent"
+  	android:layout_alignParentTop="true" 
+  	android:layout_alignParentBottom="true" 
+  	android:layout_alignParentLeft="true" 
+  	android:layout_alignParentRight="true" 
+  	android:src="@drawable/contact_64px"
+  	android:background="@drawable/dummy_48"
+  	android:scaleType="fitXY"
+  	android:focusable="false"
+  />
+		<LinearLayout 
+		android:id="@+id/iconlayout" 
+		android:orientation="horizontal" 
+		android:layout_width="wrap_content" 
+		android:layout_height="wrap_content" 
+		android:layout_alignParentTop="true" 
+		android:gravity="center_vertical"
+		android:layout_alignParentRight="true"
+		android:focusable="false">
+			<ImageView 
+				android:id="@+id/unreadimage" 
+				android:src="@drawable/message_tiny" 
+				android:layout_width="wrap_content" 
+				android:layout_height="wrap_content"
+				android:focusable="false"/>
+			<ImageView 
+				android:id="@+id/statusimage" 
+				android:src="@drawable/icq_offline_tiny" 
+				android:layout_width="wrap_content" 
+				android:layout_height="wrap_content"
+				android:focusable="false"/>
+			<ImageView 
+				android:id="@+id/xstatusimage" 
+				android:src="@drawable/logo_16px" 
+				android:layout_width="wrap_content" 
+				android:layout_height="wrap_content"
+				android:focusable="false"/>
+			<ImageView 
+				android:id="@+id/authimage" 
+				android:src="@drawable/not_authorized" 
+				android:layout_width="wrap_content" 
+				android:layout_height="wrap_content"
+				android:focusable="false"/>
+			
+		</LinearLayout>
+	<FrameLayout android:id="@+id/namelayout"
+		android:layout_width="wrap_content" 
+		android:layout_height="wrap_content"
+		android:layout_alignParentBottom="true" 
+		android:layout_alignParentLeft="true"
+		android:background="#00000000"
+		>
+		
+		<TextView 
+		android:layout_width="wrap_content" 
+		android:textSize="12dip" 
+		android:text="My Nickname" 
+		android:id="@+id/usernamelabel" 
+		android:layout_height="wrap_content" 
+		android:textColor="#ffff"
+		android:shadowColor="#ef000000"
+		android:shadowDx="1"
+		android:shadowDy="1"
+		android:shadowRadius="1.4"
+		android:padding="1px"
+		android:background="#00000000"
+		android:focusable="false"
+		/>
+	</FrameLayout>
+</merge>

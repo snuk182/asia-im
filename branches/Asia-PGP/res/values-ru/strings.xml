@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="label_pls_enter_master_password">Введите Главный Пароль</string>
+    <string name="label_use_master_password">Использовать Главный Пароль</string>    
+    <string name="label_pw_cannot_be_empty">Пароль не может быть пустым</string>
+    <string name="label_wrong_pw">Неправильный пароль</string>
+    <string name="label_old_pw">Старый Пароль</string>
+    <string name="label_new_pw">Новый Пароль (пустой для снятия)</string>
+    <string name="label_master_password">Главный Пароль</string>
+    
+    <string name="label_view_type">Вид программы (нужен перезапуск)</string>
+    <string name="label_view_type_plain">Обычный</string>
+    <string name="label_view_type_notabs">Без вкладок</string>
+    <string name="label_view_type_tablet">Планшетный</string>
+    <string name="label_this_account_to_be_enabled">"Включаю учетную запись: "</string>
+    <string name="label_this_account_to_be_disabled">"Выключаю учетную запись: "</string>
+    <string name="label_copy_all">Копировать всё</string>
+    <string name="label_personal_info">Персональные данные</string>
+    <string name="label_male">Мужской</string>
+    <string name="label_female">Женский</string>
+    <string name="label_autoconnect">Автоподключение при загрузке</string>
+    <string name="label_message_sound_only">Звук только для сообщений</string>
+    <string name="label_manage_visibility">Видимость</string>
+    <string name="label_send_typing">Оповещать о наборе</string>
+    <string name="label_fullscreen_landscape_kb">Полноэкранная горизонтальная клавиатура</string>
+    <string name="label_secure_login">Безопасный вход</string>
+    <string name="label_poweramp_playing_to_status">"Сейчас играет..." из PowerAMP</string>
+    <string name="label_androidmusic_playing_to_status">"Сейчас играет..." из Музыкального проигрывателя</string>
+    <string name="label_export">Экспорт на карту памяти"</string>
+    <string name="label_account_activity_log">Журнал активности</string>
+    <string name="label_blink_led">Мигать индикатором при новом сообщении</string>
+	<string name="label_sound_volume">Громкость уведомлений</string>
+	
+	<string name="label_enable_pgp">Включить шифрование PGP</string>
+	 <string name="label_my_pgp_key">Ключ PGP</string>
+    <string name="label_my_pgp_key_pw">Пароль ключа PGP</string>
+    <string name="label_securitize">Шифровать</string>
+	<string name="label_desecuritize">Не шифровать</string>
+	
+    <string-array name="bg_type_names">
+        <item>"Черный"</item>
+        <item>"Белый"</item>
+        <item>"Прозрачный"</item>
+    </string-array>
+
+    <string name="label_tab_style">Стиль вкладок</string>
+
+    <string-array name="list_tab_style_names">
+        <item>"Плоский"</item>
+        <item>"Системный"</item>
+    </string-array>
+    <string-array name="list_chat_date_names">
+        <item>"Не печатать"</item>
+        <item>"Только время"</item>
+        <item>"Время, дата"</item>
+    </string-array>
+
+    <string name="label_dont_draw_smileys">Не отрисовывать смайлы</string>
+    <string name="label_size_big">Большой</string>
+    <string name="label_size_medium">Средний</string>
+    <string name="label_size_small">Маленький</string>
+    <string name="label_size_smallest">Еще меньше</string>
+    <string name="label_screen_orientation">Ориентация экрана</string>
+    <string name="label_screen_orientation_system">Системная</string>
+    <string name="label_screen_orientation_portrait">Вертикальная</string>
+    <string name="label_screen_orientation_landscape">Горизонтальная</string>
+    <string name="label_screen_orientation_sensor">По сенсору</string>
+    <string name="label_deny_messages_not_from_list">"Отклонять любые сообщения от контактов не из списка"</string>
+    <string name="label_buddy">"Контакт "</string>
+    <string name="label_group">"Группа "</string>
+    <string name="label_added">" добавлен"</string>
+    <string name="label_modified">" изменен"</string>
+    <string name="label_deleted">" удален"</string>
+    <string name="app_name">"Ася"</string>
+    <string name="label_wait_starting">"Загружается"</string>
+    <string name="label_new_account">"Новая учетная запись"</string>
+    <string name="label_offline">" отключился"</string>
+    <string name="label_online">" подключился"</string>
+    <string name="label_accounts">"Учетные записи"</string>
+    <string name="label_me">"Я"</string>
+    <string name="label_unread_messages">"Есть непрочитанные сообщения"</string>
+    <string name="label_st_online">"В сети"</string>
+    <string name="label_st_offline">"Не в сети"</string>
+    <string name="label_st_away">"Ушел"</string>
+    <string name="label_st_na">"Недоступен"</string>
+    <string name="label_st_busy">"Занят"</string>
+    <string name="label_st_dnd">"Не беспокоить"</string>
+    <string name="label_st_free4chat">"Хочу чатиться"</string>
+    <string name="label_st_invisible">"Невидимка"</string>
+    <string name="label_st_home">"Дома"</string>
+    <string name="label_st_work">"На работе"</string>
+    <string name="label_st_angry">"Злой"</string>
+    <string name="label_st_dinner">"Еда"</string>
+    <string name="label_st_undetermined">"Не показывать мой статус"</string>
+    <string name="label_st_depress">"Нерадостно"</string>
+    <string name="label_unread_group">"Непрочитанные"</string>
+    <string name="label_online_group">"В сети"</string>
+    <string name="label_offline_group">"Не в сети"</string>
+    <string name="label_chats_group">"Чаты"</string>
+    <string name="label_not_in_list_group">"Не в списке"</string>
+    <string name="label_connect">"Подключиться"</string>
+    <string name="label_disconnect">"Отключиться"</string>
+    <string name="label_set_status">"Установить статус"</string>
+    <string name="label_account_settings">"Установки учетной записи"</string>
+    <string name="label_preferences">"Настройки"</string>
+    <string name="label_more">"Еще"</string>
+    <string name="label_about">"О программе"</string>
+    <string name="label_manage_accounts">"Управление учетными записями"</string>
+    <string name="label_exit_app">"Выйти из Аси"</string>
+    <string name="label_pick_status">"Выбрать статус"</string>
+    <string name="label_disconnected">"Отключился"</string>
+    <string name="label_buddy_details">"Инфо контакта"</string>
+    <string name="label_close">"Закрыть"</string>
+    <string name="label_return_to_buddylist">"Вернуться к списку контактов"</string>
+    <string name="label_edit">"Править "</string>
+    <string name="label_remove">"Удалить "</string>
+    <string name="label_are_you_sure_you_want_to_remove">"Вы действительно хотите удалить "</string>
+    <string name="label_yes">"Да"</string>
+    <string name="label_no">"Нет"</string>
+    <string name="label_add_new_account">"Добавить учетную запись"</string>
+    <string name="label_account_type">"Тип учетной записи:"</string>
+    <string name="label_account_id">"ID записи (UIN):"</string>
+    <string name="label_account_password">"Пароль:"</string>
+    <string name="label_create">"Создать"</string>
+    <string name="label_cancel">"Отмена"</string>
+    <string name="label_sorry_back_button">"Чтобы свернуть Асю, нажмите Домой. Чтобы закрыть, воспользуйтесь пунктом меню."</string>
+    <string name="label_log_to_file">"Включить лог в файл"</string>
+    <string name="label_bg_type">"Тип фона"</string>
+    <string name="label_show_groups">"Показать группы"</string>
+    <string name="label_show_offline">"Показать контакты не в сети"</string>
+    <string name="label_service_addr">"Адрес сервиса"</string>
+    <string name="label_service_port">"Порт сервиса"</string>
+    <string name="label_history">"История"</string>
+    <string name="label_appearance_prefs">Внешний вид</string>
+    <string name="label_notification_prefs">Уведомления</string>
+    <string name="label_chat_prefs">Чат</string>
+    <string name="label_misc_prefs">Разное</string>
+    <string name="label_account_prefs">"Настройки учетной записи"</string>
+    <string name="label_you_must_enter_uid">"Вы должны ввести свой UID"</string>
+    <string name="label_list_type">"Тип списка контактов"</string>
+    <string name="label_ask_xstatus">"Запросить х-статус"</string>
+    <string name="label_set_xstatus">"Установить х-статус"</string>
+    <string name="label_xstatus">"Х-статус"</string>
+    <string name="label_tabs_list">"Список вкладок"</string>
+    <string name="xstatus_text_title">"Заголовок"</string>
+    <string name="xstatus_text_value">"Текст"</string>
+    <string name="label_load_icons">"Загружать иконки контактов"</string>
+    <string name="label_show_icons">"Показывать иконки контактов"</string>
+    <string name="label_file_from">"Файл от "</string>
+    <string name="label_files">" файлов"</string>
+    <string name="label_send_by_enter">"Отправлять Энтером"</string>
+    <string name="label_send_my_location">"Отправить мое расположение"</string>
+    <string name="label_about_text">"\nАвтор: Сергей Плыгун. \nMailto:snuk182@rambler.ru. \nСмайлики - автор шаблона Roland81 (http://www.openclipart.org/user-detail/roland81). Отдельная благодарность сайту OpenClipArt.org и его участникам: Warszawianka (Tango project), nicubunu и другим.\nФункциональность XMPP/Jabber с помощью библиотеки Smack (igniterealtime.org)"</string>
+    <string name="error_fill_uid">Пожалуйста, заполните поле UID</string>
+    <string name="label_search_buddies">"Найти/Добавить..."</string>
+    <string name="label_add_to_list">"Добавить"</string>
+    <string name="label_rename">"Переименовать"</string>
+    <string name="label_move">"Переместить"</string>
+    <string name="label_inempty_group">"Эта группа не пуста. Что следует сделать с её участниками?"</string>
+    <string name="label_are_you_sure_you_want_to_cancel">"Вы уверены, что хотите отменить "</string>
+    <string name="label_connecting">подключение</string>
+    <string name="label_completed">готово</string>
+    <string name="label_contact_menu">"Меню контакта"</string>
+    <string name="label_im_here">"Я здесь - "</string>
+    <string name="label_group_menu">"Меню группы"</string>
+    <string name="label_auth_request">"Запрос авторизации"</string>
+    <string name="label_rename_buddy">"Переименовать контакт"</string>
+    <string name="label_move_buddy">"Переместить контакт"</string>
+    <string name="label_rename_group">"Переименовать группу"</string>
+    <string name="label_add_buddy">"Добавить контакт"</string>
+    <string name="label_auth_request_from">"Запрос авторизации от "</string>
+    <string name="label_deny">"Запретить"</string>
+    <string name="label_allow">"Разрешить"</string>
+    <string name="label_ignore">"Игнор"</string>
+    <string name="label_add_group">"Добавить группу"</string>
+    <string name="label_delete_history">"Очистить историю"</string>
+    <string name="label_add_me_request">"Скорей добавь меня в свой список"</string>
+    <string name="label_copied_to_clipboard">"Скопировано в буфер обмена"</string>
+    <string name="label_send_file">"Отправить файл"</string>
+    <string name="label_wait">Ждите...</string>
+    <string name="label_grid">Сетка</string>
+    <string name="label_list">Список</string>
+    <string name="label_doublelist">Двойной список</string>
+    <string name="label_sound_type_all_on">"Звук + вибро"</string>
+    <string name="label_sound_type_vibra">"Только вибро"</string>
+    <string name="label_sound_type_off">"Выключить всё"</string>
+    <string name="label_sound_type_profile">"Определено профилем"</string>
+    <string name="label_sound_type_sound">"Только звук"</string>
+    <string name="label_statusbar_type_messages">"Входящие сообщения"</string>
+    <string name="label_statusbar_type_account_status">"Статус учетной записи"</string>
+    <string name="label_statusbar_type_none">"Нет"</string>
+    <string name="label_statusbar_type_icon">Иконка программы</string>
+    <string name="label_notinlist_save">"Сохранять группу 'Не в списке'"</string>
+    <string name="label_sound_type">"Звуковые сообщения"</string>
+    <string name="label_statusbar_type">"Сообщения статусбара"</string>
+    <string name="label_text_size_big">Большой</string>
+    <string name="label_text_size_medium">Средний</string>
+    <string name="label_text_size_small">Маленький</string>
+    <string name="label_text_size_smallest">Очень маленький</string>
+    <string name="label_text_size">Размер шрифта в чате</string>
+    <string name="label_cl_item_size">Размер контакта в списке</string>
+    <string name="menu_value_copy">Копировать</string>
+    <string name="menu_value_add_to_copied">Добавить к скопированному</string>
+    <string name="menu_value_copy_all">Копировать все</string>
+    <string name="label_chat_date">"Дата в чате"</string>
+    <string name="menu_value_add_to_list">"Добавить в список"</string>
+    <string name="menu_value_view_info">"Просмотреть личное инфо"</string>
+    <string name="menu_value_delete_contact">"Удалить контакт"</string>
+    <string name="menu_value_ask_auth">"Попросить авторизацию"</string>
+    <string name="menu_value_rename">"Переименовать"</string>
+    <string name="menu_value_move">"Переместить"</string>
+    <string name="menu_value_to_permits">"В список видящих"</string>
+    <string name="menu_value_from_permits">Удалить из видящих</string>
+    <string name="menu_value_to_denys">В список невидящих</string>
+    <string name="menu_value_from_denys">Удалить из невидящих</string>
+    <string name="menu_value_add_group">"Создать группу..."</string>
+    <string name="menu_value_delete_group">"Удалить группу"</string>
+    <string name="label_too_many_accounts">Слишком много учетных записей!</string>
+    <string name="menu_value_join_chat">Войти в чат</string>
+    <string name="menu_value_leave_chat">Выйти из чата</string>
+    <string name="menu_value_add_pgp_key">Привязать ключ PGP</string>
+	<string name="menu_value_remove_pgp_key">Убрать ключ PGP</string>
+    <string name="label_hide_participants">Спрятать участников</string>
+    <string name="label_show_participants">Показать участников</string>
+    <string name="label_create_groupchat">Создать новый чат</string>
+    <string name="label_connect_to_chat">Подключиться к чату</string>
+    <string name="label_refresh_chat_list">Обновить список</string>
+    <string name="label_joinedchats">Чаты</string>
+    <string name="label_chat_name">Имя чата</string>
+    <string name="label_nickname">Ваш ник в чате</string>
+    <string name="label_chat_id">ID чата (только буквы, цифры, тире и подчеркивание)</string>
+    <string name="label_pwd_protected">Нужен пароль</string>
+    <string name="label_password">Пароль</string>
+    <string name="label_get_available_chats">Получить доступные чаты</string>
+    <string name="label_chat_options">Опции чата</string>
+    <string name="label_chat_enter_manually">Ввести вручную</string>
+    <string formatted="false" name="logparam_typing">"%s пишет вам"</string>
+    <string formatted="false" name="logparam_buddy_state">"%s сменил статус на %s"</string>
+    <string formatted="false" name="logparam_ask_for_auth">"%s просит авторизацию: %s"</string>
+    <string formatted="false" name="logparam_file_request">"%s отправляет вам файл: %s"</string>
+    <string formatted="false" name="logparam_default">"%s"</string>
+    <string name="label_chat_menu">Меню чата</string>
+    <string name="label_account_menu">Меню учетной записи</string>
+
+    <string name="label_security_preferences">Настойки безопасности</string>
+    
+</resources>
