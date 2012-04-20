@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.0"
+   width="210mm"
+   height="297mm"
+   id="svg2"
+   inkscape:version="0.48.1 "
+   sodipodi:docname="smile_tired.svg">
+  <metadata
+     id="metadata44">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1018"
+     id="namedview42"
+     showgrid="false"
+     inkscape:zoom="0.069130192"
+     inkscape:cx="231.00901"
+     inkscape:cy="484.60459"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg2" />
+  <defs
+     id="defs5">
+    <linearGradient
+       id="linearGradient3416">
+      <stop
+         style="stop-color:#d20000;stop-opacity:1"
+         offset="0"
+         id="stop3418" />
+      <stop
+         style="stop-color:#6d0000;stop-opacity:1"
+         offset="1"
+         id="stop3420" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient3382">
+      <stop
+         style="stop-color:#646464;stop-opacity:1"
+         offset="0"
+         id="stop3384" />
+      <stop
+         style="stop-color:#646464;stop-opacity:0"
+         offset="1"
+         id="stop3386" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient3374">
+      <stop
+         style="stop-color:#646464;stop-opacity:1"
+         offset="0"
+         id="stop3376" />
+      <stop
+         style="stop-color:#bcbcbc;stop-opacity:1"
+         offset="1"
+         id="stop3378" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient3196">
+      <stop
+         style="stop-color:#fdeeee;stop-opacity:1"
+         offset="0"
+         id="stop3198" />
+      <stop
+         style="stop-color:#fac1bb;stop-opacity:1"
+         offset="1"
+         id="stop3200" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient3154">
+      <stop
+         style="stop-color:#ffe500;stop-opacity:1"
+         offset="0"
+         id="stop3156" />
+      <stop
+         style="stop-color:#ff9b00;stop-opacity:1"
+         offset="1"
+         id="stop3158" />
+    </linearGradient>
+    <inkscape:perspective
+       id="perspective9"
+       inkscape:persp3d-origin="372.04724 : 350.78739 : 1"
+       inkscape:vp_z="744.09448 : 526.18109 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 526.18109 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <radialGradient
+       cx="404.31665"
+       cy="506.70181"
+       r="222.75591"
+       fx="404.31665"
+       fy="506.70181"
+       id="radialGradient3160"
+       xlink:href="#linearGradient3154"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(-1,0,0,0.9897742,686.3644,5.2990749)"
+       spreadMethod="pad" />
+    <radialGradient
+       cx="392.90057"
+       cy="313.69574"
+       r="108.81631"
+       fx="392.90057"
+       fy="313.69574"
+       id="radialGradient3202"
+       xlink:href="#linearGradient3196"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.9995717,2.9265887e-2,-3.0427056e-2,1.0392314,9.7131327,-25.690257)" />
+    <radialGradient
+       cx="243.84201"
+       cy="313.64542"
+       r="108.81631"
+       fx="243.84201"
+       fy="313.64542"
+       id="radialGradient3206"
+       xlink:href="#linearGradient3196"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.8778636,0.1306894,-0.1530917,1.0283435,77.863917,-47.006679)" />
+    <linearGradient
+       x1="120.32496"
+       y1="426.08728"
+       x2="147.06889"
+       y2="426.08728"
+       id="linearGradient3380"
+       xlink:href="#linearGradient3374"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       x1="126.23879"
+       y1="194.51459"
+       x2="151.04599"
+       y2="194.51459"
+       id="linearGradient3388"
+       xlink:href="#linearGradient3382"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       x1="566.25616"
+       y1="569.63403"
+       x2="719.03314"
+       y2="613.67566"
+       id="linearGradient3422"
+       xlink:href="#linearGradient3416"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       x1="560.56989"
+       y1="577.29688"
+       x2="677.3078"
+       y2="577.29688"
+       id="linearGradient3430"
+       xlink:href="#linearGradient3154"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3154"
+       id="linearGradient3026"
+       gradientUnits="userSpaceOnUse"
+       x1="560.56989"
+       y1="577.29688"
+       x2="677.3078"
+       y2="577.29688" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3154-4"
+       id="linearGradient3026-4"
+       gradientUnits="userSpaceOnUse"
+       x1="560.56989"
+       y1="577.29688"
+       x2="677.3078"
+       y2="577.29688" />
+    <linearGradient
+       id="linearGradient3154-4">
+      <stop
+         style="stop-color:#ffe500;stop-opacity:1"
+         offset="0"
+         id="stop3156-3" />
+      <stop
+         style="stop-color:#ff9b00;stop-opacity:1"
+         offset="1"
+         id="stop3158-5" />
+    </linearGradient>
+  </defs>
+  <path
+     d="m 116.90433,518.20868 a 215.25591,212.97806 0 1 0 430.51181,0 215.25591,212.97806 0 1 0 -430.51181,0 z"
+     style="fill:url(#radialGradient3160);fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:15;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+     id="path2382"
+     inkscape:connector-curvature="0"
+     inkscape:export-filename="D:\studyworkspace\Asia\res\drawable\boredom_30.png"
+     inkscape:export-xdpi="5.340929"
+     inkscape:export-ydpi="5.340929" />
+  <path
+     d="m 315.53883,356.82606 c -19.43606,18.89771 22.56261,-12.01511 33.46562,1.4077 10.49705,12.92303 5.15237,32.88839 10.40826,27.89502 8.23654,-8.25481 6.8123,-9.34176 7.97188,-19.83736 1.04098,-9.42204 1.25561,-17.17777 -3.42432,-21.84385 -4.67993,-4.66609 -12.72194,-5.9024 -21.85391,-3.35961 -9.13196,2.54278 -18.33715,7.47715 -26.56753,15.7381 z"
+     style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+     id="path3164"
+     inkscape:connector-curvature="0"
+     sodipodi:nodetypes="cscsssc"
+     inkscape:export-filename="D:\studyworkspace\Asia\res\drawable\boredom_30.png"
+     inkscape:export-xdpi="5.340929"
+     inkscape:export-ydpi="5.340929" />
+  <use
+     transform="matrix(0.87548612,-0.24131749,0.23805995,0.86366796,-112.56297,117.27403)"
+     id="use3168"
+     x="0"
+     y="0"
+     width="744.09448"
+     height="1052.3622"
+     xlink:href="#path3164"
+     inkscape:export-filename="D:\studyworkspace\Asia\res\drawable\boredom_30.png"
+     inkscape:export-xdpi="5.340929"
+     inkscape:export-ydpi="5.340929" />
+  <path
+     d="m 392.22768,371.21014 c 0,0 7.02388,-25.25059 -5.48647,-43.38476 -12.93507,-18.74983 -33.75873,-12.59143 -37.29757,-13.86933 11.02663,-8.04834 31.60365,-8.4972 44.64864,8.50376 20.49186,26.70616 -1.8646,48.75033 -1.8646,48.75033 z"
+     style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     id="path3236"
+     inkscape:connector-curvature="0"
+     inkscape:export-filename="D:\studyworkspace\Asia\res\drawable\boredom_30.png"
+     inkscape:export-xdpi="5.340929"
+     inkscape:export-ydpi="5.340929" />
+  <use
+     transform="matrix(0.80157547,-0.32756588,0.33416771,0.8177306,-109.74283,152.7875)"
+     id="use3368"
+     x="0"
+     y="0"
+     width="744.09448"
+     height="1052.3622"
+     xlink:href="#path3236"
+     inkscape:export-filename="D:\studyworkspace\Asia\res\drawable\boredom_30.png"
+     inkscape:export-xdpi="5.340929"
+     inkscape:export-ydpi="5.340929" />
+  <g
+     id="g3021"
+     transform="matrix(1.0397844,1.0764135,1.0764135,-1.0397844,-1199.5012,273.78173)"
+     inkscape:export-filename="D:\studyworkspace\Asia\res\drawable\boredom_30.png"
+     inkscape:export-xdpi="5.340929"
+     inkscape:export-ydpi="5.340929">
+    <path
+       id="path3400"
+       style="fill:url(#linearGradient3026);fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:10;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m 665.2681,545.18754 c -10.43231,-18.20492 -39.94271,-28.10106 -58.25196,-23.78465 -14.68379,3.4617 -24.41112,18.01881 -23.63604,37.80846 0.60418,15.42595 -21.38189,37.02595 -17.30582,56.26766 3.66915,17.32077 55.0163,21.62121 67.34118,16.96965 11.06628,-4.17654 29.90241,-14.77979 34.53837,-33.32362 4.63596,-18.54383 7.86498,-35.52595 -2.68573,-53.9375 z"
+       inkscape:connector-curvature="0" />
+    <path
+       id="path3412"
+       style="fill:none;stroke:#000000;stroke-width:8;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m 572.68451,588.34089 c 13.84512,-0.8391 27.27069,0 30.20754,1.25864 2.93684,1.25865 2.93684,1.25865 2.93684,1.25865"
+       inkscape:connector-curvature="0" />
+    <path
+       id="path3414"
+       style="fill:none;stroke:#000000;stroke-width:8;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m 583.59279,559.81155 c 13.84512,-0.8391 27.27069,0 30.20754,1.25864 2.93684,1.25865 2.93684,1.25865 2.93684,1.25865"
+       inkscape:connector-curvature="0" />
+  </g>
+  <g
+     id="g3021-1"
+     transform="matrix(-1.3385129,0.66947797,-0.66947797,-1.3385129,1845.5931,769.23303)"
+     inkscape:export-filename="D:\studyworkspace\Asia\res\drawable\boredom_30.png"
+     inkscape:export-xdpi="5.340929"
+     inkscape:export-ydpi="5.340929">
+    <path
+       id="path3400-3"
+       style="fill:url(#linearGradient3026-4);fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:10;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m 665.2681,545.18754 c -10.43231,-18.20492 -39.94271,-28.10106 -58.25196,-23.78465 -14.68379,3.4617 -24.41112,18.01881 -23.63604,37.80846 0.60418,15.42595 -21.38189,37.02595 -17.30582,56.26766 3.66915,17.32077 55.0163,21.62121 67.34118,16.96965 11.06628,-4.17654 29.90241,-14.77979 34.53837,-33.32362 4.63596,-18.54383 7.86498,-35.52595 -2.68573,-53.9375 z"
+       inkscape:connector-curvature="0" />
+    <path
+       id="path3412-2"
+       style="fill:none;stroke:#000000;stroke-width:8;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m 572.68451,588.34089 c 13.84512,-0.8391 27.27069,0 30.20754,1.25864 2.93684,1.25865 2.93684,1.25865 2.93684,1.25865"
+       inkscape:connector-curvature="0" />
+    <path
+       id="path3414-8"
+       style="fill:none;stroke:#000000;stroke-width:8;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m 583.59279,559.81155 c 13.84512,-0.8391 27.27069,0 30.20754,1.25864 2.93684,1.25865 2.93684,1.25865 2.93684,1.25865"
+       inkscape:connector-curvature="0" />
+  </g>
+  <path
+     inkscape:connector-curvature="0"
+     d="m 149.41618,562.99386 c 0.005,16.67949 3.19431,33.35148 9.32889,48.75995 6.13458,15.40847 15.20918,29.54131 26.54016,41.3338 11.33099,11.79249 24.90943,21.23536 39.7124,27.61721 14.80296,6.38185 30.8188,9.69768 46.84094,9.69768 16.02213,0 30.22979,3.01281 47.74502,1.15141 16.02978,-1.70353 38.32641,-7.68789 49.6574,-19.48038 11.33098,-11.79249 23.60533,-24.29761 31.96471,-38.62153 20.60004,-35.29848 12.94068,-58.29911 12.94526,-74.0745 0.005,-16.68556 -3.97211,-32.52333 -15.63744,-53.30278 -17.63508,-31.41337 -30.5732,-34.98292 -38.2887,-43.1667 -11.22279,-11.90396 -26.72168,-11.30462 -41.52915,-17.691 -14.80748,-6.38638 -30.82914,-9.70465 -46.8571,-9.70465 -16.02797,0 -32.04963,3.31827 -46.85711,9.70465 -14.80747,6.38638 -28.3891,15.83584 -39.72097,27.636 -11.33186,11.80015 -20.40504,25.9417 -26.53551,41.35852 -6.13046,15.41682 -9.31338,32.09676 -9.3088,48.78232 z"
+     style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+     id="path3164-1"
+     sodipodi:nodetypes="sssssssssssssssss"
+     inkscape:export-filename="D:\studyworkspace\Asia\res\drawable\boredom_30.png"
+     inkscape:export-xdpi="5.340929"
+     inkscape:export-ydpi="5.340929" />
+  <path
+     style="fill:#d94243;fill-opacity:1;stroke:none"
+     d="m 275.67314,645.50786 c 0,14.48352 9.10368,35.26466 29.66141,37.08738 34.94785,3.09859 9.87131,-4.28193 37.83636,-4.28193 37.61267,-27.11242 43.99074,-46.20368 61.90997,-77.56431 -18.32634,-9.49149 -0.17229,-7.69062 -28.13734,-7.69062 -27.96505,0 -53.28265,5.8706 -71.60899,15.36209 -18.32633,9.49149 -29.66141,22.60386 -29.66141,37.08739 z"
+     id="path3085"
+     inkscape:connector-curvature="0"
+     sodipodi:nodetypes="ssccsss"
+     inkscape:export-filename="D:\studyworkspace\Asia\res\drawable\boredom_30.png"
+     inkscape:export-xdpi="5.340929"
+     inkscape:export-ydpi="5.340929" />
+</svg>

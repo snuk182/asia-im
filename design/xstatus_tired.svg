@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   id="svg2419"
+   sodipodi:version="0.32"
+   inkscape:version="0.48.1 "
+   width="210mm"
+   height="297mm"
+   sodipodi:docname="xstatus_tired.svg"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape"
+   version="1.1">
+  <metadata
+     id="metadata2424">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs2422">
+    <linearGradient
+       id="linearGradient3771">
+      <stop
+         style="stop-color:#ffde00;stop-opacity:1;"
+         offset="0"
+         id="stop3773" />
+      <stop
+         style="stop-color:#ffc27d;stop-opacity:1;"
+         offset="1"
+         id="stop3775" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient3755">
+      <stop
+         style="stop-color:#ffde00;stop-opacity:1;"
+         offset="0"
+         id="stop3757" />
+      <stop
+         style="stop-color:#ffde00;stop-opacity:0;"
+         offset="1"
+         id="stop3759" />
+    </linearGradient>
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 526.18109 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="744.09448 : 526.18109 : 1"
+       inkscape:persp3d-origin="372.04724 : 350.78739 : 1"
+       id="perspective2426" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3755"
+       id="linearGradient3761"
+       x1="395.41049"
+       y1="529.63849"
+       x2="322.15042"
+       y2="529.63849"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3771"
+       id="linearGradient3777"
+       x1="336.84192"
+       y1="528.68875"
+       x2="397.73539"
+       y2="528.68875"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <sodipodi:namedview
+     inkscape:window-height="1058"
+     inkscape:window-width="1920"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     guidetolerance="10.0"
+     gridtolerance="10.0"
+     objecttolerance="10.0"
+     borderopacity="1.0"
+     bordercolor="#666666"
+     pagecolor="#ffffff"
+     id="base"
+     showgrid="false"
+     inkscape:zoom="4.9668578"
+     inkscape:cx="315.65399"
+     inkscape:cy="526.18109"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:current-layer="svg2419"
+     inkscape:window-maximized="0" />
+  <path
+     style="fill:url(#linearGradient3761);fill-opacity:1;fill-rule:nonzero;stroke:#ffbb00;stroke-width:4.07423687000000000;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     d="M 357.34375 476.9375 L 350.65625 479.625 L 344.9375 489.40625 L 344.90625 489.40625 C 332.58104 494.49252 323.90625 506.41646 323.90625 520.28125 C 323.90625 538.76764 339.2921 553.74998 358.25 553.75 C 377.20791 553.75 392.59376 538.76765 392.59375 520.28125 C 392.59375 505.72661 383.05893 493.3331 369.75 488.71875 L 369.875 488.59375 L 364.3125 479.1875 L 357.34375 476.9375 z "
+     id="path2428"
+     inkscape:export-filename="D:\studyworkspace\Asia\res\drawable-hdpi\xstatus_tired_32.png"
+     inkscape:export-xdpi="53.410645"
+     inkscape:export-ydpi="53.410645" />
+  <path
+     sodipodi:type="arc"
+     style="fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#ffbb00;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     id="path3200"
+     sodipodi:cx="358.19037"
+     sodipodi:cy="526.39465"
+     sodipodi:rx="28.615368"
+     sodipodi:ry="20.856474"
+     d="M 386.80574,526.39465 A 28.615368,20.856474 0 1 1 329.575,526.39465 A 28.615368,20.856474 0 1 1 386.80574,526.39465 z"
+     transform="translate(0,-1.4236501)"
+     inkscape:export-filename="D:\studyworkspace\Asia\res\drawable-hdpi\xstatus_tired_32.png"
+     inkscape:export-xdpi="53.410645"
+     inkscape:export-ydpi="53.410645" />
+  <path
+     style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;fill-opacity:1"
+     d="M 347.79773,508.52783 L 347.79773,515.78844 L 349.22138,517.49682 L 351.64159,517.63919 L 354.06179,517.63919 L 355.48544,517.63919 L 356.90909,516.21554 L 356.90909,508.95492 L 356.90909,506.67709 L 351.85513,507.10418 L 347.94009,507.95837 L 347.79773,508.52783 z"
+     id="path3205"
+     sodipodi:nodetypes="cccccccccccc"
+     inkscape:export-filename="D:\studyworkspace\Asia\res\drawable-hdpi\xstatus_tired_32.png"
+     inkscape:export-xdpi="53.410645"
+     inkscape:export-ydpi="53.410645" />
+  <path
+     style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     d="M 358.40393,508.45664 L 358.40393,515.71725 L 359.82758,517.42563 L 362.24779,517.568 L 364.66799,517.568 L 366.09164,517.568 L 367.51529,516.14435 L 367.58647,508.02954 L 367.51529,507.95836 L 363.24434,507.03299 L 358.54629,506.6059 L 358.40393,508.45664 z"
+     id="path3207"
+     sodipodi:nodetypes="cccccccccccc"
+     inkscape:export-filename="D:\studyworkspace\Asia\res\drawable-hdpi\xstatus_tired_32.png"
+     inkscape:export-xdpi="53.410645"
+     inkscape:export-ydpi="53.410645" />
+  <path
+     style="fill:url(#linearGradient3777);fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.16985904999999990px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     d="M 397.15046,539.35547 L 386.07493,534.01603 L 381.93467,520.83131 L 376.75934,509.25449 L 369.85891,508.28975 L 365.71864,513.11343 L 368.47882,518.58026 L 371.58401,524.36868 L 360.19829,517.93711 L 354.67794,516.32921 L 349.15759,514.39974 L 343.29222,516.65079 L 344.67231,521.15289 L 352.60781,523.08236 L 364.68357,527.26288 L 361.92341,528.54919 L 357.43812,527.26288 L 351.22773,525.65499 L 342.60218,523.40394 L 339.842,523.40394 L 338.1169,527.58446 L 339.49698,530.47866 L 345.36235,531.76498 L 354.67794,532.72972 L 359.50825,534.3376 L 358.12816,536.26707 L 350.8827,535.30234 L 345.01733,534.98076 L 339.49698,534.98076 L 337.42685,536.58866 L 339.15196,540.12602 L 345.01733,541.09076 L 350.8827,540.76917 L 357.43812,540.76917 L 359.50825,540.4476 L 360.19829,542.05549 L 352.60781,543.02023 L 346.39742,544.62811 L 351.22773,548.16548 L 355.71301,546.23601 L 365.37362,545.59285 L 372.61908,545.27127 L 380.89961,544.62811 L 392.15736,549.08775 L 397.15046,539.35547 z"
+     id="path3209"
+     sodipodi:nodetypes="ccccccccccccccccccccccccccccccccccccccccccccc"
+     inkscape:export-filename="D:\studyworkspace\Asia\res\drawable-hdpi\xstatus_tired_32.png"
+     inkscape:export-xdpi="53.410645"
+     inkscape:export-ydpi="53.410645" />
+</svg>

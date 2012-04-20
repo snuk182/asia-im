@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   id="レイヤー_1"
+   x="0px"
+   y="0px"
+   width="320px"
+   height="320.032px"
+   viewBox="-88.364 -88.379 320 320.032"
+   enable-background="new -88.364 -88.379 320 320.032"
+   xml:space="preserve"
+   inkscape:version="0.48.1 "
+   sodipodi:docname="permitted.svg"><metadata
+   id="metadata118"><rdf:RDF><cc:Work
+       rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
+         rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata><defs
+   id="defs116" /><sodipodi:namedview
+   pagecolor="#ffffff"
+   bordercolor="#666666"
+   borderopacity="1"
+   objecttolerance="10"
+   gridtolerance="10"
+   guidetolerance="10"
+   inkscape:pageopacity="0"
+   inkscape:pageshadow="2"
+   inkscape:window-width="1920"
+   inkscape:window-height="1018"
+   id="namedview114"
+   showgrid="false"
+   inkscape:zoom="0.16074023"
+   inkscape:cx="-11.563553"
+   inkscape:cy="160.01601"
+   inkscape:window-x="-8"
+   inkscape:window-y="-8"
+   inkscape:window-maximized="1"
+   inkscape:current-layer="レイヤー_1" />
+<radialGradient
+   id="SVGID_1_"
+   cx="71.6362"
+   cy="71.6365"
+   r="49.6064"
+   gradientTransform="matrix(3.0238 0 0 3.0238 -144.9772 -144.978)"
+   gradientUnits="userSpaceOnUse">
+	<stop
+   offset="0"
+   style="stop-color:#333333"
+   id="stop4" />
+	<stop
+   offset="0.3702"
+   style="stop-color:#353535"
+   id="stop6" />
+	<stop
+   offset="0.5036"
+   style="stop-color:#3C3C3C"
+   id="stop8" />
+	<stop
+   offset="0.5987"
+   style="stop-color:#474747"
+   id="stop10" />
+	<stop
+   offset="0.6756"
+   style="stop-color:#585858"
+   id="stop12" />
+	<stop
+   offset="0.7415"
+   style="stop-color:#6E6E6E"
+   id="stop14" />
+	<stop
+   offset="0.7998"
+   style="stop-color:#8A8A8A"
+   id="stop16" />
+	<stop
+   offset="0.8525"
+   style="stop-color:#AAAAAA"
+   id="stop18" />
+	<stop
+   offset="0.901"
+   style="stop-color:#D0D0D0"
+   id="stop20" />
+	<stop
+   offset="0.9442"
+   style="stop-color:#F9F9F9"
+   id="stop22" />
+	<stop
+   offset="0.95"
+   style="stop-color:#FFFFFF"
+   id="stop24" />
+</radialGradient>
+<circle
+   fill="url(#SVGID_1_)"
+   cx="71.635"
+   cy="71.637"
+   r="150"
+   id="circle26"
+   inkscape:export-filename="D:\studyworkspace\Asia\res\drawable-hdpi\permitted.png"
+   inkscape:export-xdpi="7.2000003"
+   inkscape:export-ydpi="7.2000003" />
+<radialGradient
+   id="SVGID_2_"
+   cx="137.1011"
+   cy="-46.3147"
+   r="78.0037"
+   gradientTransform="matrix(1.6483 0 0 -1.6483 -154.3436 -4.7039)"
+   gradientUnits="userSpaceOnUse">
+	<stop
+   offset="0"
+   style="stop-color:#EDE948"
+   id="stop29" />
+	<stop
+   offset="0.1066"
+   style="stop-color:#E7E647"
+   id="stop31" />
+	<stop
+   offset="0.2805"
+   style="stop-color:#D5DD45"
+   id="stop33" />
+	<stop
+   offset="0.5001"
+   style="stop-color:#B6CE43"
+   id="stop35" />
+	<stop
+   offset="0.7542"
+   style="stop-color:#87B843"
+   id="stop37" />
+	<stop
+   offset="0.9"
+   style="stop-color:#67AB44"
+   id="stop39" />
+	<stop
+   offset="1"
+   style="stop-color:#33633B"
+   id="stop41" />
+</radialGradient>
+<circle
+   fill="url(#SVGID_2_)"
+   cx="71.636"
+   cy="71.635"
+   r="128.572"
+   id="circle43"
+   inkscape:export-filename="D:\studyworkspace\Asia\res\drawable-hdpi\permitted.png"
+   inkscape:export-xdpi="7.2000003"
+   inkscape:export-ydpi="7.2000003" />
+<radialGradient
+   id="SVGID_3_"
+   cx="-9.3491"
+   cy="183.3083"
+   r="44.6585"
+   gradientTransform="matrix(2.5714 0 0 -2.5714 95.6744 543.0007)"
+   gradientUnits="userSpaceOnUse">
+	<stop
+   offset="0"
+   style="stop-color:#EDE948"
+   id="stop46" />
+	<stop
+   offset="0.4082"
+   style="stop-color:#ECE848"
+   id="stop48" />
+	<stop
+   offset="0.5552"
+   style="stop-color:#E7E647"
+   id="stop50" />
+	<stop
+   offset="0.66"
+   style="stop-color:#DEE246"
+   id="stop52" />
+	<stop
+   offset="0.7447"
+   style="stop-color:#D2DB45"
+   id="stop54" />
+	<stop
+   offset="0.8173"
+   style="stop-color:#C1D344"
+   id="stop56" />
+	<stop
+   offset="0.8816"
+   style="stop-color:#ABC843"
+   id="stop58" />
+	<stop
+   offset="0.9398"
+   style="stop-color:#8FBB43"
+   id="stop60" />
+	<stop
+   offset="0.9915"
+   style="stop-color:#6EAE44"
+   id="stop62" />
+	<stop
+   offset="1"
+   style="stop-color:#67AB44"
+   id="stop64" />
+</radialGradient>
+<polygon
+   fill="url(#SVGID_3_)"
+   points="71.636,64.469 91.728,-42.321 74.087,64.9 129.493,-28.577 76.243,66.143 160.277,-2.748   77.84,68.051 180.372,32.055 78.694,70.39 187.347,71.636 78.694,72.877 180.372,111.211 77.84,75.215 160.277,146.014   76.243,77.123 129.493,171.844 74.087,78.366 91.728,185.59 71.636,78.797 51.543,185.59 69.187,78.366 13.778,171.844   67.03,77.123 -17.008,146.014 65.428,75.215 -37.101,111.211 64.577,72.877 -44.079,71.636 64.577,70.39 -37.101,32.055   65.428,68.051 -17.008,-2.748 67.03,66.143 13.778,-28.577 69.187,64.9 51.543,-42.321 "
+   id="polygon66"
+   inkscape:export-filename="D:\studyworkspace\Asia\res\drawable-hdpi\permitted.png"
+   inkscape:export-xdpi="7.2000003"
+   inkscape:export-ydpi="7.2000003" />
+<radialGradient
+   id="SVGID_4_"
+   cx="-46.2144"
+   cy="169.0466"
+   r="49.6194"
+   gradientTransform="matrix(2.5618 -0.2241 -0.2241 -2.5618 227.9021 494.3345)"
+   gradientUnits="userSpaceOnUse">
+	<stop
+   offset="0"
+   style="stop-color:#EDE948"
+   id="stop69" />
+	<stop
+   offset="0.4082"
+   style="stop-color:#ECE848"
+   id="stop71" />
+	<stop
+   offset="0.5552"
+   style="stop-color:#E7E647"
+   id="stop73" />
+	<stop
+   offset="0.66"
+   style="stop-color:#DEE246"
+   id="stop75" />
+	<stop
+   offset="0.7447"
+   style="stop-color:#D2DB45"
+   id="stop77" />
+	<stop
+   offset="0.8173"
+   style="stop-color:#C1D344"
+   id="stop79" />
+	<stop
+   offset="0.8816"
+   style="stop-color:#ABC843"
+   id="stop81" />
+	<stop
+   offset="0.9398"
+   style="stop-color:#8FBB43"
+   id="stop83" />
+	<stop
+   offset="0.9915"
+   style="stop-color:#6EAE44"
+   id="stop85" />
+	<stop
+   offset="1"
+   style="stop-color:#67AB44"
+   id="stop87" />
+</radialGradient>
+<polygon
+   fill="url(#SVGID_4_)"
+   points="70.944,63.704 82.839,-56.448 73.698,63.941 125.97,-44.89 76.205,65.113 162.551,-19.282   78.156,67.065 188.159,17.296 79.326,69.575 199.716,60.429 79.568,72.327 195.825,104.913 78.85,75 176.95,145.38 77.27,77.264   145.379,176.952 75.002,78.85 104.913,195.824 72.332,79.567 60.43,199.717 69.577,79.325 17.301,188.159 67.066,78.153   -19.279,162.548 65.113,76.201 -44.892,125.969 63.942,73.694 -56.447,82.84 63.705,70.942 -52.555,38.356 64.421,68.27   -33.683,-2.114 66.005,66.005 -2.109,-33.683 68.27,64.419 38.358,-52.555 "
+   id="polygon89"
+   inkscape:export-filename="D:\studyworkspace\Asia\res\drawable-hdpi\permitted.png"
+   inkscape:export-xdpi="7.2000003"
+   inkscape:export-ydpi="7.2000003" />
+<polygon
+   fill="#FFFFFF"
+   points="70.601,65.754 71.639,-24.795 72.672,65.754 104.615,-18.981 74.625,66.466 133.619,-2.235   76.208,67.794 155.145,23.421 77.247,69.59 166.602,54.893 77.607,71.633 166.602,88.376 77.247,73.677 155.145,119.848   76.213,75.471 133.619,145.504 74.619,76.806 104.615,162.25 72.672,77.515 71.639,168.064 70.598,77.515 38.655,162.25   68.648,76.806 9.654,145.504 67.063,75.471 -11.875,119.848 66.023,73.677 -23.33,88.379 65.667,71.636 -23.33,54.89 66.027,69.59   -11.87,23.418 67.063,67.797 9.654,-2.235 68.648,66.466 38.655,-18.981 "
+   id="polygon91"
+   inkscape:export-filename="D:\studyworkspace\Asia\res\drawable-hdpi\permitted.png"
+   inkscape:export-xdpi="7.2000003"
+   inkscape:export-ydpi="7.2000003" />
+<radialGradient
+   id="SVGID_5_"
+   cx="-51.8091"
+   cy="246.072"
+   r="14.1736"
+   gradientTransform="matrix(3.0238 0 0 -3.0238 228.2943 815.71)"
+   gradientUnits="userSpaceOnUse">
+	<stop
+   offset="0"
+   style="stop-color:#18321F"
+   id="stop94" />
+	<stop
+   offset="0.2979"
+   style="stop-color:#183320"
+   id="stop96" />
+	<stop
+   offset="0.477"
+   style="stop-color:#1A3722"
+   id="stop98" />
+	<stop
+   offset="0.6247"
+   style="stop-color:#1C3D27"
+   id="stop100" />
+	<stop
+   offset="0.7553"
+   style="stop-color:#1D462D"
+   id="stop102" />
+	<stop
+   offset="0.8747"
+   style="stop-color:#1E5234"
+   id="stop104" />
+	<stop
+   offset="0.9843"
+   style="stop-color:#1E603C"
+   id="stop106" />
+	<stop
+   offset="1"
+   style="stop-color:#1E633D"
+   id="stop108" />
+</radialGradient>
+<circle
+   fill="url(#SVGID_5_)"
+   cx="71.636"
+   cy="71.635"
+   r="42.857"
+   id="circle110"
+   inkscape:export-filename="D:\studyworkspace\Asia\res\drawable-hdpi\permitted.png"
+   inkscape:export-xdpi="7.2000003"
+   inkscape:export-ydpi="7.2000003" />
+<ellipse
+   enable-background="new    "
+   cx="71.636"
+   cy="15.918"
+   rx="85.715"
+   ry="64.287"
+   id="ellipse112"
+   inkscape:export-filename="D:\studyworkspace\Asia\res\drawable-hdpi\permitted.png"
+   inkscape:export-xdpi="7.2000003"
+   inkscape:export-ydpi="7.2000003"
+   fill="#FFFFFF"
+   opacity="0.2" />
+</svg>

@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="208.453"
+   height="208.453"
+   id="svg2"
+   sodipodi:version="0.32"
+   inkscape:version="0.48.1 "
+   version="1.0"
+   sodipodi:docname="paulprogrammer_yellow_road_sign_-_two_way_traffic.svg"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape">
+  <defs
+     id="defs4">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient86905">
+      <stop
+         style="stop-color:#ffffff;stop-opacity:1;"
+         offset="0"
+         id="stop86907" />
+      <stop
+         style="stop-color:#ffffff;stop-opacity:0;"
+         offset="1"
+         id="stop86909" />
+    </linearGradient>
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 104.2265 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="208.453 : 104.2265 : 1"
+       inkscape:persp3d-origin="104.2265 : 69.484334 : 1"
+       id="perspective86371" />
+    <marker
+       inkscape:stockid="Arrow2Mstart"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow2Mstart"
+       style="overflow:visible">
+      <path
+         id="path5143"
+         style="font-size:12.0;fill-rule:evenodd;stroke-width:0.62500000;stroke-linejoin:round"
+         d="M 8.7185878,4.0337352 L -2.2072895,0.016013256 L 8.7185884,-4.0017078 C 6.9730900,-1.6296469 6.9831476,1.6157441 8.7185878,4.0337352 z "
+         transform="scale(0.6) translate(0,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lstart"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow1Lstart"
+       style="overflow:visible">
+      <path
+         id="path5119"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1.0pt;marker-start:none"
+         transform="scale(0.8) translate(12.5,0)" />
+    </marker>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient86905"
+       id="linearGradient86911"
+       x1="189.92783"
+       y1="197.82925"
+       x2="-77.623581"
+       y2="-90.951546"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     gridtolerance="10000"
+     guidetolerance="10"
+     objecttolerance="10"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.4570941"
+     inkscape:cx="-38.589662"
+     inkscape:cy="98.658627"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     inkscape:window-width="1920"
+     inkscape:window-height="1058"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     showgrid="false"
+     inkscape:window-maximized="0" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/by-sa/2.5/" />
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Paul Williams</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:rights>
+          <cc:Agent>
+            <dc:title>CC</dc:title>
+          </cc:Agent>
+        </dc:rights>
+        <dc:title></dc:title>
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/by-sa/2.5/">
+        <cc:permits
+           rdf:resource="http://web.resource.org/cc/Reproduction" />
+        <cc:permits
+           rdf:resource="http://web.resource.org/cc/Distribution" />
+        <cc:requires
+           rdf:resource="http://web.resource.org/cc/Notice" />
+        <cc:requires
+           rdf:resource="http://web.resource.org/cc/Attribution" />
+        <cc:permits
+           rdf:resource="http://web.resource.org/cc/DerivativeWorks" />
+        <cc:requires
+           rdf:resource="http://web.resource.org/cc/ShareAlike" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-18.293278,-18.611715)">
+    <g
+       id="g5102"
+       transform="matrix(0.7071068,-0.7071068,0.7071068,0.7071068,-25.405412,113.48122)"
+       inkscape:export-filename="D:\studyworkspace\Asia\res\drawable-hdpi\xstatus_way_32.png"
+       inkscape:export-xdpi="20.724527"
+       inkscape:export-ydpi="20.724527">
+      <rect
+         ry="5"
+         rx="5"
+         y="36.215302"
+         x="22.982504"
+         height="150"
+         width="150"
+         id="rect4129"
+         style="opacity:1;fill:#fff500;fill-opacity:1;stroke:#000000;stroke-width:0.454;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <rect
+         ry="3.0353124"
+         rx="2.9948392"
+         y="38.702217"
+         x="25.469419"
+         height="145.02617"
+         width="145.02617"
+         id="rect5100"
+         style="opacity:1;fill:#fff500;fill-opacity:1;stroke:#000000;stroke-width:1.97382534;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    </g>
+    <g
+       id="g3173"
+       transform="translate(3.5143228,4.2034912)"
+       inkscape:export-filename="D:\studyworkspace\Asia\res\drawable-hdpi\xstatus_way_32.png"
+       inkscape:export-xdpi="20.724527"
+       inkscape:export-ydpi="20.724527">
+      <g
+         transform="translate(105.96683,22.9604)"
+         id="g3163">
+        <rect
+           style="opacity:1;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.79999995;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           id="rect5316"
+           width="15.46961"
+           height="66.906067"
+           x="-19.942596"
+           y="79.329941" />
+        <path
+           style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:round;stroke-opacity:1"
+           d="M -12.322128,45.612648 L -37.529656,85.831398 C -38.507256,87.885805 -37.362096,90.013565 -35.310906,89.737648 C -33.270276,89.463152 -21.169853,86.394036 -12.467156,86.393898 L -12.322128,45.612648 z M -12.330934,45.612648 L -12.185906,86.393898 C -3.4832088,86.394036 8.6172182,89.463153 10.657844,89.737648 C 12.709033,90.013565 13.854196,87.885806 12.876594,85.831398 L -12.330934,45.612648 z "
+           id="path2173"
+           sodipodi:nodetypes="ccsccccscc" />
+      </g>
+      <g
+         transform="matrix(1,0,0,-1,156.69714,214.30906)"
+         id="g3167">
+        <rect
+           style="opacity:1;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.79999995;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           id="rect3169"
+           width="15.46961"
+           height="66.906067"
+           x="-19.942596"
+           y="79.329941" />
+        <path
+           style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:round;stroke-opacity:1"
+           d="M -12.322128,45.612648 L -37.529656,85.831398 C -38.507256,87.885805 -37.362096,90.013565 -35.310906,89.737648 C -33.270276,89.463152 -21.169853,86.394036 -12.467156,86.393898 L -12.322128,45.612648 z M -12.330934,45.612648 L -12.185906,86.393898 C -3.4832088,86.394036 8.6172182,89.463153 10.657844,89.737648 C 12.709033,90.013565 13.854196,87.885806 12.876594,85.831398 L -12.330934,45.612648 z "
+           id="path3171"
+           sodipodi:nodetypes="ccsccccscc" />
+      </g>
+    </g>
+    <path
+       style="fill:url(#linearGradient86911);fill-opacity:1;stroke:none;stroke-width:0.39920515000000001;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 122.76513,31.146465 C 121.64129,31.146465 120.50127,31.597823 119.64013,32.458965 L 32.608878,119.49022 C 30.886588,121.2125 30.886598,123.98668 32.608878,125.70897 L 66.827628,159.95897 C 80.534628,123.24586 117.06329,96.958965 159.95263,96.958965 C 173.23696,96.958965 185.90727,99.480963 197.48388,104.05272 L 125.85888,32.458965 C 124.99774,31.597822 123.88897,31.146465 122.76513,31.146465 z"
+       id="rect86375"
+       inkscape:export-filename="D:\studyworkspace\Asia\res\drawable-hdpi\xstatus_way_32.png"
+       inkscape:export-xdpi="20.724527"
+       inkscape:export-ydpi="20.724527" />
+  </g>
+</svg>
