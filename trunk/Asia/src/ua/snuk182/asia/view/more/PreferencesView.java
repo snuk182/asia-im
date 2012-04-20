@@ -8,6 +8,7 @@ import ua.snuk182.asia.services.ServiceUtils;
 import ua.snuk182.asia.view.ITabContent;
 import ua.snuk182.asia.view.cl.ContactList;
 import ua.snuk182.asia.view.more.widgets.EditablePasswordPreference;
+import ua.snuk182.asia.view.more.widgets.FilePickerPreference;
 import ua.snuk182.asia.view.more.widgets.SeekBarPreference;
 import android.content.res.ColorStateList;
 import android.media.MediaPlayer;
@@ -21,6 +22,7 @@ import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceScreen;
+import android.text.InputType;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup.OnHierarchyChangeListener;
@@ -64,7 +66,7 @@ public class PreferencesView extends PreferenceActivity implements ITabContent {
 
 					@Override
 					public boolean onPreferenceChange(Preference pref, Object arg1) {
-						options.putString(pref.getKey(), arg1.toString());
+						options.putString(pref.getKey(), arg1!=null ? arg1.toString() : null);
 						try {
 							entryPoint.runtimeService.savePreference(pref.getKey(), arg1.toString(), account!=null ? account.serviceId : -1);
 							
@@ -140,19 +142,16 @@ public class PreferencesView extends PreferenceActivity implements ITabContent {
 	}
 	
 	private void fillSummary(Preference pref, String value){		
-		if (pref instanceof EditTextPreference && !(pref instanceof EditablePasswordPreference)){
-			pref.setSummary(value);
-		}
-		
 		if (pref instanceof EditablePasswordPreference){
 			pref.setSummary((value!=null && value.length()>0) ? R.string.label_yes : R.string.label_no);
-		}
-		
-		if (pref instanceof ListPreference){
+		} else if (pref instanceof EditTextPreference 
+				&& !(pref instanceof EditablePasswordPreference) 
+				&& (((EditTextPreference)pref).getEditText().getInputType() & InputType.TYPE_TEXT_VARIATION_PASSWORD) == 0){
+			pref.setSummary(value);
+		} else if (pref instanceof ListPreference){
 			((ListPreference)pref).setValue( value);
 			pref.setSummary(((ListPreference)pref).getEntry());
-		}
-		if (pref instanceof SeekBarPreference){
+		} else if (pref instanceof SeekBarPreference || pref instanceof FilePickerPreference){
 			pref.setSummary(value);
 		}
 	}

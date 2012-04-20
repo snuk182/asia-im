@@ -609,7 +609,7 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
 			try {
 				Buddy budddy = getEntryPoint().runtimeService.getBuddy(message.serviceId, message.from);
 				budddy.unread++;
-				getEntryPoint().runtimeService.setUnread(budddy, message);
+				getEntryPoint().setUnread(budddy, message);
 			} catch (NullPointerException npe) {
 				ServiceUtils.log(npe);
 			} catch (RemoteException e) {

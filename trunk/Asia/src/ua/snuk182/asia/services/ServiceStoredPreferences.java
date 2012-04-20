@@ -94,6 +94,22 @@ public final class ServiceStoredPreferences {
 			}
 		}.start();
 	}
+	
+	public synchronized void removeInMap(final Set<String> set, final String storageName) {
+
+		new Thread("Preference saver " + storageName) {
+			@Override
+			public void run() {
+				SharedPreferences.Editor preferences = context.getSharedPreferences(storageName, getAccessMode()).edit();
+
+				for (String key : set) {
+					preferences.remove(key);
+				}
+
+				preferences.commit();
+			}
+		}.start();
+	}
 
 	public static String getOption(Context context, String key) {
 		SharedPreferences soptions = context.getSharedPreferences(SAVEDPARAMS_TOTAL, getAccessMode());

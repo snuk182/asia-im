@@ -1148,4 +1148,9 @@ public class EntryPoint extends ActivityGroup {
 		toggleWaitscreen(true);
 		getRuntimeService();	
 	}
+
+	public void setUnread(Buddy buddy, TextMessage message) throws RemoteException {
+		runtimeService.setUnread(buddy, null);
+		mainScreen.buddyStateChanged(buddy);
+	}
 }

@@ -1,5 +1,6 @@
 package ua.snuk182.asia.view;
 
+import java.io.FileFilter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -29,6 +30,7 @@ import ua.snuk182.asia.services.mrim.MrimServiceUtils;
 import ua.snuk182.asia.services.plus.IconMenuAdapter;
 import ua.snuk182.asia.services.xmpp.XMPPServiceUtils;
 import ua.snuk182.asia.view.more.fileexplorer.FileExplorer;
+import ua.snuk182.asia.view.more.fileexplorer.FileExplorer.FileExplorerAction;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -861,9 +863,10 @@ public final class ViewUtils {
 		}
 	}
 
-	public static void showSendFileDialog(EntryPoint entryPoint, Buddy buddy) {
+	public static void showPickFileDialog(EntryPoint entryPoint, Buddy buddy, FileExplorerAction action, FileFilter filter) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(entryPoint);
-		FileExplorer explorer = new FileExplorer(entryPoint, buddy);
+		
+		FileExplorer explorer = new FileExplorer(entryPoint, action, filter);
 		try {
 			builder.setTitle(explorer.currentDirectory.getCanonicalPath());
 		} catch (IOException e) {
