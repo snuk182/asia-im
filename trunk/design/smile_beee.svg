@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.0"
+   width="210mm"
+   height="297mm"
+   id="svg2"
+   inkscape:version="0.48.1 "
+   sodipodi:docname="smile_beee.svg">
+  <metadata
+     id="metadata32">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1018"
+     id="namedview30"
+     showgrid="false"
+     inkscape:zoom="0.13826039"
+     inkscape:cx="372.04724"
+     inkscape:cy="445.00792"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg2" />
+  <defs
+     id="defs5">
+    <linearGradient
+       id="linearGradient3950">
+      <stop
+         style="stop-color:#79513a;stop-opacity:1"
+         offset="0"
+         id="stop3952" />
+      <stop
+         style="stop-color:#271a12;stop-opacity:1"
+         offset="1"
+         id="stop3954" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient3196">
+      <stop
+         style="stop-color:#fdeeee;stop-opacity:1"
+         offset="0"
+         id="stop3198" />
+      <stop
+         style="stop-color:#fac1bb;stop-opacity:1"
+         offset="1"
+         id="stop3200" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient3154">
+      <stop
+         style="stop-color:#ffe500;stop-opacity:1"
+         offset="0"
+         id="stop3156" />
+      <stop
+         style="stop-color:#ff9b00;stop-opacity:1"
+         offset="1"
+         id="stop3158" />
+    </linearGradient>
+    <inkscape:perspective
+       id="perspective9"
+       inkscape:persp3d-origin="372.04724 : 350.78739 : 1"
+       inkscape:vp_z="744.09448 : 526.18109 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 526.18109 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <radialGradient
+       cx="404.31665"
+       cy="506.70181"
+       r="222.75591"
+       fx="404.31665"
+       fy="506.70181"
+       id="radialGradient3160"
+       xlink:href="#linearGradient3154"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(-1,0,0,0.9897742,840.84673,5.299075)"
+       spreadMethod="pad" />
+    <linearGradient
+       x1="422.7608"
+       y1="316.15829"
+       x2="422.7608"
+       y2="406.6579"
+       id="linearGradient3956"
+       xlink:href="#linearGradient3950"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <path
+     d="m 205.16746,549.11097 a 215.25591,212.97806 0 1 0 430.51181,0 215.25591,212.97806 0 1 0 -430.51181,0 z"
+     style="fill:url(#radialGradient3160);fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:15;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+     id="path2382"
+     inkscape:export-filename="D:\studyworkspace\Asia\res\drawable\beee_30.png"
+     inkscape:export-xdpi="6.122015"
+     inkscape:export-ydpi="6.122015"
+     inkscape:connector-curvature="0" />
+  <path
+     d="m 417.83805,427.72228 c -35.53463,-1.14054 -35.20008,-31.89455 -45.94428,-25.24839 0.25871,10.14467 5.66084,20.03181 14.68111,26.8698 9.02029,6.83799 21.54762,10.5426 34.04497,10.06787 12.49593,-0.47468 24.80799,-5.12188 33.46065,-12.62977 8.65265,-7.50787 13.53935,-17.78398 13.28067,-27.92752 -20.66815,2.53802 -13.9067,28.64088 -49.52312,28.86801 z"
+     style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+     id="path3164"
+     inkscape:export-filename="D:\studyworkspace\Asia\res\drawable\beee_30.png"
+     inkscape:export-xdpi="6.122015"
+     inkscape:export-ydpi="6.122015"
+     inkscape:connector-curvature="0"
+     sodipodi:nodetypes="ccssscc" />
+  <use
+     transform="translate(-112.03546,-7.2269553)"
+     id="use3168"
+     x="0"
+     y="0"
+     width="744.09448"
+     height="1052.3622"
+     xlink:href="#path3164"
+     inkscape:export-filename="D:\studyworkspace\Asia\res\drawable\beee_30.png"
+     inkscape:export-xdpi="6.122015"
+     inkscape:export-ydpi="6.122015" />
+  <path
+     d="m 427.40835,593.81106 c -18.94401,-29.57074 -53.65144,-57.19419 -80.32192,-68.74256 -23.08296,-9.99499 -49.13629,-12.88878 -90.47209,-0.23124 -11.79813,8.50339 1.74995,9.95044 1.62181,5.90354 43.4617,-11.98191 83.41912,4.85039 105.21312,16.48734 25.08894,13.3963 60.4366,45.77072 57.53201,49.13979 2.16272,-0.41232 6.42707,-2.55687 6.42707,-2.55687 z"
+     style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.15930939px;stroke-linecap:butt;stroke-linejoin:round;stroke-opacity:1"
+     id="path3178"
+     inkscape:connector-curvature="0"
+     sodipodi:nodetypes="csccscc"
+     inkscape:export-filename="D:\studyworkspace\Asia\res\drawable\beee_30.png"
+     inkscape:export-xdpi="6.122015"
+     inkscape:export-ydpi="6.122015" />
+</svg>

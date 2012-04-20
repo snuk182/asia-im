@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="protocolnames">
+        <item>@string/icq_service_name</item>
+        <item>@string/xmpp_service_name</item>
+        <item>@string/mrim_service_name</item>
+    </string-array>    
+</resources>
