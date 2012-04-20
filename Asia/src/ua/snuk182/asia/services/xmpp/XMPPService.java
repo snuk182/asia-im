@@ -238,8 +238,10 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 		case AccountService.REQ_GETBUDDYINFO:
 			break;
 		case AccountService.REQ_ADDGROUP:
+			addGroup((BuddyGroup) args[0]);
 			break;
 		case AccountService.REQ_ADDBUDDY:
+			addBuddy((Buddy) args[0], (BuddyGroup) args[1]);
 			break;
 		case AccountService.REQ_REMOVEBUDDY:
 			break;
@@ -333,6 +335,47 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 			break;
 		}
 		return null;
+	}
+
+	private void addGroup(final BuddyGroup buddyGroup) {
+		new Thread(){
+			
+			@Override
+			public void run(){
+				try {
+					connection.getRoster().createGroup(buddyGroup.name);
+					serviceResponse.respond(IAccountServiceResponse.RES_GROUPADDED, serviceId, buddyGroup);
+				} catch (ProtocolException e) {
+					try {
+						serviceResponse.respond(IAccountServiceResponse.RES_NOTIFICATION, serviceId, e.getLocalizedMessage());
+					} catch (ProtocolException e1) {
+						log(e);
+					}
+				}
+			}
+		}.start();
+	}
+
+	private void addBuddy(final Buddy buddy, final BuddyGroup buddyGroup) {
+		new Thread(){
+			
+			@Override
+			public void run(){
+				try {
+					connection.getRoster().createEntry(buddy.protocolUid, buddy.name, new String[]{buddyGroup.name});
+					serviceResponse.respond(IAccountServiceResponse.RES_BUDDYADDED, serviceId, buddy);
+				} catch (XMPPException e) {
+					try {
+						serviceResponse.respond(IAccountServiceResponse.RES_NOTIFICATION, serviceId, e.getLocalizedMessage());
+					} catch (ProtocolException e1) {
+						log(e);
+					}
+				} catch (ProtocolException e) {
+					log(e);
+				}
+			}
+			
+		}.start();
 	}
 
 	private void fileRespond(final FileMessage fileMessage, final Boolean accept) {

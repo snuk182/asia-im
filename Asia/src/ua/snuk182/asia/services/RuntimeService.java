@@ -289,9 +289,17 @@ public class RuntimeService extends Service {
 			 * ServiceUtils.log((String) args[0], account, false); } break;
 			 */
 			case IAccountServiceResponse.RES_GETFROMSTORAGE:
-				return storage.getMap((Set<String>) args[1], account.getAccountId() + " " + (String) args[0]);
+				if (args[0] != null){
+					return storage.getMap((Set<String>) args[1], account.getAccountId() + " " + (String) args[0]);
+				} else {
+					return storage.getMap((Set<String>) args[1], account.getAccountId());
+				}				
 			case IAccountServiceResponse.RES_SAVETOSTORAGE:
-				storage.saveMap((Map<String, String>) args[1], account.getAccountId() + " " + (String) args[0]);
+				if (args[0] != null){
+					storage.saveMap((Map<String, String>) args[1], account.getAccountId() + " " + (String) args[0]);
+				} else {
+					storage.saveMap((Map<String, String>) args[1], account.getAccountId());
+				}
 				break;
 			case IAccountServiceResponse.RES_TYPING:
 				try {
@@ -1174,7 +1182,7 @@ public class RuntimeService extends Service {
 					notificator.cancel(buddy);
 				}
 				statusbarNotifyAccountChanged();
-				uiCallback.buddyStateChanged(serviceBuddy);
+				//uiCallback.buddyStateChanged(serviceBuddy);
 
 			}
 			storage.saveAccount(account);
@@ -1893,6 +1901,14 @@ public class RuntimeService extends Service {
 				} else {
 					notificator.removeAppIcon();
 				}
+			}
+		}
+
+		@Override
+		public void editBuddy(Buddy buddy) throws RemoteException {
+			Buddy bu = getBuddy(buddy.serviceId, buddy.protocolUid);
+			if (bu != null){
+				bu.merge(buddy);
 			}
 		}
 	};

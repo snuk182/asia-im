@@ -22,7 +22,7 @@ public interface IAccountServiceResponse {
 	public static final short RES_NOTIFICATION = 16;
 	public static final short RES_ACCOUNTUPDATED = 17;
 	public static final short RES_SAVETOSTORAGE = 18;
-	public static final short RES_GETFROMSTORAGE = 19;
+	public static final short RES_GETFROMSTORAGE = 19; // String storageSuffix, Set<String> keys
 	//public static final short RES_LOG = 20;
 	public static final short RES_AUTHREQUEST = 21;
 	public static final short RES_SEARCHRESULT = 22;

@@ -1,5 +1,7 @@
 package ua.snuk182.asia.view.conversations;
 
+import java.io.File;
+import java.io.FileFilter;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -28,6 +30,7 @@ import ua.snuk182.asia.view.cl.ContactList;
 import ua.snuk182.asia.view.cl.grid.ContactListGridItem;
 import ua.snuk182.asia.view.more.StatusTextView;
 import ua.snuk182.asia.view.more.TabWidgetLayout;
+import ua.snuk182.asia.view.more.fileexplorer.FileExplorer.FileExplorerAction;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -107,6 +110,31 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 	private final Handler handler = new Handler();
 	private ImageOrTextGridAdapter smileAdapter;
 	
+	private final FileExplorerAction sendFileAction = new FileExplorerAction() {
+		
+		@Override
+		public void action(File file) {
+			Bundle bu = new Bundle();
+			bu.putSerializable(File.class.getName(), file);
+			try {
+				getEntryPoint().runtimeService.sendFile(bu, buddy);
+			} catch (NullPointerException npe) {	
+				ServiceUtils.log(npe);
+			} catch (RemoteException e) {
+				getEntryPoint().onRemoteCallFailed(e);
+			}
+		}
+	};
+	
+	private static final FileFilter fileSendFilter = new FileFilter() {
+
+		@Override
+		public boolean accept(File pathname) {
+			return true;
+		}
+		
+	};
+	
 	private ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(4);
 	
 	private Runnable freeToSendTypingRunable = new Runnable(){
@@ -149,7 +177,7 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 			} else {
 				buddy.unread = 0;
 				try {
-					getEntryPoint().runtimeService.setUnread(buddy, null);
+					getEntryPoint().setUnread(buddy, null);					
 				} catch (NullPointerException npe) {	
 					ServiceUtils.log(npe);
 				} catch (RemoteException e) {
@@ -539,7 +567,7 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 			returnToBuddyList();
 			break;
 		case R.id.menuitem_send_file:
-			ViewUtils.showSendFileDialog(getEntryPoint(), buddy);
+			ViewUtils.showPickFileDialog(getEntryPoint(), buddy, sendFileAction, fileSendFilter);
 			break;
 		case R.id.menuitem_send_location:
 			new LocationLoader().getAndSendLocation();

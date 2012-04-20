@@ -153,14 +153,9 @@ public abstract class AccountService {
 		if (pingTimeout < 1){
 			return;
 		}
-		/*TextMessage msg = new TextMessage(getUserID());
-		msg.to = getUserID();
-		msg.time = new Date();
-		msg.text = "";*/
 		log("bugoga attacks..."+getCurrentState());
 		try {
 			if (getCurrentState() == AccountService.STATE_CONNECTED){
-				//request(REQ_SENDMESSAGE, msg);
 				keepaliveRequest();
 				task = executor.schedule(timeoutRunnable, pingTimeout , TimeUnit.SECONDS);
 				keepaliveTimer.running = true;	

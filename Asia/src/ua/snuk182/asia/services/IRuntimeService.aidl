@@ -70,6 +70,7 @@ interface IRuntimeService{
 	//void log(String log);
 	void sendTyping(byte serviceId, String buddyUid);
 	void editBuddyVisibility(in Buddy buddy);
+	void editBuddy(in Buddy buddy);
 	void editMyVisibility(byte serviceId, byte visibility);
 	
 	void requestAvailableChatRooms(byte serviceId);
