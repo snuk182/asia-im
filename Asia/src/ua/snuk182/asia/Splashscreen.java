@@ -14,6 +14,8 @@ import android.view.MenuItem;
 import android.widget.RelativeLayout;
 
 /**
+ * Splashscreen for tablet mode. Shown if no conversation tabs opened.
+ * 
  * @author Sergiy P
  *
  */
@@ -30,11 +32,6 @@ public class Splashscreen extends RelativeLayout implements ITabContent{
 	
 	@Override 
 	public boolean onKeyDown(int i, KeyEvent event) {
-
-		  /*if (i == KeyEvent.KEYCODE_BACK) {
-		    Toast.makeText(getContext(), getResources().getString(R.string.label_sorry_back_button), Toast.LENGTH_LONG).show();
-		    return true; 
-		  }*/
 
 		  return false;
 	}

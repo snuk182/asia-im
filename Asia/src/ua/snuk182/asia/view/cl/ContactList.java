@@ -225,7 +225,7 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 			ViewUtils.getGroupChatAction(getEntryPoint(), account);
 			break;
 		case R.id.menuitem_search:
-			getEntryPoint().addSearchTab(account);
+			getEntryPoint().getSearchTab(account);
 			break;
 	    case R.id.menuitem_exit:
 	    	getEntryPoint().exit();			
@@ -267,7 +267,7 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 	    	}.start();   	
 	    	return true;
 	    case R.id.menuitem_account_log:
-	    	getEntryPoint().addAccountActivityTab(account);
+	    	getEntryPoint().getAccountActivityTab(account);
 	    	break;
 	    case R.id.menuitem_editstatus:
 	    	ViewUtils.menuEditStatus(getEntryPoint(), account);

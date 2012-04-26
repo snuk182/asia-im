@@ -20,6 +20,12 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+/**
+ * Account view part, for using in views.
+ * 
+ * @author SergiyP
+ *
+ */
 public class AccountView implements Parcelable {
 	
 	public static final byte VIS_TO_PERMITTED = 3;
@@ -28,24 +34,89 @@ public class AccountView implements Parcelable {
 	public static final byte VIS_TO_ALL = 1;
 	public static final byte VIS_INVISIBLE = 2;
 	
+	/**
+	 * "Account enabled" flag
+	 */
 	public boolean isEnabled = true;
 	
+	/**
+	 * Service ID (0 to 255)
+	 */
 	public byte serviceId = -1;
-	//private String protocolId;
+	
+	/**
+	 * Protocol name (ICQ, XMPP etc)
+	 */
 	public String protocolName;
+	
+	/**
+	 * Protocol-specific identifier (444555666 for ICQ, user@server.com for XMPP and so on)
+	 */
 	public String protocolUid;
+	
+	/**
+	 * User name, human friendly
+	 */
 	public String ownName;
+	
+	/**
+	 * Account availability status.
+	 */
 	public byte status = Buddy.ST_ONLINE;
+	
+	/**
+	 * Account extended status.
+	 */
 	public byte xStatus = -1;
+	
+	/**
+	 * Account extended status name
+	 */
 	public String xStatusName = "";
+	
+	/**
+	 * Account extended status text.
+	 */
 	public String xStatusText = "";
+	
+	/**
+	 * Account visibility.
+	 */
 	public byte visibility = VIS_TO_BUDDIES;
+	
+	/**
+	 * Buddy list.
+	 */
 	private List<Buddy> buddyList = Collections.synchronizedList(new ArrayList<Buddy>());
+	
+	/**
+	 * Buddy group list.
+	 */
 	private List<BuddyGroup> buddyGroupList = Collections.synchronizedList(new ArrayList<BuddyGroup>());
+	
+	/**
+	 * Buddies with unread messages temporary storage. Buddy uid - number of unread messages. Non-serializable.
+	 */
 	private Map<String, Byte> unreadsMap = new HashMap<String, Byte>();
+	
+	/**
+	 * Undeletable buddies temporary storage. Non-serializable.
+	 */
 	private List<Buddy> undeletable;
+	
+	/**
+	 * Account options storage.
+	 */
 	public Bundle options = new Bundle();
+	
+	/**
+	 * Account connection state.
+	 */
 	private short connectionState = AccountService.STATE_DISCONNECTED;
+	
+	/**
+	 * Account last update time.
+	 */
 	public long lastUpdateTime = new Date().getTime();
 
 	@Override
