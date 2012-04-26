@@ -576,7 +576,7 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 			ViewUtils.showTabChangeMenu(getEntryPoint());
 			break;
 		case R.id.menuitem_history:
-			getEntryPoint().addHistoryTab(buddy);
+			getEntryPoint().getHistoryTab(buddy);
 			break;
 		case R.id.menuitem_askxstatus:
 			try {

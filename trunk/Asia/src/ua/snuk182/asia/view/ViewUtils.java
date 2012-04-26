@@ -1033,7 +1033,7 @@ public final class ViewUtils {
 		if (accountSupportsManualChatConnection(entryPoint, account)){
 			showJoinGroupChatMenu(entryPoint, account);
 		} else {
-			entryPoint.addMyGroupChatsTab(account);
+			entryPoint.getMyGroupChatsTab(account);
 		}
 	}
 
@@ -1045,7 +1045,7 @@ public final class ViewUtils {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				entryPoint.addMyGroupChatsTab(account);
+				entryPoint.getMyGroupChatsTab(account);
 				//entryPoint.runtimeService.requestAvailableChatRooms(account.serviceId);
 				dialog.dismiss();
 			}

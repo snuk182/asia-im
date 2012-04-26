@@ -2,6 +2,12 @@ package ua.snuk182.asia;
 
 import ua.snuk182.asia.services.ServiceUtils;
 
+/**
+ * Overridden exception handler for storing stack traces in text log file.
+ * 
+ * @author SergiyP
+ *
+ */
 public class ExceptionHandler implements Thread.UncaughtExceptionHandler {
 
     Thread.UncaughtExceptionHandler oldHandler;
