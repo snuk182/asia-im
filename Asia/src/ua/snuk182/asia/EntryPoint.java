@@ -405,9 +405,6 @@ public class EntryPoint extends ActivityGroup {
         		savedTabs = null;
         	}
     		
-    		if (savedTabs == null){
-    			savedTabs = (ArrayList<TabInfo>) runtimeService.getSavedTabs();
-    		}
     		if (savedTabs!=null){
     			for (TabInfo tab:savedTabs){    				
     				mainScreen.addTab(TabInfoFactory.recreateTabContent(this, tab), false);    	

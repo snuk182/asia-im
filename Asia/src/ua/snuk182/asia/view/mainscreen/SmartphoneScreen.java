@@ -417,7 +417,7 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 
 	@Override
 	public void onDestroy() {
-		try {
+		/*try {
 			for (int i=tabs.size()-1; i>=0; i--){
 				if (tabs.get(i).tag.indexOf(ContactList.class.getSimpleName())<0 &&
 						tabs.get(i).tag.indexOf(ConversationsView.class.getSimpleName())<0 &&
@@ -431,7 +431,7 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 			ServiceUtils.log(npe);
 		} catch (RemoteException e){
 			getEntryPoint().onRemoteCallFailed(e);
-		}
+		}*/
 	}
 
 	@Override

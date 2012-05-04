@@ -28,6 +28,8 @@ public class Splashscreen extends RelativeLayout implements ITabContent{
 		inflate.inflate(R.layout.splashscreen, this);
 		
 		setGravity(Gravity.CENTER);
+		
+		visualStyleUpdated();
 	}
 	
 	@Override 
@@ -55,7 +57,7 @@ public class Splashscreen extends RelativeLayout implements ITabContent{
 	public TabWidgetLayout getTabWidgetLayout() {
 		TabWidgetLayout tabWidgetLayout = new TabWidgetLayout(getEntryPoint());
 		
-		tabWidgetLayout.setText(R.string.label_wait_starting);
+		tabWidgetLayout.setText(R.string.app_name);
 		return tabWidgetLayout;
 	}
 
@@ -68,7 +70,7 @@ public class Splashscreen extends RelativeLayout implements ITabContent{
 	public void visualStyleUpdated() {
 		if (EntryPoint.bgColor == EntryPoint.BGCOLOR_WALLPAPER){
 			setBackgroundColor(0x60000000);
-		}else {
+		} else {
 			try {
 				setBackgroundColor(0);
 			} catch (NumberFormatException e) {				

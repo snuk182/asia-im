@@ -18,19 +18,39 @@ import ua.snuk182.asia.core.dataentity.TextMessage;
 import android.content.Context;
 import android.os.Environment;
 
+/**
+ * History saver.
+ * 
+ * @author Sergiy Plygun
+ *
+ */
 public final class HistorySaver {
+	
+	//in-file history markers for incoming and outgoing messages
 	private static final String MARK_IN = ">->";
 	private static final String MARK_OUT = "<-<";
 	
+	//history file suffix
 	private static final String SUFFIX = ".history";
+	
+	//messages divider
 	private static final String RECORD_DIVIDER = "--------------------------------------";
 	
+	//owner buddy
 	private Buddy buddy;
 	
 	public HistorySaver(Buddy buddy){
 		this.buddy = buddy;
 	}
 	
+	/**
+	 * Format {@link TextMessage} for storing.
+	 * 
+	 * @param message input message
+	 * @param buddy buddy
+	 * @param myName a name for distinguishing account messages from buddy messages. 
+	 * @return
+	 */
 	public static TextMessage formatMessageForHistory(TextMessage message, Buddy buddy, String myName){
 		StringBuilder bu = new StringBuilder();
 		
@@ -53,10 +73,22 @@ public final class HistorySaver {
 		return message;
 	}	
 	
+	/**
+	 * Delete history
+	 * 
+	 * @param context 
+	 * @return
+	 */
 	public boolean deleteHistory(Context context){
 		return context.deleteFile(buddy.getOwnerAccountId()+" "+buddy.protocolUid+SUFFIX);
 	}
 	
+	/**
+	 * Export history to file on external storage.
+	 * 
+	 * @param context
+	 * @return
+	 */
 	public String exportHistory(Context context) {
 		if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){
 			return "No external storage found";
@@ -100,6 +132,13 @@ public final class HistorySaver {
 		return "Saved to "+file.getAbsolutePath();
 	}
 	
+	/**
+	 * Obtain last history
+	 * 
+	 * @param context context to operate in
+	 * @param getAll set to true, if all history need to be taken
+	 * @return
+	 */
 	public List<TextMessage> getLastHistory(Context context, boolean getAll){
 		List<TextMessage> output = new ArrayList<TextMessage>();		
 		
@@ -183,10 +222,22 @@ public final class HistorySaver {
 		}
 	}
 	
+	/**
+	 * Save message to history
+	 * 
+	 * @param message a message to save
+	 * @param context the context to operate in
+	 */
 	public void saveHistoryRecord(TextMessage message, Context context){
 		new AsyncSaver(message, context).start();
 	}
 	
+	/**
+	 * Separate-threaded message saver
+	 * 
+	 * @author SergiyP
+	 *
+	 */
 	class AsyncSaver extends Thread {
 		
 		TextMessage message;

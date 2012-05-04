@@ -5,6 +5,7 @@ import java.io.Serializable;
 import ua.snuk182.asia.services.ProtocolServiceFactory;
 import ua.snuk182.asia.services.api.AccountService;
 import ua.snuk182.asia.services.api.IAccountServiceResponse;
+import ua.snuk182.asia.view.more.AsiaCoreException;
 import android.content.Context;
 
 /**
@@ -20,7 +21,7 @@ public class Account implements Serializable {
 	public AccountView accountView;
 	public AccountService accountService; 
 	
-	public Account(Context context, AccountView accountView, IAccountServiceResponse serviceResponse){
+	public Account(Context context, AccountView accountView, IAccountServiceResponse serviceResponse) throws AsiaCoreException{
 		this.accountView = accountView;
 		accountService = ProtocolServiceFactory.createProtocolService(context, accountView, serviceResponse);
 	}

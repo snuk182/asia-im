@@ -3,9 +3,22 @@ package ua.snuk182.asia.core.dataentity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+/**
+ * Transferring file information entity.
+ * 
+ * @author Sergiy Plygun
+ *
+ */
 public class FileInfo implements Parcelable {
 
+	/**
+	 * File size
+	 */
 	public long size;
+	
+	/**
+	 * File name, with or without full path.
+	 */
 	public String filename;
 	
 	public FileInfo(Parcel arg0) {

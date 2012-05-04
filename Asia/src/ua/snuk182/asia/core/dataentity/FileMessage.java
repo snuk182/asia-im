@@ -6,8 +6,17 @@ import java.util.List;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+/**
+ * File transfer message entity.
+ * 
+ * @author Sergiy Plygun
+ *
+ */
 public class FileMessage extends Message {
 	
+	/**
+	 * List of files to be sent or received
+	 */
 	public final List<FileInfo> files = new LinkedList<FileInfo>();
 
 	public FileMessage(Parcel arg0) {

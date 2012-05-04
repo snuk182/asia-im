@@ -12,11 +12,32 @@ import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
 import android.widget.TabHost.TabSpec;
 
+/**
+ * Tab info entity. Used for storing tab data.
+ * 
+ * @author SergiyP
+ *
+ */
 public class TabInfo implements TabContentFactory, Parcelable{
 	
+	/**
+	 * Tab spec
+	 */
 	public TabSpec tabSpec;
+	
+	/** 
+	 * Tab tag
+	 */
 	public String tag;
+	
+	/**
+	 * Tab content
+	 */
 	public ITabContent content;
+	
+	/**
+	 * Tab widget layout (icon, title)
+	 */
 	public TabWidgetLayout tabWidgetLayout;
 	
 	public TabInfo(String tag, final ITabContent content, final TabHost tabHost){
@@ -54,6 +75,11 @@ public class TabInfo implements TabContentFactory, Parcelable{
 		tag = in.readString();		
 	}
 	
+	/**
+	 * Construct tab info from tab host
+	 * 
+	 * @param host
+	 */
 	public void construct(TabHost host){
 		if (tag==null || content == null){
 			return;

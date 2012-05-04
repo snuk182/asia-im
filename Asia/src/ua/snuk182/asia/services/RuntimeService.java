@@ -31,7 +31,6 @@ import ua.snuk182.asia.core.dataentity.MultiChatRoomOccupants;
 import ua.snuk182.asia.core.dataentity.OnlineInfo;
 import ua.snuk182.asia.core.dataentity.PersonalInfo;
 import ua.snuk182.asia.core.dataentity.ServiceMessage;
-import ua.snuk182.asia.core.dataentity.TabInfo;
 import ua.snuk182.asia.core.dataentity.TextMessage;
 import ua.snuk182.asia.services.api.AccountService;
 import ua.snuk182.asia.services.api.IAccountServiceResponse;
@@ -58,22 +57,36 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.widget.Toast;
 
+/**
+ * Application service
+ * 
+ * @author Sergiy Plygun
+ *
+ */
 public class RuntimeService extends Service {
 
+	//Accounts list
 	private final List<Account> accounts = new ArrayList<Account>();
 
+	//Protocol service response entity
 	private ProtocolServiceResponse protocolResponse;
+	
+	//UI callback entity
 	private IRuntimeServiceCallback uiCallback;
+	
+	//Preferences storage
 	private ServiceStoredPreferences storage;
-	private List<TabInfo> tabInfos = null;
+	
+	//private List<TabInfo> tabInfos = null;
 	private Notificator notificator = null;
 	//private boolean isAppVisible = true;
 	private Handler handler = new Handler();
 	private Bundle appOptions;
 	
-	//also indicates wheter app view is visible (value > 0)
+	//opened tab info list, also indicates wheter app view is visible (value > 0)
 	private List<String> openedTabs = new ArrayList<String>();
 	
+	//player state listeners for "Now playing" feature
 	private Map<String, AbstractPlayerStateListener> playerStateListeners = new HashMap<String, AbstractPlayerStateListener>();
 
 	private int startId;
@@ -81,8 +94,10 @@ public class RuntimeService extends Service {
 	private WifiManager.WifiLock wifiLock = null;
 	private PowerManager.WakeLock powerLock = null;
 
+	//service finished flag, for preventing possible reusing
 	private boolean finished = false;
 
+	//actions on application exit, within separate thread
 	private final Thread exitThread = new Thread() {
 
 		@Override
@@ -113,28 +128,16 @@ public class RuntimeService extends Service {
 	public void onCreate() {
 		super.onCreate();
 
-		mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		try {
-			mStartForeground = getClass().getMethod("startForeground", mStartForegroundSignature);
-			mStopForeground = getClass().getMethod("stopForeground", mStopForegroundSignature);
-		} catch (Exception e) {
-			// Running on an older platform.
-			mStartForeground = mStopForeground = null;
-		}
-		try {
-			mSetForeground = getClass().getMethod("setForeground", mSetForegroundSignature);
-		} catch (Exception e) {
-			mSetForeground = null;
-		}
-		// android.os.Debug.waitForDebugger();
-		startForegroundCompat(R.string.label_wait, new Notification());
+		doStartForeground();
 
 		protocolResponse = new ProtocolServiceResponse();
-		// setForeground(true);
 		storage = new ServiceStoredPreferences(getApplicationContext());
 		notificator = new Notificator(getApplicationContext());
 
+		//getting global preferences
 		appOptions = storage.getApplicationOptions();
+		
+		//tuning logs
 		String logToFile = appOptions.getString(getResources().getString(R.string.key_log_to_file));
 		if (logToFile != null) {
 			try {
@@ -144,6 +147,7 @@ public class RuntimeService extends Service {
 			}
 		}
 		
+		//tuning notification
 		String volume = appOptions.getString(getResources().getString(R.string.key_sound_volume));
 		if (volume != null) {
 			try {
@@ -153,6 +157,7 @@ public class RuntimeService extends Service {
 			}
 		}
 
+		//getting accounts
 		List<AccountView> acViews;
 		try {
 			acViews = storage.getAccounts();
@@ -162,28 +167,36 @@ public class RuntimeService extends Service {
 		}
 		accounts.clear();
 		for (AccountView aView : acViews) {
-			Account a = new Account(getApplicationContext(), aView, protocolResponse);
-			accounts.add(a);
+			Account a;
+			try {
+				a = new Account(getApplicationContext(), aView, protocolResponse);
+				accounts.add(a);
+			} catch (AsiaCoreException e) {
+				ServiceUtils.log(e, aView);
+			}			
 		}
 		statusbarNotifyAccountChanged();
 
+		//tuning power options
 		PowerManager powerManager = (PowerManager) getApplicationContext().getSystemService(POWER_SERVICE);
 		powerLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "asia power lock");
 		powerLock.acquire();
-
 		WifiManager wlanManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
 		if (wlanManager != null) {
 			wifiLock = wlanManager.createWifiLock(WifiManager.WIFI_MODE_FULL, "asia wifi lock");
 			wifiLock.acquire();
 		}
 
-		String autoconnect = appOptions.getString(getResources().getString(R.string.key_autoconnect));
+		//tuning autoconnection
+		boolean autoconnect = Boolean.parseBoolean(appOptions.getString(getResources().getString(R.string.key_autoconnect)));		
+		
 		for (Account a : accounts) {
 			if (!a.accountView.isEnabled) {
 				continue;
 			}
 
-			if (a.accountView.getConnectionState() != AccountService.STATE_DISCONNECTED || (autoconnect != null && autoconnect.indexOf("true") > -1)) {
+			//if service connection was interrupted or auto connection is toggled, do connection
+			if (a.accountView.getConnectionState() != AccountService.STATE_DISCONNECTED || autoconnect) {
 				try {
 					a.accountView.setConnectionState(AccountService.STATE_CONNECTING);
 					serviceBinder.connect(a.accountView.serviceId);
@@ -210,6 +223,25 @@ public class RuntimeService extends Service {
 		}
 	}
 
+	//Mark service as foreground, taking different API versions into account
+	private void doStartForeground() {
+		mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		try {
+			mStartForeground = getClass().getMethod("startForeground", mStartForegroundSignature);
+			mStopForeground = getClass().getMethod("stopForeground", mStopForegroundSignature);
+		} catch (Exception e) {
+			// Running on an older platform.
+			mStartForeground = mStopForeground = null;
+		}
+		try {
+			mSetForeground = getClass().getMethod("setForeground", mSetForegroundSignature);
+		} catch (Exception e) {
+			mSetForeground = null;
+		}
+		startForegroundCompat(R.string.label_wait, new Notification());
+	}
+
+	//Get player state listener by key
 	private AbstractPlayerStateListener getPlayerStateListener(String key) {
 		AbstractPlayerStateListener listener = playerStateListeners.get(key);
 		if (listener == null) {
@@ -227,6 +259,7 @@ public class RuntimeService extends Service {
 		return listener;
 	}
 
+	//It's not quite clear how can we help system to free up memory, so stay with calling GC for now... 
 	@Override
 	public void onLowMemory() {
 		storage.saveAccounts(accounts);
@@ -244,6 +277,7 @@ public class RuntimeService extends Service {
 		stopForegroundCompat(R.string.label_wait);
 	}
 
+	//unlock power and wireless, save current account states
 	private void wipe() {
 		// removeStatusbarNotification();
 		ServiceUtils.log("wipe service data");
@@ -261,6 +295,12 @@ public class RuntimeService extends Service {
 	public RuntimeService() {
 	}
 
+	/**
+	 * Request userpic for protocol UID
+	 * 
+	 * @param serviceId account's service id to ask userpic from
+	 * @param uid uid of userpic's holder (buddy or account)
+	 */
 	public void requestIcon(byte serviceId, String uid) {
 		try {
 			getAccountInternal(serviceId).accountService.request(AccountService.REQ_GETICON, uid);
@@ -269,6 +309,12 @@ public class RuntimeService extends Service {
 		}
 	}
 
+	/**
+	 * Service response class
+	 * 
+	 * @author Sergiy Plygun
+	 *
+	 */
 	public class ProtocolServiceResponse implements IAccountServiceResponse {
 
 		@SuppressWarnings({ "unchecked" })
@@ -1137,7 +1183,11 @@ public class RuntimeService extends Service {
 			account.serviceId = (byte) accounts.size();
 			account.status = Buddy.ST_ONLINE;
 			storage.saveAccount(account, true);
-			accounts.add(new Account(getApplicationContext(), account, protocolResponse));
+			try {
+				accounts.add(new Account(getApplicationContext(), account, protocolResponse));
+			} catch (AsiaCoreException e) {
+				throw new RemoteException(e.getLocalizedMessage());
+			}
 			uiCallback.accountAdded(account);
 
 			return account.serviceId;
@@ -1191,17 +1241,6 @@ public class RuntimeService extends Service {
 		@Override
 		public Buddy getBuddy(byte serviceId, String buddyProtocolUid) throws RemoteException {
 			return getAccountInternal(serviceId).accountView.getBuddyByProtocolUid(buddyProtocolUid);
-		}
-
-		@Override
-		public List<TabInfo> getSavedTabs() throws RemoteException {
-			//isAppVisible = true;
-			return tabInfos;
-		}
-
-		@Override
-		public void saveTabs(List<TabInfo> tabs) throws RemoteException {
-			tabInfos = tabs;
 		}
 
 		@Override

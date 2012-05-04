@@ -6,20 +6,42 @@ import java.util.List;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+/**
+ * Buddy group entity.
+ * 
+ * @author Sergiy Plygun.
+ *
+ */
 public class BuddyGroup implements Parcelable, Comparable<BuddyGroup> {
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -9101729129950262311L;
 	
+	/**
+	 * Group internal id
+	 */
 	public int id;
 	
+	/**
+	 * Holder account's service id
+	 */
 	public byte serviceId;
+	
+	/**
+	 * Group name, human-readable
+	 */
 	public String name;
+	
+	/**
+	 * Holder account's protocol UID
+	 */
 	public String ownerUid;
+	
+	/**
+	 * Shows whether group should be collapsed on showing.
+	 */
 	public boolean isCollapsed = false;
 	
+	/**
+	 * List of contained buddies' IDs
+	 */
 	public List<Integer> buddyList = new ArrayList<Integer>();
 
 	@Override
@@ -72,6 +94,9 @@ public class BuddyGroup implements Parcelable, Comparable<BuddyGroup> {
 		
 	};
 	
+	/**
+	 * Safe name getter. If no human-readable name found, the empty string is returned.
+	 */
 	@Override
 	public String toString(){
 		return name!=null?name:"";

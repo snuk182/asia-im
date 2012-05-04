@@ -427,7 +427,7 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
 
 	@Override
 	public void onDestroy() {
-		try {
+		/*try {
 			for (int i=tabsChat.size()-1; i>=0; i--){
 				if (tabsChat.get(i).tag.indexOf(ConversationsView.class.getSimpleName())<0 &&
 						tabsChat.get(i).tag.indexOf(HistoryView.class.getSimpleName())<0){
@@ -439,7 +439,7 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
 			ServiceUtils.log(npe);
 		} catch (RemoteException e){
 			getEntryPoint().onRemoteCallFailed(e);
-		}
+		}*/
 	}
 
 	@Override
