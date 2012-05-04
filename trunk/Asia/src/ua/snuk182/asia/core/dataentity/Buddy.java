@@ -1,6 +1,7 @@
 package ua.snuk182.asia.core.dataentity;
 
 import java.io.FileInputStream;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -12,13 +13,15 @@ import android.graphics.BitmapFactory;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+/**
+ * Buddy entity.
+ * 
+ * @author Sergiy Plygun
+ *
+ */
 public class Buddy implements Parcelable, Comparable<Buddy> {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 3234673071630264609L;
-	
+	//Status values
 	public static final byte ST_OFFLINE = 0;
 	public static final byte ST_ONLINE = 1;
 	public static final byte ST_AWAY = 2;
@@ -34,6 +37,7 @@ public class Buddy implements Parcelable, Comparable<Buddy> {
 	public static final byte ST_ANGRY = 12;
 	public static final byte ST_OTHER = 13;
 
+	//Visibility values
 	public static final byte VIS_PERMITTED = 1;
 	public static final byte VIS_DENIED = 2;
 	public static final byte VIS_IGNORED = 3;
@@ -41,27 +45,100 @@ public class Buddy implements Parcelable, Comparable<Buddy> {
 	public static final byte VIS_NOT_AUTHORIZED = 4;
 	public static final byte VIS_GROUPCHAT = 5;
 	
+	/**
+	 * Buddy internal ID
+	 */
 	public int id;
 	
+	/**
+	 * Service name of buddy's account
+	 */
 	public String serviceName;
 	
+	/**
+	 * Buddy name/nick
+	 */
 	public String name;
+	
+	/**
+	 * Buddy protocol-specific identifier (444555666 for ICQ, user@server.com for XMPP and so on)
+	 */
 	public String protocolUid;
+	
+	/**
+	 * Buddy's account protocol-specific identifier (444555666 for ICQ, user@server.com for XMPP and so on)
+	 */
 	public String ownerUid;
+	
+	/**
+	 * Icon hash value (unusable for now, v0.8.x)
+	 */
 	public String iconHash;
+	
+	/**
+	 * Buddy's account service ID
+	 */
 	public byte serviceId;
+	
+	/**
+	 * Buddy's status (see ST_* fields for values)
+	 */
 	public byte status;
+	
+	/**
+	 * Buddy's extended status. The different account types (ICQ, XMPP...) operate with different extended status sets. Value = -1 means no xstatus.
+	 */
 	public byte xstatus = -1;
+	
+	/**
+	 * Extended status title
+	 */
 	public String xstatusName;
+	
+	/**
+	 * Extended status text.
+	 */
 	public String xstatusDescription;
+	
+	/**
+	 * Buddy's IP. Note that not all buddies make their IP visible, so this field can be empty.
+	 */
 	public String externalIP;
+	
+	/**
+	 * Buddy's online time in seconds since last login.
+	 */
 	public int onlineTime;
+	
+	/**
+	 * Buddy's signon time
+	 */
 	public Date signonTime;
 	//public List<String> capabilities = new ArrayList<String>();
+	
+	/**
+	 * Buddy's visibility (see VIS_* fields for values)
+	 */
 	public byte visibility;
+	
+	/**
+	 * Buddy's unread messages counter
+	 */
 	public byte unread = 0;
+	
+	/**
+	 * Buddy's group ID
+	 */
 	public int groupId;
+	
+	/**
+	 * File sharing ability flag
+	 */
 	public boolean canFileShare = false;
+	
+	/**
+	 * Buddy's client application ID. Depends on holder account type.
+	 */
 	public String clientId = null;
 	
 	//non-serializable field
@@ -151,6 +228,11 @@ public class Buddy implements Parcelable, Comparable<Buddy> {
 		dest.writeString(clientId);
 	}
 	
+	/**
+	 * Obtain history saver for buddy
+	 * 
+	 * @return saver
+	 */
 	public HistorySaver getHistorySaver() {
 		if (historySaver == null){
 			historySaver = new HistorySaver(this);
@@ -172,11 +254,23 @@ public class Buddy implements Parcelable, Comparable<Buddy> {
 		
 	};
 
+	/**
+	 * Get history for buddy.
+	 * 
+	 * @param context application context to operate in
+	 * @param getAll true if all history should be taken.
+	 * @return a list of history messages. May be empty.
+	 */
 	public List<TextMessage> getLastHistory(Context context, boolean getAll) {
 		unread = 0;		
 		return getHistorySaver().getLastHistory(context, getAll);
 	}
 	
+	/**
+	 * Merge buddy with new data.
+	 * 
+	 * @param origin the new data holder.
+	 */
 	public void merge(Buddy origin){
 		if (origin == null || origin == this){
 			return;
@@ -202,12 +296,23 @@ public class Buddy implements Parcelable, Comparable<Buddy> {
 		iconHash = origin.iconHash;
 	}
 	
+	/**
+	 * Returns holder account id, in form of "123456789 ICQ"
+	 * 
+	 * @see AccountView#getAccountId()
+	 * @return id
+	 */
 	public String getOwnerAccountId(){
 		return ownerUid+" "+serviceName;
 	}
 	
 	public Buddy(){}
 
+	/**
+	 * Comparator. First checks status, then name, ignoring case.
+	 * 
+	 * @see Comparator
+	 */
 	@Override
 	public int compareTo(Buddy another) {
 		if (status != another.status){
@@ -221,10 +326,22 @@ public class Buddy implements Parcelable, Comparable<Buddy> {
 		return name.compareToIgnoreCase(another.name);
 	}
 
+	/**
+	 * Obtain filename for buddy's additional data (history, icon etc) 
+	 * 
+	 * @return
+	 */
 	public String getFilename() {
 		return getOwnerAccountId()+" "+protocolUid;
 	}
 	
+	/**
+	 * Get buddy's userpic.
+	 * 
+	 * @param context context to operate in
+	 * @param filename icon file name
+	 * @return icon bitmap as {@link Bitmap.Config.ARGB_8888}, if found, or null
+	 */
 	public static synchronized Bitmap getIcon(Context context, String filename){
 		
 		FileInputStream fis = null;
@@ -244,6 +361,11 @@ public class Buddy implements Parcelable, Comparable<Buddy> {
 		return BitmapFactory.decodeStream(fis, null, options);
 	}
 
+	/**
+	 * Get chat tag for buddy.
+	 * 
+	 * @return
+	 */
 	public String getChatTag() {
 		return ConversationsView.class.getSimpleName()+" "+serviceId+" "+protocolUid;
 	}

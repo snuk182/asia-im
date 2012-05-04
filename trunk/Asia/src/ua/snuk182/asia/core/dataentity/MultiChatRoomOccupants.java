@@ -7,10 +7,27 @@ import java.util.List;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+/**
+ * Multi-user chat room occupants entity.
+ * 
+ * @author SergiyP
+ *
+ */
 public class MultiChatRoomOccupants implements Parcelable {
 	
+	/**
+	 * User groups.
+	 */
 	public final List<BuddyGroup> groups = Collections.synchronizedList(new ArrayList<BuddyGroup>());
+	
+	/**
+	 * Chat users
+	 */
 	public final List<Buddy> buddies = Collections.synchronizedList(new ArrayList<Buddy>());
+	
+	/**
+	 * Holder account's service id.
+	 */
 	public final byte serviceId;
 
 	public MultiChatRoomOccupants(byte serviceId, List<BuddyGroup> groups, List<Buddy> buddies) {

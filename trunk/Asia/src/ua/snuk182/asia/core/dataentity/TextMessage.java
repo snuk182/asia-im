@@ -3,8 +3,17 @@ package ua.snuk182.asia.core.dataentity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+/**
+ * Text message
+ * 
+ * @author SergiyP
+ *
+ */
 public class TextMessage extends Message {
 	
+	/**
+	 * Sender's protocol UID. Equals to account's UID for outgoing messages, buddy's UID for incomings.
+	 */
 	public String writerUid = null;
 	public String to;
 	
