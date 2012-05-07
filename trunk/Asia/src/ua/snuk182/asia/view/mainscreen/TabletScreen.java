@@ -290,17 +290,11 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
 			return;
 		}
 		
-		boolean isChat = info.tag.indexOf(PreferencesView.class.getSimpleName()) > -1
-				|| info.content instanceof Splashscreen
-				|| info.content instanceof ConversationsView 
-				|| info.content instanceof HistoryView 
-				|| info.content instanceof PersonalInfoView;
-		
 		if (info.tabWidgetLayout!= null && info.tabWidgetLayout.getParent() != null){
 			((ViewGroup)info.tabWidgetLayout.getParent()).removeView(info.tabWidgetLayout);
 		}
 		
-		if (isChat){
+		if (isChat(info)){
 			tabsChat.add(info);
 			if (tabHostChat.getCurrentTabTag() != null && tabHostChat.getCurrentTabTag().equals(Splashscreen.class.getSimpleName())){
 				removeTabAt(0, tabsChat, tabHostChat);
@@ -323,7 +317,17 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
 			if (setAsCurrent){
 				tabHostAccount.setCurrentTabByTag(info.tag);
 			}
-		}		
+		}	
+		
+		addLongClickListenerToTabWidget(info);
+	}
+
+	private static final boolean isChat(TabInfo info) {
+		return info.tag.indexOf(PreferencesView.class.getSimpleName()) > -1
+				|| info.content instanceof Splashscreen
+				|| info.content instanceof ConversationsView 
+				|| info.content instanceof HistoryView 
+				|| info.content instanceof PersonalInfoView;
 	}
 
 	@Override
@@ -465,6 +469,10 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
 				addChatMenu = true;
 			}
 			
+			if (info.content.getMainMenuId() < 1){
+				return false;
+			}
+			
 			inflater.inflate(info.content.getMainMenuId(), menu);
 			
 			if (addChatMenu){
@@ -477,6 +485,10 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
 				return false;
 			}
 			info = tabsChat.get(currentTab);
+			
+			if (info.content.getMainMenuId() < 1){
+				return false;
+			}
 			inflater.inflate(info.content.getMainMenuId(), menu);
 			
 			if (ServiceUtils.isTablet(getContext())) {
@@ -853,5 +865,23 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
 		list.add(tabHostAccount.getCurrentTabTag());
 		list.add(tabHostChat.getCurrentTabTag());
 		return list;
+	}
+	
+	private void addLongClickListenerToTabWidget(final TabInfo tab){
+		tab.tabWidgetLayout.setOnLongClickListener(new OnLongClickListener() {
+			
+			@Override
+			public boolean onLongClick(View v) {
+				boolean isChat = isChat(tab);
+				
+				if (tab.tag.equals(isChat ? getCurrentChatsTabTag() : getCurrentAccountsTabTag())){
+					isChatMenu = isChat;
+					getEntryPoint().getWindow().openPanel(Window.FEATURE_OPTIONS_PANEL, new	KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MENU)); 
+					return true;
+				} else {
+					return false;
+				}
+			}
+		});
 	}
 }

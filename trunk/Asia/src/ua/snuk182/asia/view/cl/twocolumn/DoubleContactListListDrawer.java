@@ -16,6 +16,8 @@ import ua.snuk182.asia.services.api.AccountService;
 import ua.snuk182.asia.view.ViewUtils;
 import ua.snuk182.asia.view.cl.ContactList;
 import ua.snuk182.asia.view.cl.IContactListDrawer;
+import ua.snuk182.asia.view.cl.grid.ContactListGridGroupItem;
+import ua.snuk182.asia.view.cl.grid.ContactListGridItem;
 import ua.snuk182.asia.view.cl.list.ContactListListItem;
 import android.os.RemoteException;
 import android.view.LayoutInflater;
@@ -193,6 +195,12 @@ public class DoubleContactListListDrawer extends ScrollView implements IContactL
 			parent.setClReady(true);
 			
 			tmpItems.clear();
+			
+			for (DoubleContactListGroupItem group : groups){
+				for (ContactListListItem item: group.getBuddyList()){
+					item.requestIcon(parent.account.getBuddyByProtocolUid(item.getTag().toString()));
+				}
+			}
 		}
 	};
 	
@@ -443,7 +451,7 @@ public class DoubleContactListListDrawer extends ScrollView implements IContactL
 		
 		item.removeFromParent();
 		item.populate(buddy, showIcons);
-		item.requestIcon(buddy);
+		//item.requestIcon(buddy);
 		
 		return item;
 	}

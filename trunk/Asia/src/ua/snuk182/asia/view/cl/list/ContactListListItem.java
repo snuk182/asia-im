@@ -268,7 +268,8 @@ public class ContactListListItem extends RelativeLayout implements ContactListIt
 	@Override
 	public void requestIcon(final Buddy buddy){
 		if (showIcons){
-			new Thread("CL list item icon request"){
+			getEntryPoint().threadMsgHandler.post(new Runnable() {
+				
 				@Override
 				public void run(){
 					finalizeBitmap();
@@ -277,9 +278,10 @@ public class ContactListListItem extends RelativeLayout implements ContactListIt
 					if (icon != null){
 						ViewUtils.VMRUNTIME.allocBitmap(icon);
 					}
-					getEntryPoint().threadMsgHandler.post(iconGot);
+					//getEntryPoint().threadMsgHandler.post(iconGot);
+					iconGot.run();
 				}
-			}.start();
+			});
 		} else {
 			picLayout.setBuddyImage(R.drawable.dummy_48);
 		}
