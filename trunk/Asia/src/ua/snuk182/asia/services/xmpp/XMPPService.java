@@ -825,7 +825,7 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 
 		pw = sharedPreferences.get(PASSWORD);
 		try {
-			loginPort = Integer.parseInt(sharedPreferences.get(LOGIN_PORT));
+			loginPort = Integer.parseInt(sharedPreferences.get(LOGIN_PORT).trim().replace("\n", ""));
 		} catch (Exception e2) {
 		}
 
