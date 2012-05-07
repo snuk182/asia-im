@@ -215,7 +215,9 @@ public class ContactListGridItem extends RelativeLayout implements ContactListIt
 	public void requestIcon(final Buddy buddy){
 		if (showIcon){
 			mainStatusIcon.setVisibility(View.VISIBLE);
-			new Thread("CL grid item icon request"){
+			
+			getEntryPoint().threadMsgHandler.post(new Runnable() {
+				
 				@Override
 				public void run(){
 					finalizeBitmap();
@@ -225,9 +227,10 @@ public class ContactListGridItem extends RelativeLayout implements ContactListIt
 						ViewUtils.VMRUNTIME.allocBitmap(icon);
 					}
 					
-					getEntryPoint().threadMsgHandler.post(iconGot);
+					//getEntryPoint().threadMsgHandler.post(iconGot);
+					iconGot.run();
 				}
-			}.start();
+			});			
 		} else {
 			setNoBuddyImageMode(buddy);
 		}

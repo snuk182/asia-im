@@ -200,6 +200,12 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 			parent.setClReady(true);
 			
 			tmpItems.clear();
+			
+			for (ContactListGridGroupItem group : groups){
+				for (ContactListGridItem item: group.getBuddyList()){
+					item.requestIcon(parent.account.getBuddyByProtocolUid(item.getTag().toString()));
+				}
+			}
 		}
 	};
 	
@@ -453,7 +459,7 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 
 		item.removeFromParent();
 		item.populate(buddy, showIcons);
-		item.requestIcon(buddy);
+		//item.requestIcon(buddy);
 		
 		return item;
 	}

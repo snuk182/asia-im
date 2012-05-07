@@ -259,7 +259,7 @@ public class RuntimeService extends Service {
 		return listener;
 	}
 
-	//It's not quite clear how can we help system to free up memory, so stay with calling GC for now... 
+	//TODO It's not quite clear how can we help system to free up memory, so stay with calling GC for now... 
 	@Override
 	public void onLowMemory() {
 		storage.saveAccounts(accounts);
@@ -310,13 +310,16 @@ public class RuntimeService extends Service {
 	}
 
 	/**
-	 * Service response class
+	 * Service response implementation
 	 * 
 	 * @author Sergiy Plygun
 	 *
 	 */
 	public class ProtocolServiceResponse implements IAccountServiceResponse {
 
+		/**
+		 * @see IAccountServiceResponse
+		 */
 		@SuppressWarnings({ "unchecked" })
 		@Override
 		public synchronized Object respond(final short action, final byte serviceId, final Object... args) throws ProtocolException {
@@ -470,20 +473,6 @@ public class RuntimeService extends Service {
 					}
 				}
 
-				break;
-			case IAccountServiceResponse.RES_SAVEPARAMS:
-				new Thread("Save account parameters") {
-					@Override
-					public void run() {
-						Map<String, String> map = (Map<String, String>) args[0];
-						SharedPreferences.Editor settings = getSharedPreferences(account.getAccountId(), 0).edit();
-						for (String key : map.keySet()) {
-							String value = map.get(key);
-							settings.putString(key, value);
-						}
-						settings.commit();
-					}
-				}.start();
 				break;
 			case IAccountServiceResponse.RES_CLUPDATED:
 				Boolean saveNotInList = Boolean.parseBoolean(account.options.getString(getApplicationContext().getResources().getString(R.string.key_notinlist_save)));
