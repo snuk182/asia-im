@@ -812,6 +812,16 @@ public class PersonalInfoEngine {
 	}
 	
 	public void sendSearchByUinRequest(String uin){
+		
+		int numUin;
+		try {
+			numUin = Integer.parseInt(uin);
+		} catch (NumberFormatException e) {
+			service.getServiceResponse().respond(ICQServiceResponse.RES_NOTIFICATION, "UIN cannot be parsed");
+			service.getServiceResponse().respond(ICQServiceResponse.RES_SEARCHRESULT, new ArrayList<ICQPersonalInfo>(0));
+			return;
+		}
+		
 		Flap flap = new Flap();
 		flap.channel = ICQConstants.FLAP_CHANNELL_DATA;
 		
@@ -830,7 +840,7 @@ public class PersonalInfoEngine {
 		System.arraycopy(ProtocolUtils.short2ByteLE((short) ICQConstants.ICQEXTENSION_SUBCOMMAND_SEARCH_BY_UIN_WITH_TLV), 0, value, 10, 2);
 		System.arraycopy(ProtocolUtils.short2ByteLE((short) 0x136), 0, value, 12, 2);
 		System.arraycopy(ProtocolUtils.short2ByteLE((short) 0x9), 0, value, 14, 2);
-		System.arraycopy(ProtocolUtils.int2ByteLE(Integer.parseInt(uin)), 0, value, 16, 4);
+		System.arraycopy(ProtocolUtils.int2ByteLE(numUin), 0, value, 16, 4);
 		
 		tlv.value = value;
 		data.data = new TLV[]{tlv};

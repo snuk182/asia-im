@@ -356,7 +356,7 @@ public final class MrimServiceInternal {
 			}
 			
 			if (args[3] != null){
-				loginPort = Integer.parseInt((String) args[3]);
+				loginPort = Integer.parseInt(((String) args[3]).trim().replace("\n", ""));
 			}
 			
 			onlineInfo.status = (Integer) args[4];
