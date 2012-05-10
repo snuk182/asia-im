@@ -312,7 +312,7 @@ public class EntryPoint extends ActivityGroup {
     	
     	if (show){
     		try {
-				progressDialog = ProgressDialog.show(EntryPoint.this, "", getResources().getString(R.string.label_wait), true);
+				progressDialog = ProgressDialog.show(this, "", getResources().getString(R.string.label_wait), true);
 				progressDialog.setIndeterminateDrawable(getResources().getDrawable(R.drawable.logo_96px));
 				progressDialog.setCancelable(true);
 			} catch (Exception e) {
@@ -1014,12 +1014,13 @@ public class EntryPoint extends ActivityGroup {
 		try {
 			ArrayList<TabInfo> tabs = mainScreen.getTabs();
 			for (int i=tabs.size()-1; i>=0; i--){
+				TabInfo tab = tabs.get(i);
 				
 				//do not save tabs other than contact list, chats and history tabs
-				if (tabs.get(i).tag.indexOf(ContactList.class.getSimpleName())<0 &&
-						tabs.get(i).tag.indexOf(ConversationsView.class.getSimpleName())<0 &&
-						tabs.get(i).tag.indexOf(HistoryView.class.getSimpleName())<0){
-					tabs.remove(i);
+				if (tab.tag.indexOf(ContactList.class.getSimpleName())<0 &&
+						tab.tag.indexOf(ConversationsView.class.getSimpleName())<0 &&
+						tab.tag.indexOf(HistoryView.class.getSimpleName())<0){
+					mainScreen.removeTabByTag(tab.tag);
 				}
 			}
 			

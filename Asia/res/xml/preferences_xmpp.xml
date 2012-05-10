@@ -12,7 +12,7 @@
   	<CheckBoxPreference android:persistent="false" android:title="@string/label_notinlist_save" android:key="@string/key_notinlist_save" android:defaultValue="false"/>
   	<CheckBoxPreference android:persistent="false" android:title="@string/label_deny_messages_not_from_list" android:key="@string/key_deny_messages_not_from_list" android:defaultValue="false"/>
 </PreferenceCategory>
-<!-- <PreferenceCategory android:title="@string/xmpp_service_name">
+<PreferenceCategory android:title="@string/xmpp_service_name">
   	<CheckBoxPreference android:title="@string/label_secure_login" android:key="@string/key_secure_login" android:defaultValue="false"/>
-  </PreferenceCategory> -->
+  </PreferenceCategory>
 </PreferenceScreen>

@@ -25,7 +25,6 @@ import ua.snuk182.asia.view.cl.ContactList;
 import ua.snuk182.asia.view.conversations.ConversationsView;
 import ua.snuk182.asia.view.groupchats.GroupChatsView;
 import ua.snuk182.asia.view.more.AsiaCoreException;
-import ua.snuk182.asia.view.more.HistoryView;
 import ua.snuk182.asia.view.more.PreferencesView;
 import ua.snuk182.asia.view.more.SearchUsersView;
 import ua.snuk182.asia.view.more.TabWidgetLayout;
@@ -230,8 +229,13 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 
 	@Override
 	public void onStart() {
-		if (tabs.size() > 0 && getSelectedTab().content != null){
-			getSelectedTab().content.onStart();
+		try {
+			if (tabs.size() > 0 && getSelectedTab().content != null){
+				getSelectedTab().content.onStart();
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}		
 	}
 	
@@ -459,7 +463,7 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 		try {
 			return tabs.get(getCurrentTab());
 		} catch (Exception e) {
-			//return tabs.get(0);
+			ServiceUtils.log(e);
 			return null;
 		}
 	}
