@@ -498,7 +498,7 @@ public class AccountView implements Parcelable {
 	 * @return
 	 */
 	public String getSafeName(){
-		return ownName != null ? ownName : protocolUid;
+		return (ownName != null && !ownName.isEmpty()) ? ownName : protocolUid;
 	}
 	
 	/**

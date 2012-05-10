@@ -25,9 +25,12 @@ import ua.snuk182.asia.core.dataentity.ServiceMessage;
 import ua.snuk182.asia.core.dataentity.TabInfo;
 import ua.snuk182.asia.services.ServiceUtils;
 import ua.snuk182.asia.services.api.AccountService;
+import ua.snuk182.asia.services.icq.ICQService;
 import ua.snuk182.asia.services.icq.ICQServiceUtils;
+import ua.snuk182.asia.services.mrim.MrimService;
 import ua.snuk182.asia.services.mrim.MrimServiceUtils;
 import ua.snuk182.asia.services.plus.IconMenuAdapter;
+import ua.snuk182.asia.services.xmpp.XMPPService;
 import ua.snuk182.asia.services.xmpp.XMPPServiceUtils;
 import ua.snuk182.asia.view.more.fileexplorer.FileExplorer;
 import ua.snuk182.asia.view.more.fileexplorer.FileExplorer.FileExplorerAction;
@@ -131,15 +134,15 @@ public final class ViewUtils {
 		});
 		builder.create().show();
 	}
-	
-	private static final int getContactMenuResIdByAccount(Context context, AccountView account){
-		if (account.protocolName.equals(context.getResources().getString(R.string.icq_service_name))){
+
+	private static final int getContactMenuResIdByAccount(Context context, AccountView account) {
+		if (account.protocolName.equals(context.getResources().getString(R.string.icq_service_name))) {
 			return R.array.icq_contact_menu_names;
 		}
-		if (account.protocolName.equals(context.getResources().getString(R.string.xmpp_service_name))){
+		if (account.protocolName.equals(context.getResources().getString(R.string.xmpp_service_name))) {
 			return R.array.xmpp_contact_menu_names;
 		}
-		if (account.protocolName.equals(context.getResources().getString(R.string.mrim_service_name))){
+		if (account.protocolName.equals(context.getResources().getString(R.string.mrim_service_name))) {
 			return R.array.mrim_contact_menu_names;
 		}
 		return 0;
@@ -147,17 +150,17 @@ public final class ViewUtils {
 
 	public static void contactMenu(final EntryPoint entryPoint, final AccountView account, final Buddy buddy) {
 		int menuResId = getContactMenuResIdByAccount(entryPoint, account);
-		
-		if (menuResId == 0){
+
+		if (menuResId == 0) {
 			return;
 		}
-		
+
 		TypedArray items = entryPoint.getResources().obtainTypedArray(menuResId);
 
-		if (items.length() < 1){
+		if (items.length() < 1) {
 			return;
 		}
-		
+
 		AlertDialog.Builder builder = new AlertDialog.Builder(entryPoint);
 		builder.setTitle(entryPoint.getResources().getString(R.string.label_contact_menu) + ": " + buddy.getName() + " (" + buddy.protocolUid + ")");
 		final Resources res = entryPoint.getResources();
@@ -198,24 +201,24 @@ public final class ViewUtils {
 					continue;
 				}
 			}
-			if (item.equals(res.getString(R.string.menu_value_join_chat))){
-				if (buddy.visibility != Buddy.VIS_GROUPCHAT || buddy.status != Buddy.ST_OFFLINE){
+			if (item.equals(res.getString(R.string.menu_value_join_chat))) {
+				if (buddy.visibility != Buddy.VIS_GROUPCHAT || buddy.status != Buddy.ST_OFFLINE) {
 					continue;
 				}
 			}
-			if (item.equals(res.getString(R.string.menu_value_leave_chat))){
-				if (buddy.visibility != Buddy.VIS_GROUPCHAT || buddy.status == Buddy.ST_OFFLINE){
+			if (item.equals(res.getString(R.string.menu_value_leave_chat))) {
+				if (buddy.visibility != Buddy.VIS_GROUPCHAT || buddy.status == Buddy.ST_OFFLINE) {
 					continue;
 				}
 			}
-			if (item.equals(res.getString(R.string.label_edit))){
-				
+			if (item.equals(res.getString(R.string.label_edit))) {
+
 			}
 			itemList.add(item);
 		}
 
 		items.recycle();
-		
+
 		String[] itemArray = itemList.toArray(new String[itemList.size()]);
 
 		builder.setItems(itemArray, new OnClickListener() {
@@ -313,16 +316,21 @@ public final class ViewUtils {
 					}
 					return;
 				}
-				if (command.equals(res.getString(R.string.menu_value_join_chat))){
-					try {
-						entryPoint.runtimeService.joinExistingChat(buddy.serviceId, buddy.protocolUid);
-					} catch (NullPointerException npe) {
-						ServiceUtils.log(npe);
-					} catch (RemoteException e) {
-						entryPoint.onRemoteCallFailed(e);
-					}
+				if (command.equals(res.getString(R.string.menu_value_join_chat))) {
+					new Thread(){
+						@Override
+						public void run(){
+							try {
+								entryPoint.runtimeService.joinExistingChat(buddy.serviceId, buddy.protocolUid);
+							} catch (NullPointerException npe) {
+								ServiceUtils.log(npe);
+							} catch (RemoteException e) {
+								entryPoint.onRemoteCallFailed(e);
+							}
+						}
+					}.start();
 				}
-				if (command.equals(res.getString(R.string.menu_value_leave_chat))){
+				if (command.equals(res.getString(R.string.menu_value_leave_chat))) {
 					try {
 						entryPoint.runtimeService.leaveChat(buddy.serviceId, buddy.protocolUid);
 					} catch (NullPointerException npe) {
@@ -331,10 +339,10 @@ public final class ViewUtils {
 						entryPoint.onRemoteCallFailed(e);
 					}
 				}
-				if (command.equals(res.getString(R.string.label_edit))){
+				if (command.equals(res.getString(R.string.label_edit))) {
 					showManualGroupChatOptions(entryPoint, account, buddy);
 				}
-				
+
 			}
 		});
 		builder.create().show();
@@ -459,7 +467,9 @@ public final class ViewUtils {
 				break;
 			}
 		}
-		adapter = new ArrayAdapter<BuddyGroup>(entryPoint, android.R.layout.simple_spinner_dropdown_item, groups);
+		adapter = new ArrayAdapter<BuddyGroup>(entryPoint, android.R.layout.simple_spinner_item, groups);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
 		groupSpinner.setAdapter(adapter);
 		okBtn.setOnClickListener(new View.OnClickListener() {
 
@@ -499,7 +509,9 @@ public final class ViewUtils {
 				break;
 			}
 		}
-		adapter = new ArrayAdapter<BuddyGroup>(entryPoint, android.R.layout.simple_spinner_dropdown_item, groups);
+		adapter = new ArrayAdapter<BuddyGroup>(entryPoint, android.R.layout.simple_spinner_item, groups);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
 		final BuddyGroup oldGroup2 = oldGroup;
 		groupSpinner.setAdapter(adapter);
 		okBtn.setOnClickListener(new View.OnClickListener() {
@@ -757,7 +769,7 @@ public final class ViewUtils {
 	}
 
 	public static void showTabChangeMenu(final EntryPoint entryPoint) {
-		
+
 		AlertDialog.Builder builder = new AlertDialog.Builder(entryPoint);
 		builder.setTitle(R.string.label_tabs_list);
 		final TabsAdapter adapter = getTabsAdapter(entryPoint);
@@ -765,7 +777,7 @@ public final class ViewUtils {
 
 			@Override
 			public void onClick(DialogInterface dialog, int position) {
-				entryPoint.mainScreen.checkAndSetCurrentTabByTag(((TabInfo)adapter.getItem(position)).tag);
+				entryPoint.mainScreen.checkAndSetCurrentTabByTag(((TabInfo) adapter.getItem(position)).tag);
 				dialog.dismiss();
 			}
 		});
@@ -865,7 +877,7 @@ public final class ViewUtils {
 
 	public static void showPickFileDialog(EntryPoint entryPoint, Buddy buddy, FileExplorerAction action, FileFilter filter) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(entryPoint);
-		
+
 		FileExplorer explorer = new FileExplorer(entryPoint, action, filter);
 		try {
 			builder.setTitle(explorer.currentDirectory.getCanonicalPath());
@@ -902,49 +914,49 @@ public final class ViewUtils {
 		});
 		builder.create().show();
 	}
-	
-	public static final Bitmap scaleBitmap(Bitmap bmp, int size, boolean fitHeightOnly){
-		if (bmp == null){
+
+	public static final Bitmap scaleBitmap(Bitmap bmp, int size, boolean fitHeightOnly) {
+		if (bmp == null) {
 			return null;
 		}
-		
-		if (fitHeightOnly || bmp.getWidth() < bmp.getHeight()){
+
+		if (fitHeightOnly || bmp.getWidth() < bmp.getHeight()) {
 			int itemWidth = (size * bmp.getWidth()) / bmp.getHeight();
-			return Bitmap.createScaledBitmap(bmp, itemWidth, size,  true);
+			return Bitmap.createScaledBitmap(bmp, itemWidth, size, true);
 		} else {
 			int itemHeight = (size * bmp.getHeight()) / bmp.getWidth();
-			return Bitmap.createScaledBitmap(bmp, size, itemHeight,  true);
+			return Bitmap.createScaledBitmap(bmp, size, itemHeight, true);
 		}
 	}
 
 	public static final void newGroupChatDialog(final EntryPoint entryPoint, final AccountView account) {
 		final Dialog dialog = new Dialog(entryPoint);
-		
+
 		dialog.setContentView(R.layout.create_groupchat);
 		dialog.setTitle(R.string.label_chat_enter_manually);
 
 		Button okBtn = (Button) dialog.findViewById(R.id.button_ok);
-		
+
 		final View passwordProtectedLayout = dialog.findViewById(R.id.pwd_protected_layout);
 		passwordProtectedLayout.setVisibility(accountSupportsPwdedChat(entryPoint, account) ? View.VISIBLE : View.GONE);
 		final View nicknameLayout = dialog.findViewById(R.id.nickname_layout);
 		nicknameLayout.setVisibility(accountSupportsCustomChatNickname(entryPoint, account) ? View.VISIBLE : View.GONE);
-		
+
 		final EditText chatNameText = (EditText) dialog.findViewById(R.id.chat_name);
 		final EditText chatIdText = (EditText) dialog.findViewById(R.id.chat_id);
 		final CheckBox protectedChatBox = (CheckBox) dialog.findViewById(R.id.pwd_protected_cb);
 		final EditText passwordText = (EditText) dialog.findViewById(R.id.chat_password);
 		final EditText nicknameText = (EditText) dialog.findViewById(R.id.nickname);
-		
+
 		final TextView passwordLbl = (TextView) dialog.findViewById(R.id.chat_password_lbl);
-		
+
 		nicknameText.setText(account.getSafeName());
-		
+
 		protectedChatBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			
+
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				if (isChecked){
+				if (isChecked) {
 					passwordLbl.setVisibility(View.VISIBLE);
 					passwordText.setVisibility(View.VISIBLE);
 				} else {
@@ -953,7 +965,7 @@ public final class ViewUtils {
 				}
 			}
 		});
-		
+
 		okBtn.setOnClickListener(new View.OnClickListener() {
 
 			@Override
@@ -974,14 +986,14 @@ public final class ViewUtils {
 					Toast.makeText(entryPoint, "Nickname cannot be empty", Toast.LENGTH_SHORT).show();
 					return;
 				}
-				
-				//entryPoint.toggleWaitscreen(true);
+
+				// entryPoint.toggleWaitscreen(true);
 				try {
 					entryPoint.runtimeService.createChat(account.serviceId, chatIdText.getText().toString(), nicknameText.getText().toString(), chatNameText.getText().toString(), passwordText.getText().toString());
 				} catch (RemoteException e) {
 					entryPoint.onRemoteCallFailed(e);
 				}
-				
+
 				dialog.dismiss();
 			}
 
@@ -991,46 +1003,46 @@ public final class ViewUtils {
 	}
 
 	public static final boolean accountSupportsPwdedChat(Context context, AccountView account) {
-		if (account.protocolName.equals(context.getResources().getString(R.string.icq_service_name))){
+		if (account.protocolName.equals(context.getResources().getString(R.string.icq_service_name))) {
 			return ICQServiceUtils.supportsPasswordedChats;
 		}
-		if (account.protocolName.equals(context.getResources().getString(R.string.xmpp_service_name))){
+		if (account.protocolName.equals(context.getResources().getString(R.string.xmpp_service_name))) {
 			return XMPPServiceUtils.supportsPasswordedChats;
 		}
-		if (account.protocolName.equals(context.getResources().getString(R.string.mrim_service_name))){
+		if (account.protocolName.equals(context.getResources().getString(R.string.mrim_service_name))) {
 			return MrimServiceUtils.supportsPasswordedChats;
 		}
 		return false;
 	}
-	
+
 	public static final boolean accountSupportsCustomChatNickname(Context context, AccountView account) {
-		if (account.protocolName.equals(context.getResources().getString(R.string.icq_service_name))){
+		if (account.protocolName.equals(context.getResources().getString(R.string.icq_service_name))) {
 			return ICQServiceUtils.supportsCustomChatNickname;
 		}
-		if (account.protocolName.equals(context.getResources().getString(R.string.xmpp_service_name))){
+		if (account.protocolName.equals(context.getResources().getString(R.string.xmpp_service_name))) {
 			return XMPPServiceUtils.supportsCustomChatNickname;
 		}
-		if (account.protocolName.equals(context.getResources().getString(R.string.mrim_service_name))){
+		if (account.protocolName.equals(context.getResources().getString(R.string.mrim_service_name))) {
 			return MrimServiceUtils.supportsCustomChatNickname;
 		}
 		return false;
 	}
-	
+
 	public static final boolean accountSupportsManualChatConnection(Context context, AccountView account) {
-		if (account.protocolName.equals(context.getResources().getString(R.string.icq_service_name))){
+		if (account.protocolName.equals(context.getResources().getString(R.string.icq_service_name))) {
 			return ICQServiceUtils.supportsManuallyConnectedChats;
 		}
-		if (account.protocolName.equals(context.getResources().getString(R.string.xmpp_service_name))){
+		if (account.protocolName.equals(context.getResources().getString(R.string.xmpp_service_name))) {
 			return XMPPServiceUtils.supportsManuallyConnectedChats;
 		}
-		if (account.protocolName.equals(context.getResources().getString(R.string.mrim_service_name))){
+		if (account.protocolName.equals(context.getResources().getString(R.string.mrim_service_name))) {
 			return MrimServiceUtils.supportsManuallyConnectedChats;
 		}
 		return false;
 	}
 
 	public static final void getGroupChatAction(EntryPoint entryPoint, AccountView account) {
-		if (accountSupportsManualChatConnection(entryPoint, account)){
+		if (accountSupportsManualChatConnection(entryPoint, account)) {
 			showJoinGroupChatMenu(entryPoint, account);
 		} else {
 			entryPoint.getMyGroupChatsTab(account);
@@ -1039,19 +1051,19 @@ public final class ViewUtils {
 
 	private static final void showJoinGroupChatMenu(final EntryPoint entryPoint, final AccountView account) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(entryPoint);
-		
+
 		builder.setTitle(R.string.label_connect_to_chat);
 		builder.setPositiveButton(R.string.label_get_available_chats, new OnClickListener() {
-			
+
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				entryPoint.getMyGroupChatsTab(account);
-				//entryPoint.runtimeService.requestAvailableChatRooms(account.serviceId);
+				// entryPoint.runtimeService.requestAvailableChatRooms(account.serviceId);
 				dialog.dismiss();
 			}
 		});
 		builder.setNegativeButton(R.string.label_chat_enter_manually, new OnClickListener() {
-			
+
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				showManualGroupChatOptions(entryPoint, account, null);
@@ -1059,50 +1071,50 @@ public final class ViewUtils {
 			}
 		});
 		builder.setNeutralButton(R.string.label_create_groupchat, new OnClickListener() {
-			
+
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				newGroupChatDialog(entryPoint, account);
 			}
 		});
-		
+
 		builder.create().show();
 	}
 
 	public final static void showManualGroupChatOptions(final EntryPoint entryPoint, final AccountView account, Buddy chat) {
 		final Dialog dialog = new Dialog(entryPoint);
-		
+
 		dialog.setContentView(R.layout.create_groupchat);
 		dialog.setTitle(R.string.label_chat_options);
 
 		Button okBtn = (Button) dialog.findViewById(R.id.button_ok);
-		
+
 		final View passwordProtectedLayout = dialog.findViewById(R.id.pwd_protected_layout);
 		passwordProtectedLayout.setVisibility(accountSupportsPwdedChat(entryPoint, account) ? View.VISIBLE : View.GONE);
 		final View nicknameLayout = dialog.findViewById(R.id.nickname_layout);
 		nicknameLayout.setVisibility(accountSupportsCustomChatNickname(entryPoint, account) ? View.VISIBLE : View.GONE);
 		final View chatNameLayout = dialog.findViewById(R.id.chat_name_layout);
 		chatNameLayout.setVisibility(View.GONE);
-		
+
 		final EditText chatIdText = (EditText) dialog.findViewById(R.id.chat_id);
 		final CheckBox protectedChatBox = (CheckBox) dialog.findViewById(R.id.pwd_protected_cb);
 		final EditText passwordText = (EditText) dialog.findViewById(R.id.chat_password);
 		final EditText nicknameText = (EditText) dialog.findViewById(R.id.nickname);
-		
+
 		final TextView passwordLbl = (TextView) dialog.findViewById(R.id.chat_password_lbl);
-		
-		if (chat != null){
+
+		if (chat != null) {
 			chatIdText.setText(chat.protocolUid);
 			chatIdText.setEnabled(false);
 		}
-		
+
 		nicknameText.setText(account.getSafeName());
-		
+
 		protectedChatBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			
+
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				if (isChecked){
+				if (isChecked) {
 					passwordLbl.setVisibility(View.VISIBLE);
 					passwordText.setVisibility(View.VISIBLE);
 				} else {
@@ -1111,7 +1123,7 @@ public final class ViewUtils {
 				}
 			}
 		});
-		
+
 		okBtn.setOnClickListener(new View.OnClickListener() {
 
 			@Override
@@ -1128,14 +1140,22 @@ public final class ViewUtils {
 					Toast.makeText(entryPoint, "Nickname cannot be empty", Toast.LENGTH_SHORT).show();
 					return;
 				}
-				
-				//entryPoint.toggleWaitscreen(true);
-				try {
-					entryPoint.runtimeService.joinChat(account.serviceId, chatIdText.getText().toString(), nicknameText.getText().toString(), passwordText.getText().toString());
-				} catch (RemoteException e) {
-					entryPoint.onRemoteCallFailed(e);
-				}
-				
+
+				entryPoint.toggleWaitscreen(true);
+				new Thread() {
+
+					@Override
+					public void run() {
+						try {
+							entryPoint.runtimeService.joinChat(account.serviceId, chatIdText.getText().toString(), nicknameText.getText().toString(), passwordText.getText().toString());
+						} catch (RemoteException e) {
+							ServiceUtils.log(e);							
+						} finally {
+							entryPoint.toggleWaitscreen(false);
+						}
+					}
+				}.start();
+
 				dialog.dismiss();
 			}
 
@@ -1143,13 +1163,13 @@ public final class ViewUtils {
 
 		dialog.show();
 	}
-	
-	public static final void styleTextView(TextView text){
-		if (EntryPoint.bgColor < 0xff7f7f80){
+
+	public static final void styleTextView(TextView text) {
+		if (EntryPoint.bgColor < 0xff7f7f80) {
 			text.setShadowLayer(0, 0, 0, 0);
 			text.setTextColor(0xffffffff);
 			text.setBackgroundColor(0xe0000000);
-		} else if (EntryPoint.bgColor == 0xff7f7f80){
+		} else if (EntryPoint.bgColor == 0xff7f7f80) {
 			text.setShadowLayer(1.8f, 2, 2, 0xcd000000);
 			text.setTextColor(0xffffffff);
 			text.setBackgroundColor(0x00000000);
@@ -1161,168 +1181,201 @@ public final class ViewUtils {
 	}
 
 	public static final void showChatInfo(final AccountView account, final MultiChatRoom chat, PersonalInfo info, final EntryPoint entryPoint) {
-		final Dialog dialog = new Dialog(entryPoint);
+		/*AlertDialog.Builder newBuilder = new AlertDialog.Builder(entryPoint);
+
+		newBuilder.setTitle(chat.getName());
+		newBuilder.setPositiveButton(R.string.label_connect_to_chat, new OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				showManualGroupChatOptions(entryPoint, account, chat);
+				dialog.dismiss();
+			}
+		});
 		
+		newBuilder.create().show();*/
+
+		final Dialog dialog = new Dialog(entryPoint);
+
 		dialog.setContentView(R.layout.chat_info_layout);
 		dialog.setTitle(chat.getName());
 
 		Button okBtn = (Button) dialog.findViewById(R.id.button_ok);
 		LinearLayout layout = (LinearLayout) dialog.findViewById(R.id.layout);
-		
+
 		okBtn.setOnClickListener(new View.OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
 				showManualGroupChatOptions(entryPoint, account, chat);
 				dialog.dismiss();
 			}
 		});
-		
-		updatePersonalInfoLayout(info, layout, null);		
-		
+
+		updatePersonalInfoLayout(info, layout, null);
+
 		dialog.show();
 	}
-	
-	public static void updatePersonalInfoLayout(PersonalInfo info, LinearLayout layout, OnLongClickListener longClickListener){
-		if (info == null || info.properties == null){
+
+	public static void updatePersonalInfoLayout(PersonalInfo info, LinearLayout layout, OnLongClickListener longClickListener) {
+		if (info == null || info.properties == null) {
 			return;
 		}
-		
+
 		TextView uidView = new TextView(layout.getContext());
-		uidView.setText("UID: "+info.protocolUid, TextView.BufferType.EDITABLE);
+		uidView.setText("UID: " + info.protocolUid, TextView.BufferType.EDITABLE);
 		ViewUtils.colorPersonalInfoView(uidView);
-		if (longClickListener != null){
+		if (longClickListener != null) {
 			uidView.setOnLongClickListener(longClickListener);
 		}
 		layout.addView(uidView);
-		
+
 		List<String> keys = new ArrayList<String>();
 		keys.addAll(info.properties.keySet());
-		
+
 		Collections.sort(keys);
-		
-		for (String key: keys){
+
+		for (String key : keys) {
 			Object value = info.properties.get(key);
-			if (value == null || value.toString().equals("-1")){
+			if (value == null || value.toString().equals("-1")) {
 				continue;
 			}
-			
+
 			TextView iew = new TextView(layout.getContext());
-			
-			if (key.equals(PersonalInfo.INFO_GENDER)){
-				info.properties.putString(key, ((Byte)info.properties.get(key)) == 1 ? layout.getResources().getString(R.string.label_male) : layout.getResources().getString(R.string.label_female));
+
+			if (key.equals(PersonalInfo.INFO_GENDER)) {
+				info.properties.putString(key, ((Byte) info.properties.get(key)) == 1 ? layout.getResources().getString(R.string.label_male) : layout.getResources().getString(R.string.label_female));
 			}
-			
-			iew.setText(key+": "+info.properties.get(key), TextView.BufferType.EDITABLE);
+
+			iew.setText(key + ": " + info.properties.get(key), TextView.BufferType.EDITABLE);
 			colorPersonalInfoView(iew);
-			if (longClickListener != null){
+			if (longClickListener != null) {
 				iew.setOnLongClickListener(longClickListener);
 			}
 			layout.addView(iew);
 		}
 	}
-	
-	public static final void colorPersonalInfoView(TextView view){
+
+	public static final void colorPersonalInfoView(TextView view) {
 		Spannable s = view.getEditableText();
-		if (s == null){
+		if (s == null) {
 			return;
 		}
-		
-		if (view.getText().toString().indexOf("UID: ") > -1){
+
+		if (view.getText().toString().indexOf("UID: ") > -1) {
 			s.setSpan(new ForegroundColorSpan(0xffff0000), 0, view.getText().toString().indexOf(":"), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		} else {
 			s.setSpan(new ForegroundColorSpan(0xff00a5ff), 0, view.getText().toString().indexOf(":"), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		}
-		
+
 	}
-	
+
 	public static class VMRuntimeHack {
-        private Object runtime = null;
-        private Method trackAllocation = null;
-        private Method trackFree = null;
-        
-        public boolean trackAlloc(long size) {
-            if (runtime == null)
-                return false;
-            try {
-                Object res = trackAllocation.invoke(runtime, Long.valueOf(size));
-                return (res instanceof Boolean) ? (Boolean)res : true;
-            } catch (IllegalArgumentException e) {
-                return false;
-            } catch (IllegalAccessException e) {
-                return false;
-            } catch (InvocationTargetException e) {
-                return false;
-            }
-        }
+		private Object runtime = null;
+		private Method trackAllocation = null;
+		private Method trackFree = null;
 
-        public boolean trackFree(long size) {
-            if (runtime == null)
-                return false;
-            try {
-                Object res = trackFree.invoke(runtime, Long.valueOf(size));
-                return (res instanceof Boolean) ? (Boolean)res : true;
-            } catch (IllegalArgumentException e) {
-                return false;
-            } catch (IllegalAccessException e) {
-                return false;
-            } catch (InvocationTargetException e) {
-                return false;
-            }
-        }
-        
-        public Bitmap allocBitmap(Bitmap bmp) {
-            if (useHack) {
-                trackFree(bmp.getRowBytes() * bmp.getHeight());
-                hackedBitmaps.add(bmp);
-            }
-            allocatedBitmaps.add(bmp);
-            return bmp;
-    	}
+		public boolean trackAlloc(long size) {
+			if (runtime == null)
+				return false;
+			try {
+				Object res = trackAllocation.invoke(runtime, Long.valueOf(size));
+				return (res instanceof Boolean) ? (Boolean) res : true;
+			} catch (IllegalArgumentException e) {
+				return false;
+			} catch (IllegalAccessException e) {
+				return false;
+			} catch (InvocationTargetException e) {
+				return false;
+			}
+		}
 
-    	public void freeBitmap(Bitmap bmp) {
-   			bmp.recycle();
-            if (hackedBitmaps.contains(bmp)) {
-                trackAlloc(bmp.getRowBytes() * bmp.getHeight());
-                hackedBitmaps.remove(bmp);
-            }
-            allocatedBitmaps.remove(bmp);
-    	}
+		public boolean trackFree(long size) {
+			if (runtime == null)
+				return false;
+			try {
+				Object res = trackFree.invoke(runtime, Long.valueOf(size));
+				return (res instanceof Boolean) ? (Boolean) res : true;
+			} catch (IllegalArgumentException e) {
+				return false;
+			} catch (IllegalAccessException e) {
+				return false;
+			} catch (InvocationTargetException e) {
+				return false;
+			}
+		}
 
-    	public void freeAll() {
-    		for (Bitmap bmp : new LinkedList<Bitmap>(allocatedBitmaps))
-    			freeBitmap(bmp);
-    	}
+		public Bitmap allocBitmap(Bitmap bmp) {
+			if (useHack) {
+				trackFree(bmp.getRowBytes() * bmp.getHeight());
+				hackedBitmaps.add(bmp);
+			}
+			allocatedBitmaps.add(bmp);
+			return bmp;
+		}
 
-    	//may be turned to changeable
-    	private final boolean useHack = true;
-    	
-    	private Set<Bitmap> allocatedBitmaps = new HashSet<Bitmap>(); 
-    	private Set<Bitmap> hackedBitmaps = new HashSet<Bitmap>(); 
-        
-        
-        public VMRuntimeHack() {
-            boolean success = false;
-            try {
-                Class<?> cl = Class.forName("dalvik.system.VMRuntime");
-                Method getRt = cl.getMethod("getRuntime", new Class[0]);
-                runtime = getRt.invoke(null, new Object[0]);
-                trackAllocation = cl.getMethod("trackExternalAllocation", new Class[] {long.class});
-                trackFree = cl.getMethod("trackExternalFree", new Class[] {long.class});
-                success = true;
-            } catch (ClassNotFoundException e) {
-            } catch (SecurityException e) {
-            } catch (NoSuchMethodException e) {
-            } catch (IllegalArgumentException e) {
-            } catch (IllegalAccessException e) {
-            } catch (InvocationTargetException e) {
-            }
-            if (!success) {
-                ServiceUtils.log("VMRuntime hack does not work!");
-                runtime = null;
-                trackAllocation = null;
-                trackFree = null;
-            }
-        }
-    }
+		public void freeBitmap(Bitmap bmp) {
+			bmp.recycle();
+			if (hackedBitmaps.contains(bmp)) {
+				trackAlloc(bmp.getRowBytes() * bmp.getHeight());
+				hackedBitmaps.remove(bmp);
+			}
+			allocatedBitmaps.remove(bmp);
+		}
+
+		public void freeAll() {
+			for (Bitmap bmp : new LinkedList<Bitmap>(allocatedBitmaps))
+				freeBitmap(bmp);
+		}
+
+		// may be turned to changeable
+		private final boolean useHack = true;
+
+		private Set<Bitmap> allocatedBitmaps = new HashSet<Bitmap>();
+		private Set<Bitmap> hackedBitmaps = new HashSet<Bitmap>();
+
+		public VMRuntimeHack() {
+			boolean success = false;
+			try {
+				Class<?> cl = Class.forName("dalvik.system.VMRuntime");
+				Method getRt = cl.getMethod("getRuntime", new Class[0]);
+				runtime = getRt.invoke(null, new Object[0]);
+				trackAllocation = cl.getMethod("trackExternalAllocation", new Class[] { long.class });
+				trackFree = cl.getMethod("trackExternalFree", new Class[] { long.class });
+				success = true;
+			} catch (ClassNotFoundException e) {
+			} catch (SecurityException e) {
+			} catch (NoSuchMethodException e) {
+			} catch (IllegalArgumentException e) {
+			} catch (IllegalAccessException e) {
+			} catch (InvocationTargetException e) {
+			}
+			if (!success) {
+				ServiceUtils.log("VMRuntime hack does not work!");
+				runtime = null;
+				trackAllocation = null;
+				trackFree = null;
+			}
+		}
+	}
+
+	public static String[] getProxyTypes(AccountService aps, Context context) {
+		int id = 0;
+
+		if (aps.getServiceName().equals(context.getResources().getString(R.string.icq_service_name))) {
+			id = ICQService.PROXY_TYPE_ID;
+		}
+		if (aps.getServiceName().equals(context.getResources().getString(R.string.xmpp_service_name))) {
+			id = XMPPService.PROXY_TYPE_ID;
+		}
+		if (aps.getServiceName().equals(context.getResources().getString(R.string.mrim_service_name))) {
+			id = MrimService.PROXY_TYPE_ID;
+		}
+
+		if (id == 0) {
+			return null;
+		}
+
+		return context.getResources().getStringArray(id);
+	}
 }

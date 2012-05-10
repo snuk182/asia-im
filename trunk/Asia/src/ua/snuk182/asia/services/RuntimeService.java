@@ -1075,25 +1075,21 @@ public class RuntimeService extends Service {
 	}
 
 	private void connect(final Account a) {
-		new Runnable() {
+		new Thread() {
 
 			@Override
 			public void run() {
 				a.accountView.setConnectionState(AccountService.STATE_CONNECTING);
 				statusbarNotifyAccountChanged();
-				String secure = a.accountView.options.getString(getResources().getString(R.string.key_secure_login));
+				boolean secure = Boolean.parseBoolean(a.accountView.options.getString(getResources().getString(R.string.key_secure_login)));
 				try {
-					if (secure != null && secure.equalsIgnoreCase("true")) {
-						a.accountService.request(AccountService.REQ_CONNECT, a.accountView.status, a.accountView.xStatus, a.accountView.xStatusName, a.accountView.xStatusText, true);
-					} else {
-						a.accountService.request(AccountService.REQ_CONNECT, a.accountView.status, a.accountView.xStatus, a.accountView.xStatusName, a.accountView.xStatusText);
-					}
+					a.accountService.request(AccountService.REQ_CONNECT, a.accountView.status, a.accountView.xStatus, a.accountView.xStatusName, a.accountView.xStatusText, secure);
 				} catch (ProtocolException e) {
 					ServiceUtils.log(e);
 				}
 			}
 
-		}.run();
+		}.start();
 	}
 
 	private final IRuntimeService.Stub serviceBinder = new IRuntimeService.Stub() {
@@ -1849,6 +1845,7 @@ public class RuntimeService extends Service {
 				return ProtocolException.ERROR_NONE;
 			} catch (ProtocolException e) {
 				ServiceUtils.log(e);
+				notificationToast(e.getLocalizedMessage());
 				return e.errorCode;
 			}
 		}

@@ -34,6 +34,8 @@ public class ICQService extends AccountService {
 	private static final String LOGIN_HOST = "loginhost";
 	private static final String PASSWORD = "password";
 	private static final String UID = "uid";
+	
+	public static final int PROXY_TYPE_ID = 0;
 
 	private ICQServiceResponse icqResponse = new ICQServiceResponse(){
 

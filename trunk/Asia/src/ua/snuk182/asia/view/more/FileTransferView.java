@@ -35,8 +35,6 @@ public class FileTransferView extends ScrollView implements ITabContent, IHasFil
 		
 		tabWidgetLayout = new TabWidgetLayout(entryPoint);
 		
-		int size = (int) (32*entryPoint.metrics.density);
-		tabWidgetLayout.setLayoutParams(new LinearLayout.LayoutParams(size, size));
 		tabWidgetLayout.setImageResource(android.R.drawable.ic_menu_save);
 		//tabWidgetLayout.setScaleType(ScaleType.FIT_XY);
 		tabWidgetLayout.setText(account.getSafeName());

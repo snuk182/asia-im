@@ -6,13 +6,31 @@
 		<item>loginhost</item>
 		<item>loginport</item>
 		<item>pingtimeout</item>
+		<item>proxytype</item>
+		<item>proxyhost</item>
+		<item>proxyport</item>
+		<item>proxyuser</item>
+		<item>proxypw</item>
 	</string-array>
+	
 	<string-array name="xmpp_preference_defaults">
 		<item></item>
 		<item></item>
 		<item>jabber.ru</item>
 		<item>5222</item>
 		<item>200</item>
+		<item>none</item>
+		<item></item>
+		<item></item>
+		<item></item>
+		<item></item>
+	</string-array>
+	
+	<string-array name="xmpp_proxy_names">
+		<item>none</item>
+		<item>http</item>
+		<item>socks4</item>
+		<item>socks5</item>		
 	</string-array>
 	
 	<string-array name="xmpp_contact_menu_names">

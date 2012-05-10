@@ -19,6 +19,7 @@ import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterListener;
+import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.SmackConfiguration;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
@@ -27,6 +28,8 @@ import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.provider.PrivacyProvider;
 import org.jivesoftware.smack.provider.ProviderManager;
+import org.jivesoftware.smack.proxy.ProxyInfo;
+import org.jivesoftware.smack.proxy.ProxyInfo.ProxyType;
 import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.ChatState;
 import org.jivesoftware.smackx.ChatStateListener;
@@ -56,8 +59,6 @@ import org.jivesoftware.smackx.muc.ParticipantStatusListener;
 import org.jivesoftware.smackx.muc.RoomInfo;
 import org.jivesoftware.smackx.muc.SubjectUpdatedListener;
 import org.jivesoftware.smackx.packet.ChatStateExtension;
-import org.jivesoftware.smackx.packet.DiscoverItems;
-import org.jivesoftware.smackx.packet.DiscoverItems.Item;
 import org.jivesoftware.smackx.packet.LastActivity;
 import org.jivesoftware.smackx.packet.OfflineMessageInfo;
 import org.jivesoftware.smackx.packet.OfflineMessageRequest;
@@ -98,14 +99,17 @@ import android.content.Context;
 public class XMPPService extends AccountService implements ConnectionListener, MessageListener, ChatManagerListener, RosterListener, MessageEventNotificationListener, ChatStateListener, FileTransferListener {
 
 	private static final String LOGIN_PORT = "loginport";
-
 	private static final String LOGIN_HOST = "loginhost";
-
 	private static final String PASSWORD = "password";
-
 	private static final String JID = "jid";
-
+	private static final String PROXY_HOST = "proxyhost";
+	private static final String PROXY_PORT = "proxyport";
+	private static final String PROXY_TYPE = "proxytype";
+	private static final String PROXY_USER = "proxyuser";
+	private static final String PROXY_PW = "proxypw";
+	
 	private static final Random random = new Random();
+	public static final int PROXY_TYPE_ID = R.array.xmpp_proxy_names;
 
 	private OnlineInfo onlineInfo;
 
@@ -117,7 +121,6 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 
 	private volatile boolean isContactListReady = false;
 
-	@SuppressWarnings("unused")
 	private boolean isSecure = false;
 
 	String groupchatService = null;
@@ -215,6 +218,11 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 		options.put(LOGIN_HOST, loginHost);
 		options.put(LOGIN_PORT, loginPort + "");
 		options.put(PING_TIMEOUT, pingTimeout + "");
+		options.put(PROXY_HOST, null);
+		options.put(PROXY_PORT, "0");
+		options.put(PROXY_USER, null);
+		options.put(PROXY_PW, null);
+		options.put(PROXY_TYPE, "socks5");
 	}
 
 	public XMPPService(Context context) {
@@ -538,14 +546,7 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 		String roomJid = chatId.indexOf("@") > 1 ? chatId : chatId + "@" + groupchatService;
 		MultiUserChat chat = new MultiUserChat(connection, roomJid);
 		try {
-			/*
-			 * DiscussionHistory history = new DiscussionHistory();
-			 * history.setMaxStanzas(5); chat.join(nickName == null ? un :
-			 * nickName, chatPassword, history,
-			 * SmackConfiguration.getPacketReplyTimeout());
-			 */
-
-			chat.join(nickName == null ? un : nickName, chatPassword);
+			chat.join(nickName == null ? un : nickName, chatPassword, null, 300000);
 
 			fillWithListeners(chat);
 			multichats.put(chat.getRoom(), chat);
@@ -849,30 +850,44 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 			} catch (Exception e) {
 			}
 		}
-
-		if (args.length > 9) {
-			isSecure = true;
+		
+		String proxyHost = sharedPreferences.get(PROXY_HOST);
+		String proxyPort = sharedPreferences.get(PROXY_PORT);
+		String proxyUser = sharedPreferences.get(PROXY_USER);
+		String proxyPw = sharedPreferences.get(PROXY_PW);
+		String proxyType = sharedPreferences.get(PROXY_TYPE);
+		final ProxyInfo proxyInfo;
+		if(proxyHost != null && proxyPort != null && !proxyHost.isEmpty() && !proxyPort.isEmpty() && proxyType != null && !proxyType.equalsIgnoreCase("none")){
+			proxyInfo = new ProxyInfo(getProxyType(proxyType), proxyHost, Integer.parseInt(proxyPort.trim().replaceAll("\n", "")), proxyUser, proxyPw);
 		} else {
-			isSecure = false;
+			proxyInfo = null;
 		}
 
+		isSecure = (Boolean) args[4];
+		
 		new Thread("XMPP connector " + getJID()) {
 			@Override
 			public void run() {
 				SmackConfiguration.setPacketReplyTimeout(120000);
-				ConnectionConfiguration config = new ConnectionConfiguration(loginHost, loginPort);
+				ConnectionConfiguration config;
+				
+				if (proxyInfo != null){
+					config = new ConnectionConfiguration(loginHost, loginPort, proxyInfo);
+				} else {
+					config = new ConnectionConfiguration(loginHost, loginPort);
+				}
+				
 				String login;
 				
-				//goddamn gtalk, i dunno what he wants...
-				if (isGmail()) {
-					//SASLAuthentication.supportSASLMechanism("PLAIN", 0);
-					//config.setSocketFactory(new DummySSLSocketFactory());
-					config.setSASLAuthenticationEnabled(false);
-					//login = getJID();
-					login = un;
+				if (isGmail() && isSecure) {
+					SASLAuthentication.supportSASLMechanism("PLAIN", 0);
+					login = getJID();
 				} else {
 					login = un;
 				}
+				
+				config.setSASLAuthenticationEnabled(isSecure);	
+				
 				config.setServiceName(serviceName);
 				configure(ProviderManager.getInstance());
 				connection = new XMPPConnection(config);
@@ -932,6 +947,17 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 				}
 			}
 		}.start();
+	}
+
+	private ProxyType getProxyType(String proxyType) {
+		if (proxyType.equalsIgnoreCase("http")){
+			return ProxyType.HTTP;
+		} else if (proxyType.equalsIgnoreCase("socks4")){
+			return ProxyType.SOCKS4;
+		} else if (proxyType.equalsIgnoreCase("socks5")){
+			return ProxyType.SOCKS5;
+		}
+		return ProxyType.NONE;
 	}
 
 	protected boolean isGmail() {
@@ -1250,20 +1276,20 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 
 		ServiceDiscoveryManager discoManager = ServiceDiscoveryManager.getInstanceFor(connection);
 
-		try {
+		resetHeartbeat();
+		
+		/*try {
 			DiscoverItems discoItems = discoManager.discoverItems(serviceName);
 			resetHeartbeat();
 
 			Iterator<Item> it = discoItems.getItems();
 			while (it.hasNext()) {
 				DiscoverItems.Item item = (DiscoverItems.Item) it.next();
-				System.out.println(item.getEntityID());
-				System.out.println(item.getNode());
-				System.out.println(item.getName());
+				log(item.getEntityID());
 			}
 		} catch (XMPPException e) {
 			log(e);
-		}
+		}*/
 	}
 
 	@Override
