@@ -11,11 +11,13 @@ import java.util.Map;
 
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.RosterGroup;
+import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.Presence.Mode;
 import org.jivesoftware.smack.packet.Presence.Type;
+import org.jivesoftware.smack.packet.RosterPacket;
 import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.MessageEventManager;
 import org.jivesoftware.smackx.muc.HostedRoom;
@@ -148,11 +150,14 @@ public final class XMPPEntityAdapter {
 		buddy.name = entry.getName();
 		buddy.id = entry.getUser().hashCode();
 		buddy.clientId = getClientId(entry.getUser());
+		if (entry.getStatus()!=null && entry.getStatus().equals(RosterPacket.ItemStatus.SUBSCRIPTION_PENDING)){
+			buddy.visibility = Buddy.VIS_NOT_AUTHORIZED;
+		}
 		
 		return buddy;
 	}
 	
-	public static final BuddyGroup rosterGroup2BuddyGroup(RosterGroup entry, String ownerUid, byte serviceId){
+	public static final BuddyGroup rosterGroup2BuddyGroup(RosterGroup entry, String ownerUid, byte serviceId, List<Buddy> buddies){
 		if (entry == null){
 			return null;
 		}
@@ -160,7 +165,12 @@ public final class XMPPEntityAdapter {
 		group.id = entry.hashCode();
 		group.name = entry.getName();
 		for (RosterEntry buddy: entry.getEntries()){
-			group.buddyList.add(buddy.getUser().hashCode());
+			for (Buddy buu : buddies){
+				if (buddy.getUser().hashCode() == buu.id){
+					buu.groupId = group.id;
+					group.buddyList.add(buu.id);
+				}
+			}			
 		}
 		return group;
 	}
@@ -176,13 +186,13 @@ public final class XMPPEntityAdapter {
 		return buddies;
 	}
 	
-	public static final List<BuddyGroup> rosterGroupCollection2BuddyGroupList(Collection<RosterGroup> entries, String ownerUid, byte serviceId){
+	public static final List<BuddyGroup> rosterGroupCollection2BuddyGroupList(Collection<RosterGroup> entries, String ownerUid, byte serviceId, List<Buddy> buddies){
 		if (entries == null){
 			return null;
 		}
 		List<BuddyGroup> groups = new ArrayList<BuddyGroup>(entries.size());
 		for (RosterGroup entry: entries){
-			groups.add(rosterGroup2BuddyGroup(entry, ownerUid, serviceId));
+			groups.add(rosterGroup2BuddyGroup(entry, ownerUid, serviceId, buddies));
 		}
 		return Collections.unmodifiableList(groups);
 	}
@@ -325,5 +335,18 @@ public final class XMPPEntityAdapter {
 			map.put(buddy.protocolUid, buddy);
 			buddy.id = buddyId.hashCode();
 		}		
+	}
+
+	public static RosterEntry buddy2RosterEntry(XMPPConnection connection, Buddy buddy) {		
+		return connection.getRoster().getEntry(buddy.protocolUid);
+	}
+
+	public static RosterGroup buddyGroup2RosterEntry(XMPPConnection connection, BuddyGroup buddyGroup) {
+		for (RosterGroup group: connection.getRoster().getGroups()){
+			if (group.hashCode() == buddyGroup.id){
+				return group;
+			}
+		}
+		return null;
 	}
 }

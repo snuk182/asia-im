@@ -18,11 +18,15 @@ import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.Roster;
+import org.jivesoftware.smack.Roster.SubscriptionMode;
+import org.jivesoftware.smack.RosterEntry;
+import org.jivesoftware.smack.RosterGroup;
 import org.jivesoftware.smack.RosterListener;
 import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.SmackConfiguration;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.Presence;
@@ -59,6 +63,8 @@ import org.jivesoftware.smackx.muc.ParticipantStatusListener;
 import org.jivesoftware.smackx.muc.RoomInfo;
 import org.jivesoftware.smackx.muc.SubjectUpdatedListener;
 import org.jivesoftware.smackx.packet.ChatStateExtension;
+import org.jivesoftware.smackx.packet.DiscoverItems;
+import org.jivesoftware.smackx.packet.DiscoverItems.Item;
 import org.jivesoftware.smackx.packet.LastActivity;
 import org.jivesoftware.smackx.packet.OfflineMessageInfo;
 import org.jivesoftware.smackx.packet.OfflineMessageRequest;
@@ -98,6 +104,13 @@ import android.content.Context;
 
 public class XMPPService extends AccountService implements ConnectionListener, MessageListener, ChatManagerListener, RosterListener, MessageEventNotificationListener, ChatStateListener, FileTransferListener {
 
+	private String un = null;
+	private String pw = null;
+	private String serviceName = null;
+
+	private String loginHost = "jabber.ru";
+	private int loginPort = 5222;
+
 	private static final String LOGIN_PORT = "loginport";
 	private static final String LOGIN_HOST = "loginhost";
 	private static final String PASSWORD = "password";
@@ -107,7 +120,7 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 	private static final String PROXY_TYPE = "proxytype";
 	private static final String PROXY_USER = "proxyuser";
 	private static final String PROXY_PW = "proxypw";
-	
+
 	private static final Random random = new Random();
 	public static final int PROXY_TYPE_ID = R.array.xmpp_proxy_names;
 
@@ -193,22 +206,37 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 
 	@Override
 	public void entriesUpdated(Collection<String> addresses) {
+		try {
+			clUpdated();
+		} catch (ProtocolException e) {
+			ServiceUtils.log(e);
+		}
 	}
 
 	@Override
 	public void entriesDeleted(Collection<String> addresses) {
+		try {
+			clUpdated();
+		} catch (ProtocolException e) {
+			ServiceUtils.log(e);
+		}
 	}
 
 	@Override
 	public void entriesAdded(Collection<String> addresses) {
+		try {
+			clUpdated();
+		} catch (ProtocolException e) {
+			ServiceUtils.log(e);
+		}
 	}
 
-	private String un = null;
-	private String pw = null;
-	private String serviceName = null;
-
-	private String loginHost = "jabber.ru";
-	private int loginPort = 5222;
+	private void clUpdated() throws ProtocolException {
+		Roster roster = connection.getRoster();
+		List<Buddy> buddies = XMPPEntityAdapter.rosterEntryCollection2BuddyList(XMPPService.this, roster.getEntries());
+		List<BuddyGroup> groups = XMPPEntityAdapter.rosterGroupCollection2BuddyGroupList(roster.getGroups(), getJID(), serviceId, buddies);
+		serviceResponse.respond(IAccountServiceResponse.RES_CLUPDATED, getServiceId(), buddies, groups);
+	}
 
 	public XMPPService(Context context, IAccountServiceResponse serviceResponse, byte serviceId) {
 		super(context, serviceResponse, serviceId);
@@ -252,6 +280,7 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 			addBuddy((Buddy) args[0], (BuddyGroup) args[1]);
 			break;
 		case AccountService.REQ_REMOVEBUDDY:
+			removeBuddy((Buddy) args[0]);
 			break;
 		case AccountService.REQ_MOVEBUDDIES:
 			break;
@@ -266,8 +295,10 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 		case AccountService.REQ_SETEXTENDEDSTATUS:
 			break;
 		case AccountService.REQ_AUTHREQUEST:
+			subscriptionRequest((Buddy)args[0], (String)args[1]);
 			break;
 		case AccountService.REQ_AUTHRESPONSE:
+			respondSubscriptionAnswer((String)args[0], (Boolean)args[1]);
 			break;
 		case AccountService.REQ_SEARCHFORBUDDY_BY_UID:
 			break;
@@ -290,10 +321,13 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 		case AccountService.REQ_GETEXTENDEDSTATUS:
 			break;
 		case AccountService.REQ_RENAMEBUDDY:
+			renameBuddy((Buddy)args[0]);
 			break;
 		case AccountService.REQ_RENAMEGROUP:
+			renameGroup((BuddyGroup) args[0]);
 			break;
 		case AccountService.REQ_MOVEBUDDY:
+			moveBuddy((Buddy) args[0], (BuddyGroup) args[2]);
 			break;
 		case AccountService.REQ_GETGROUPLIST:
 			break;
@@ -317,6 +351,7 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 			getPersonalInfo((String) args[0]);
 			break;
 		case AccountService.REQ_REMOVEGROUP:
+			removeGroup((BuddyGroup) args[0]);
 			break;
 		case AccountService.REQ_SENDTYPING:
 			if (connection == null) {
@@ -345,11 +380,125 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 		return null;
 	}
 
-	private void addGroup(final BuddyGroup buddyGroup) {
-		new Thread(){
-			
+	private void respondSubscriptionAnswer(final String buddyJid, Boolean accept) {
+		if (accept){
+			new Thread(){
+				@Override
+				public void run(){
+					Presence packet = new Presence(Presence.Type.subscribed);
+					packet.setTo(buddyJid);
+					packet.setFrom(getJID());
+					connection.sendPacket(packet);
+				}
+			}.start();
+		}
+	}
+
+	private void subscriptionRequest(Buddy buddy, String string) {
+		//TODO
+	}
+
+	private void renameBuddy(Buddy buddy) {
+		//TODO
+	}
+
+	private void renameGroup(final BuddyGroup buddyGroup) {
+		new Thread() {
+
 			@Override
-			public void run(){
+			public void run() {
+				try {
+					RosterGroup rgroup = XMPPEntityAdapter.buddyGroup2RosterEntry(connection, buddyGroup);
+
+					for (RosterEntry entry : rgroup.getEntries()) {
+						connection.getRoster().createEntry(entry.getUser(), entry.getName(), new String[] { buddyGroup.name });
+					}
+
+					serviceResponse.respond(IAccountServiceResponse.RES_GROUPMODIFIED, serviceId, buddyGroup);
+				} catch (Exception e) {
+					try {
+						serviceResponse.respond(IAccountServiceResponse.RES_NOTIFICATION, serviceId, e.getLocalizedMessage());
+					} catch (ProtocolException e1) {
+						log(e);
+					}
+				}
+			}
+		}.start();
+	}
+
+	private void moveBuddy(final Buddy buddy, final BuddyGroup newGroup) {
+		new Thread() {
+			@Override
+			public void run() {
+				try {
+					Roster roster = connection.getRoster();
+					roster.createEntry(buddy.protocolUid, buddy.name, new String[] { newGroup.name });
+					buddy.groupId = roster.getGroup(newGroup.name).hashCode();
+					serviceResponse.respond(IAccountServiceResponse.RES_BUDDYMODIFIED, serviceId, XMPPEntityAdapter.rosterEntry2Buddy(XMPPService.this, roster.getEntry(buddy.protocolUid)));
+				} catch (XMPPException e) {
+					try {
+						serviceResponse.respond(IAccountServiceResponse.RES_NOTIFICATION, serviceId, e.getLocalizedMessage());
+					} catch (ProtocolException e1) {
+						log(e);
+					}
+				} catch (ProtocolException e) {
+					log(e);
+				}
+			}
+		}.start();
+	}
+
+	private void removeGroup(final BuddyGroup buddyGroup) {
+		new Thread() {
+
+			@Override
+			public void run() {
+				try {
+					RosterGroup rgroup = XMPPEntityAdapter.buddyGroup2RosterEntry(connection, buddyGroup);
+
+					for (RosterEntry entry : rgroup.getEntries()) {
+						connection.getRoster().removeEntry(entry);
+					}
+
+					serviceResponse.respond(IAccountServiceResponse.RES_GROUPDELETED, serviceId, buddyGroup);
+				} catch (Exception e) {
+					try {
+						serviceResponse.respond(IAccountServiceResponse.RES_NOTIFICATION, serviceId, e.getLocalizedMessage());
+					} catch (ProtocolException e1) {
+						log(e);
+					}
+				}
+			}
+		}.start();
+	}
+
+	private void removeBuddy(final Buddy buddy) {
+		new Thread() {
+
+			@Override
+			public void run() {
+				try {
+					connection.getRoster().removeEntry(XMPPEntityAdapter.buddy2RosterEntry(connection, buddy));
+					serviceResponse.respond(IAccountServiceResponse.RES_BUDDYDELETED, serviceId, buddy);
+				} catch (XMPPException e) {
+					try {
+						serviceResponse.respond(IAccountServiceResponse.RES_NOTIFICATION, serviceId, e.getLocalizedMessage());
+					} catch (ProtocolException e1) {
+						log(e);
+					}
+				} catch (ProtocolException e) {
+					log(e);
+				}
+			}
+
+		}.start();
+	}
+
+	private void addGroup(final BuddyGroup buddyGroup) {
+		new Thread() {
+
+			@Override
+			public void run() {
 				try {
 					connection.getRoster().createGroup(buddyGroup.name);
 					serviceResponse.respond(IAccountServiceResponse.RES_GROUPADDED, serviceId, buddyGroup);
@@ -365,13 +514,14 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 	}
 
 	private void addBuddy(final Buddy buddy, final BuddyGroup buddyGroup) {
-		new Thread(){
-			
+		new Thread() {
+
 			@Override
-			public void run(){
+			public void run() {
 				try {
-					connection.getRoster().createEntry(buddy.protocolUid, buddy.name, new String[]{buddyGroup.name});
-					serviceResponse.respond(IAccountServiceResponse.RES_BUDDYADDED, serviceId, buddy);
+					Roster roster = connection.getRoster();
+					roster.createEntry(buddy.protocolUid, buddy.name, buddyGroup != null ? new String[] { buddyGroup.name } : new String[0]);
+					serviceResponse.respond(IAccountServiceResponse.RES_BUDDYADDED, serviceId, XMPPEntityAdapter.rosterEntry2Buddy(XMPPService.this, roster.getEntry(buddy.protocolUid)));
 				} catch (XMPPException e) {
 					try {
 						serviceResponse.respond(IAccountServiceResponse.RES_NOTIFICATION, serviceId, e.getLocalizedMessage());
@@ -382,7 +532,7 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 					log(e);
 				}
 			}
-			
+
 		}.start();
 	}
 
@@ -403,9 +553,11 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 							while (!transfer.isDone()) {
 								try {
 									if (transfer.getStatus() == Status.error) {
-										serviceResponse.respond(IAccountServiceResponse.RES_FILEPROGRESS, serviceId, (long) request.hashCode(), request.getFileName(), 100L, (long) transfer.getProgress() * 100, false, transfer.getError().getMessage(), fileMessage.from);
+										serviceResponse.respond(IAccountServiceResponse.RES_FILEPROGRESS, serviceId, (long) request.hashCode(), request.getFileName(), 100L, (long) transfer.getProgress() * 100, false, transfer.getError()
+												.getMessage(), fileMessage.from);
 									} else {
-										serviceResponse.respond(IAccountServiceResponse.RES_FILEPROGRESS, serviceId, (long) request.hashCode(), request.getFileName(), 100L, (long) transfer.getProgress() * 100, false, null, fileMessage.from);
+										serviceResponse
+												.respond(IAccountServiceResponse.RES_FILEPROGRESS, serviceId, (long) request.hashCode(), request.getFileName(), 100L, (long) transfer.getProgress() * 100, false, null, fileMessage.from);
 									}
 									Thread.sleep(1000);
 								} catch (InterruptedException e) {
@@ -443,7 +595,8 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 					while (!transfer.isDone()) {
 						try {
 							if (transfer.getStatus() == Status.error) {
-								serviceResponse.respond(IAccountServiceResponse.RES_FILEPROGRESS, serviceId, (long) files.hashCode(), file.getAbsolutePath(), 100L, (long) transfer.getProgress() * 100, false, transfer.getError().getMessage(), buddy.protocolUid);
+								serviceResponse.respond(IAccountServiceResponse.RES_FILEPROGRESS, serviceId, (long) files.hashCode(), file.getAbsolutePath(), 100L, (long) transfer.getProgress() * 100, false, transfer.getError()
+										.getMessage(), buddy.protocolUid);
 							} else {
 								serviceResponse.respond(IAccountServiceResponse.RES_FILEPROGRESS, serviceId, (long) files.hashCode(), file.getAbsolutePath(), 100L, (long) transfer.getProgress() * 100, false, null, buddy.protocolUid);
 							}
@@ -460,10 +613,10 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 	}
 
 	private void getFullInfo(final String uid) throws ProtocolException {
-		new Thread(){
-			
-			@Override 
-			public void run(){
+		new Thread() {
+
+			@Override
+			public void run() {
 				PersonalInfo info = new PersonalInfo();
 				info.protocolUid = uid;
 
@@ -472,7 +625,7 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 						RoomInfo room = MultiUserChat.getRoomInfo(connection, uid);
 						info.properties.putCharSequence(PersonalInfo.INFO_CHAT_DESCRIPTION, room.getDescription());
 						info.properties.putCharSequence(PersonalInfo.INFO_CHAT_OCCUPANTS, room.getOccupantsCount() + "");
-						info.properties.putCharSequence(PersonalInfo.INFO_CHAT_SUBJECT, room.getSubject());						
+						info.properties.putCharSequence(PersonalInfo.INFO_CHAT_SUBJECT, room.getSubject());
 					} catch (XMPPException e) {
 						log(e);
 					}
@@ -485,21 +638,21 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 						info.properties.putCharSequence(PersonalInfo.INFO_NICK, card.getNickName());
 						info.properties.putCharSequence(PersonalInfo.INFO_EMAIL, card.getEmailHome());
 
-						for (String prop: card.otherSimpleFields.keySet()){
-							info.properties.putCharSequence(prop, card.getField(prop));							
+						for (String prop : card.otherSimpleFields.keySet()) {
+							info.properties.putCharSequence(prop, card.getField(prop));
 						}
 					} catch (XMPPException e) {
 						log(e);
-					}					
+					}
 				}
-				
+
 				try {
 					serviceResponse.respond(IAccountServiceResponse.RES_USERINFO, serviceId, info);
 				} catch (ProtocolException e) {
 					log(e);
-				}				
+				}
 			}
-			
+
 		}.start();
 	}
 
@@ -850,44 +1003,44 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 			} catch (Exception e) {
 			}
 		}
-		
+
 		String proxyHost = sharedPreferences.get(PROXY_HOST);
 		String proxyPort = sharedPreferences.get(PROXY_PORT);
 		String proxyUser = sharedPreferences.get(PROXY_USER);
 		String proxyPw = sharedPreferences.get(PROXY_PW);
 		String proxyType = sharedPreferences.get(PROXY_TYPE);
 		final ProxyInfo proxyInfo;
-		if(proxyHost != null && proxyPort != null && !proxyHost.isEmpty() && !proxyPort.isEmpty() && proxyType != null && !proxyType.equalsIgnoreCase("none")){
+		if (proxyHost != null && proxyPort != null && !proxyHost.isEmpty() && !proxyPort.isEmpty() && proxyType != null && !proxyType.equalsIgnoreCase("none")) {
 			proxyInfo = new ProxyInfo(getProxyType(proxyType), proxyHost, Integer.parseInt(proxyPort.trim().replaceAll("\n", "")), proxyUser, proxyPw);
 		} else {
 			proxyInfo = null;
 		}
 
 		isSecure = (Boolean) args[4];
-		
+
 		new Thread("XMPP connector " + getJID()) {
 			@Override
 			public void run() {
 				SmackConfiguration.setPacketReplyTimeout(120000);
 				ConnectionConfiguration config;
-				
-				if (proxyInfo != null){
+
+				if (proxyInfo != null) {
 					config = new ConnectionConfiguration(loginHost, loginPort, proxyInfo);
 				} else {
 					config = new ConnectionConfiguration(loginHost, loginPort);
 				}
-				
+
 				String login;
-				
+
 				if (isGmail() && isSecure) {
 					SASLAuthentication.supportSASLMechanism("PLAIN", 0);
 					login = getJID();
 				} else {
 					login = un;
 				}
-				
-				config.setSASLAuthenticationEnabled(isSecure);	
-				
+
+				config.setSASLAuthenticationEnabled(isSecure);
+
 				config.setServiceName(serviceName);
 				configure(ProviderManager.getInstance());
 				connection = new XMPPConnection(config);
@@ -898,7 +1051,9 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 					serviceResponse.respond(IAccountServiceResponse.RES_CONNECTING, serviceId, 2);
 					new ServiceDiscoveryManager(connection);
 					connection.login(login, pw, "AsiaIM");
+					connection.addPacketListener(subscriptionListener, subscriptionFilter);
 					Roster roster = connection.getRoster();
+					roster.setSubscriptionMode(SubscriptionMode.manual);
 					roster.addRosterListener(XMPPService.this);
 					/*
 					 * ServiceDiscoveryManager discoManager = new
@@ -914,7 +1069,7 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 						Thread.sleep(500);
 					}
 					List<Buddy> buddies = XMPPEntityAdapter.rosterEntryCollection2BuddyList(XMPPService.this, roster.getEntries());
-					List<BuddyGroup> groups = XMPPEntityAdapter.rosterGroupCollection2BuddyGroupList(roster.getGroups(), getJID(), serviceId);
+					List<BuddyGroup> groups = XMPPEntityAdapter.rosterGroupCollection2BuddyGroupList(roster.getGroups(), getJID(), serviceId, buddies);
 					serviceResponse.respond(IAccountServiceResponse.RES_CONNECTING, serviceId, 7);
 					connection.getChatManager().addChatListener(XMPPService.this);
 					try {
@@ -950,11 +1105,11 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 	}
 
 	private ProxyType getProxyType(String proxyType) {
-		if (proxyType.equalsIgnoreCase("http")){
+		if (proxyType.equalsIgnoreCase("http")) {
 			return ProxyType.HTTP;
-		} else if (proxyType.equalsIgnoreCase("socks4")){
+		} else if (proxyType.equalsIgnoreCase("socks4")) {
 			return ProxyType.SOCKS4;
-		} else if (proxyType.equalsIgnoreCase("socks5")){
+		} else if (proxyType.equalsIgnoreCase("socks5")) {
 			return ProxyType.SOCKS5;
 		}
 		return ProxyType.NONE;
@@ -1277,8 +1432,8 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 		ServiceDiscoveryManager discoManager = ServiceDiscoveryManager.getInstanceFor(connection);
 
 		resetHeartbeat();
-		
-		/*try {
+
+		try {
 			DiscoverItems discoItems = discoManager.discoverItems(serviceName);
 			resetHeartbeat();
 
@@ -1289,7 +1444,7 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 			}
 		} catch (XMPPException e) {
 			log(e);
-		}*/
+		}
 	}
 
 	@Override
@@ -1311,4 +1466,46 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 			log(e);
 		}
 	}
+
+	private PacketFilter subscriptionFilter = new PacketFilter() {
+		public boolean accept(Packet aPacket) {
+			if (aPacket instanceof Presence) {
+				Presence p = (Presence) aPacket;
+				return ((Presence.Type.subscribe.equals(p.getType())) 
+					|| (Presence.Type.unsubscribe.equals(p.getType()))
+					|| (Presence.Type.subscribed.equals(p.getType()))
+					|| (Presence.Type.unsubscribed.equals(p.getType())));
+			}
+			return false;
+		}
+	};
+        
+    private PacketListener subscriptionListener = new PacketListener() {
+		
+		@Override
+		public void processPacket(Packet packet) {
+			if (packet instanceof Presence) {
+				Presence p = (Presence) packet;
+				if (Presence.Type.subscribe.equals(p.getType())) {					
+					try {
+						serviceResponse.respond(IAccountServiceResponse.RES_AUTHREQUEST, getServiceId(), XMPPEntityAdapter.normalizeJID(p.getFrom()), "");
+					} catch (ProtocolException e) {
+						ServiceUtils.log(e);
+					}
+					
+				} else if (Presence.Type.unsubscribe.equals(p.getType())) {					
+					Presence ppacket = new Presence(Presence.Type.unsubscribed);
+					ppacket.setTo(packet.getFrom());
+					ppacket.setFrom(packet.getTo());
+					connection.sendPacket(ppacket);					
+				} else if (Presence.Type.unsubscribed.equals(p.getType()) || Presence.Type.subscribed.equals(p.getType())) {
+					try {
+						clUpdated();
+					} catch (ProtocolException e) {
+						ServiceUtils.log(e);
+					}
+				}  
+			}
+		}
+	};   
 }

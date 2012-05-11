@@ -246,5 +246,6 @@
     <string formatted="false" name="logparam_default">"%s"</string>
     <string name="label_chat_menu">Chat menu</string>
     <string name="label_account_menu">Account menu</string>
+    <string name="label_no_group">No group</string>
 
 </resources>

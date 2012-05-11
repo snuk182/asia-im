@@ -234,7 +234,8 @@
     <string formatted="false" name="logparam_default">"%s"</string>
     <string name="label_chat_menu">Меню чата</string>
     <string name="label_account_menu">Меню облікового запису</string>
-
+	<string name="label_no_group">Без групи</string>
+	
     <string name="label_security_preferences">Налаштування безпеки</string>
     
 </resources>

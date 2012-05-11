@@ -35,13 +35,13 @@
 	
 	<string-array name="xmpp_contact_menu_names">
 	    <item>@string/menu_value_delete_contact</item>
-		<item>@string/menu_value_ask_auth</item>
-		<item>@string/menu_value_rename</item>
+		<!-- <item>@string/menu_value_ask_auth</item> -->
+		<!-- <item>@string/menu_value_rename</item> -->
 		<item>@string/menu_value_move</item>
-		<item>@string/menu_value_to_permits</item>
+		<!-- <item>@string/menu_value_to_permits</item>
 		<item>@string/menu_value_from_permits</item>
 		<item>@string/menu_value_to_denys</item>
-		<item>@string/menu_value_from_denys</item>
+		<item>@string/menu_value_from_denys</item> -->
 		<item>@string/menu_value_view_info</item>
 		<item>@string/menu_value_join_chat</item>
 		<item>@string/menu_value_leave_chat</item>

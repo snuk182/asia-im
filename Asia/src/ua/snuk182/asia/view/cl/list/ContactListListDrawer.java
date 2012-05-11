@@ -16,8 +16,6 @@ import ua.snuk182.asia.services.api.AccountService;
 import ua.snuk182.asia.view.ViewUtils;
 import ua.snuk182.asia.view.cl.ContactList;
 import ua.snuk182.asia.view.cl.IContactListDrawer;
-import ua.snuk182.asia.view.cl.grid.ContactListGridGroupItem;
-import ua.snuk182.asia.view.cl.grid.ContactListGridItem;
 import android.os.RemoteException;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,6 +30,7 @@ public class ContactListListDrawer extends ScrollView implements IContactListDra
 	private ContactListListGroupItem notInListGroup;
 	private ContactListListGroupItem onlineGroup;
 	private ContactListListGroupItem chatsGroup;
+	private ContactListListGroupItem noGroup;
 
 	private LinearLayout contactList;
 	protected ContactList parent;
@@ -85,11 +84,12 @@ public class ContactListListDrawer extends ScrollView implements IContactListDra
 			offlineGroup.getBuddyList().clear();
 			notInListGroup.getBuddyList().clear();
 			chatsGroup.getBuddyList().clear();
+			noGroup.getBuddyList().clear();
 			onlineGroup.getBuddyList().clear();
 
 			groups.add(unreadGroup);
 
-			if (showGroups && parent.account.getBuddyGroupList().size() > 0) {
+			if (showGroups) {
 				Collections.sort(parent.account.getBuddyGroupList());
 				for (final BuddyGroup group : parent.account.getBuddyGroupList()) {
 					ContactListListGroupItem clgroup = new ContactListListGroupItem(getEntryPoint(), null, contactList, group.id + "", group.name);
@@ -123,7 +123,7 @@ public class ContactListListDrawer extends ScrollView implements IContactListDra
 				ContactListListItem item = getItem(buddy, showIcons);
 				item.color();
 
-				if (showGroups && parent.account.getBuddyGroupList().size() > 0) {
+				if (showGroups) {
 					if (buddy.unread > 0) {
 						unreadGroup.getBuddyList().add(item);
 					} else if (buddy.groupId == AccountService.NOT_IN_LIST_GROUP_ID) {
@@ -132,6 +132,8 @@ public class ContactListListDrawer extends ScrollView implements IContactListDra
 						chatsGroup.getBuddyList().add(item);
 					} else if (buddy.status == Buddy.ST_OFFLINE && !showOffline) {
 						continue;
+					} else if (buddy.groupId == AccountService.NO_GROUP_ID) {
+						noGroup.getBuddyList().add(item);
 					} else {
 						for (int i = 1; i < groups.size(); i++) {
 							ContactListListGroupItem group = groups.get(i);
@@ -171,6 +173,10 @@ public class ContactListListDrawer extends ScrollView implements IContactListDra
 				groups.add(chatsGroup);
 			}
 
+			if (noGroup.getBuddyList().size() > 0) {
+				groups.add(noGroup);
+			}
+			
 			if (!showGroups && showOffline) {
 				groups.add(offlineGroup);
 			}
@@ -196,7 +202,7 @@ public class ContactListListDrawer extends ScrollView implements IContactListDra
 		}
 	};
 
-	public ContactListListDrawer(EntryPoint entryPoint, AccountView account, ContactList parent) {
+	public ContactListListDrawer(EntryPoint entryPoint, AccountView account, final ContactList parent) {
 		super(entryPoint);
 
 		this.parent = parent;
@@ -217,6 +223,25 @@ public class ContactListListDrawer extends ScrollView implements IContactListDra
 
 		chatsGroup = new ContactListListGroupItem(entryPoint, null, contactList, ServiceConstants.VIEWGROUP_CHATS, getResources().getString(R.string.label_chats_group));
 
+		noGroup = new ContactListListGroupItem(entryPoint, null, contactList, ServiceConstants.VIEWGROUP_NOGROUP, getResources().getString(R.string.label_no_group));
+		noGroup.setOnLongClickListener(new OnLongClickListener() {
+
+			@Override
+			public boolean onLongClick(View v) {
+				try {
+					AccountView myacc = getEntryPoint().runtimeService.getAccountView(parent.account.serviceId);
+					if (myacc.getConnectionState() == AccountService.STATE_CONNECTED) {
+						ViewUtils.groupMenu(getEntryPoint(), parent.account, null);
+					}
+				} catch (NullPointerException npe) {
+					ServiceUtils.log(npe);
+				} catch (RemoteException e) {
+					getEntryPoint().onRemoteCallFailed(e);
+				}
+				return false;
+			}
+		});
+		
 		setFocusable(false);
 		LinearLayout.LayoutParams layout = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT);
 		layout.weight = 0.1f;
@@ -332,11 +357,13 @@ public class ContactListListDrawer extends ScrollView implements IContactListDra
 				tag = ServiceConstants.VIEWGROUP_NOT_IN_LIST;
 			} else if (buddy.visibility == Buddy.VIS_GROUPCHAT) {
 				tag = ServiceConstants.VIEWGROUP_CHATS;
+			} else if (showGroups && buddy.groupId == AccountService.NO_GROUP_ID) {
+				tag = ServiceConstants.VIEWGROUP_NOGROUP;
 			} else {
 				if (buddy.status == Buddy.ST_OFFLINE && !showGroups && showOffline) {
 					tag = ServiceConstants.VIEWGROUP_OFFLINE;
 				} else {
-					if (showGroups && parent.account.getBuddyGroupList().size() > 0) {
+					if (showGroups) {
 						tag = buddy.groupId + "";
 					} else {
 						tag = ServiceConstants.VIEWGROUP_ONLINE;
