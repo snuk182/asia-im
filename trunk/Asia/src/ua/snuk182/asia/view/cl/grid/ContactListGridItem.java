@@ -126,7 +126,7 @@ public class ContactListGridItem extends RelativeLayout implements ContactListIt
 			return;
 		}
 		if (layout == null){
-			setLayoutParams(new LayoutParams(itemSize, itemSize));
+			setLayoutParams(new LinearLayout.LayoutParams(itemSize, itemSize));
 		}
 		
 		//setGravity(Gravity.CENTER);					

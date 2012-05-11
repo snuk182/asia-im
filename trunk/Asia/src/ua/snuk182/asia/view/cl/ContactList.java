@@ -155,11 +155,12 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 		
 		MenuItem searchItem = menu.findItem(R.id.menuitem_search);
 		if (searchItem != null){
-			if (account!=null && account.getConnectionState() == AccountService.STATE_CONNECTED){
-				searchItem.setVisible(true);
-			} else {
-				searchItem.setVisible(false);
-			}
+			searchItem.setVisible(account!=null && account.getConnectionState() == AccountService.STATE_CONNECTED);			
+		}
+		
+		MenuItem addBuddyItem = menu.findItem(R.id.menuitem_add_buddy);
+		if (addBuddyItem != null){
+			addBuddyItem.setVisible(account!=null && account.getConnectionState() == AccountService.STATE_CONNECTED);			
 		}
 		
 		MenuItem editXStatusItem = menu.findItem(R.id.menuitem_editxstatus);
@@ -241,6 +242,9 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 	    	return true;
 	    case R.id.menuitem_visibility:
 	    	ViewUtils.showVisibilityMenu(getEntryPoint(), account);
+	    	return true;
+	    case R.id.menuitem_add_buddy:
+	    	ViewUtils.showAddBuddyDialog(getAccount(), null, getEntryPoint());
 	    	return true;
 	    case R.id.menuitem_connect:	
 	    	new Thread(){

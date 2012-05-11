@@ -236,5 +236,5 @@
     <string name="label_account_menu">Меню учетной записи</string>
 
     <string name="label_security_preferences">Настойки безопасности</string>
-    
+    <string name="label_no_group">Без группы</string>
 </resources>

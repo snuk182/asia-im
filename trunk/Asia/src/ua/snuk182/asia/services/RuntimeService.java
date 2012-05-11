@@ -1579,7 +1579,7 @@ public class RuntimeService extends Service {
 
 		@Override
 		public void moveBuddy(Buddy buddy, BuddyGroup oldGroup, BuddyGroup newGroup) throws RemoteException {
-			if (buddy == null || oldGroup == null || newGroup == null) {
+			if (buddy == null || newGroup == null) {
 				return;
 			}
 			Account account = getAccountInternal(buddy.serviceId);

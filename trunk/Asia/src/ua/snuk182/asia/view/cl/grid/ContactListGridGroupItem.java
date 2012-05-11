@@ -94,6 +94,7 @@ public class ContactListGridGroupItem extends LinearLayout implements OnClickLis
 			return;
 		}
 
+		//System.out.println(buddyList.size()+"-"+getTag());
 		subGroupCountText.setText(buddyList.size() + SPACE);
 		
 		int rowNum = buddyList.size() / columnCount + ((buddyList.size() % columnCount) > 0 ? 1 : 0);

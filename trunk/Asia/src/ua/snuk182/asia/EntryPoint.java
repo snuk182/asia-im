@@ -712,6 +712,7 @@ public class EntryPoint extends ActivityGroup {
 				@Override
 				public void run() {
 					Toast.makeText(getBaseContext(), getApplicationContext().getResources().getString(R.string.label_group) + group.name + getApplicationContext().getResources().getString(R.string.label_added), Toast.LENGTH_LONG).show();
+					mainScreen.visualStyleUpdated();
 				}
 				
 			});
@@ -724,8 +725,7 @@ public class EntryPoint extends ActivityGroup {
 				@Override
 				public void run() {
 					Toast.makeText(getBaseContext(), getApplicationContext().getResources().getString(R.string.label_buddy) + buddy.name + " (" + buddy.protocolUid + ")" + getApplicationContext().getResources().getString(R.string.label_added),
-							Toast.LENGTH_LONG).show();
-					
+							Toast.LENGTH_LONG).show();					
 					mainScreen.visualStyleUpdated();
 				}
 				
@@ -783,11 +783,10 @@ public class EntryPoint extends ActivityGroup {
 				public void run() {
 					Toast.makeText(getBaseContext(), getApplicationContext().getResources().getString(R.string.label_group) + group.name + getApplicationContext().getResources().getString(R.string.label_modified), Toast.LENGTH_LONG).show();
 					
-					mainScreen.visualStyleUpdated();
-				}
-				
+					//mainScreen.visualStyleUpdated();
+				}				
 			});
-			
+			mainScreen.accountUpdated(account, true);
 		}
 
 		@Override

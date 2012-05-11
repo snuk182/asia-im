@@ -112,20 +112,20 @@ public final class ViewUtils {
 
 	public static void groupMenu(final EntryPoint entryPoint, final AccountView account, final BuddyGroup group) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(entryPoint);
-		builder.setTitle(entryPoint.getResources().getString(R.string.label_group_menu) + " : " + group.name);
+		builder.setTitle(entryPoint.getResources().getString(R.string.label_group_menu) + (group!=null ? group.name :"" ));
 		final TypedArray values = entryPoint.getResources().obtainTypedArray(R.array.icq_group_menu_names);
 		builder.setItems(R.array.icq_group_menu_names, new OnClickListener() {
 
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				String value = values.getString(which);
-				if (value.equals(entryPoint.getResources().getString(R.string.menu_value_rename))) {
+				if (group!=null && value.equals(entryPoint.getResources().getString(R.string.menu_value_rename))) {
 					showGroupRenameDialog(group, entryPoint);
 				}
 				if (value.equals(entryPoint.getResources().getString(R.string.menu_value_add_group))) {
 					showAddGroupDialog(account, entryPoint);
 				}
-				if (value.equals(entryPoint.getResources().getString(R.string.menu_value_delete_group))) {
+				if (group!=null && value.equals(entryPoint.getResources().getString(R.string.menu_value_delete_group))) {
 					if (account.getBuddyGroupList().size() > 1) {
 						showRemoveGroupDialog(account, group, entryPoint);
 					}
@@ -642,7 +642,7 @@ public final class ViewUtils {
 		dialog.show();
 	}
 
-	public static void showAddBuddyDialog(final AccountView account, final Buddy buddy, final EntryPoint entryPoint) {
+	public static void showAddBuddyDialog(final AccountView account, final Buddy bb, final EntryPoint entryPoint) {
 		final Dialog dialog = new Dialog(entryPoint);
 
 		dialog.setContentView(R.layout.add_buddy);
@@ -650,37 +650,50 @@ public final class ViewUtils {
 
 		final Spinner groupSpinner = (Spinner) dialog.findViewById(R.id.buddy_group);
 		final EditText nameEditor = (EditText) dialog.findViewById(R.id.buddy_name);
+		final EditText idEditor = (EditText) dialog.findViewById(R.id.buddy_id);
+		
+		if (bb == null){
+			dialog.findViewById(R.id.id).setVisibility(View.VISIBLE);
+			idEditor.setVisibility(View.VISIBLE);
+			dialog.findViewById(R.id.name).setVisibility(View.GONE);
+			nameEditor.setVisibility(View.GONE);
+		} else {
+			dialog.findViewById(R.id.id).setVisibility(View.GONE);
+			idEditor.setVisibility(View.GONE);
+			dialog.findViewById(R.id.name).setVisibility(View.VISIBLE);
+			nameEditor.setVisibility(View.VISIBLE);
+			nameEditor.setText(bb.getName());
+		}
 
-		nameEditor.setText(buddy.getName());
-		ArrayAdapter<BuddyGroup> adapter = new ArrayAdapter<BuddyGroup>(entryPoint, android.R.layout.simple_spinner_dropdown_item, account.getBuddyGroupList());
+		ArrayAdapter<BuddyGroup> adapter = new ArrayAdapter<BuddyGroup>(entryPoint, android.R.layout.simple_spinner_item, account.getBuddyGroupList());
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		groupSpinner.setAdapter(adapter);
-		/*
-		 * groupSpinner.setOnItemSelectedListener(new OnItemSelectedListener(){
-		 * 
-		 * @Override public void onItemSelected(AdapterView<?> parent, View
-		 * view, int position, long id) {
-		 * buddy.setGroupId(((BuddyGroup)groupSpinner
-		 * .getSelectedItem()).getId()); }
-		 * 
-		 * @Override public void onNothingSelected(AdapterView<?> parent) { //
-		 * TODO Auto-generated method stub
-		 * 
-		 * }
-		 * 
-		 * });
-		 */
 		Button okBtn = (Button) dialog.findViewById(R.id.button_ok);
 		okBtn.setOnClickListener(new View.OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
+				Buddy buddy;
+				
 				try {
-					if (nameEditor.getText().toString().length() < 1) {
-						Toast.makeText(entryPoint, "Name too short", Toast.LENGTH_SHORT).show();
-						return;
-					}
+					if (bb == null) {
+						if (idEditor.getText().toString().length() < 1){
+							Toast.makeText(entryPoint, "ID too short", Toast.LENGTH_SHORT).show();
+							return;
+						}	
+						buddy = new Buddy(idEditor.getText().toString().trim().replaceAll("\n", ""), account);
+					} else {
+						if (nameEditor.getText().toString().length() < 1) {
+							Toast.makeText(entryPoint, "Name too short", Toast.LENGTH_SHORT).show();
+							return;
+						}
+						buddy = bb;
+					}				
+					
 					buddy.name = nameEditor.getText().toString();
-					buddy.groupId = ((BuddyGroup) groupSpinner.getSelectedItem()).id;
+					if (groupSpinner.getChildCount() > 0){
+						buddy.groupId = ((BuddyGroup) groupSpinner.getSelectedItem()).id;
+					}
 					entryPoint.runtimeService.addBuddy(buddy);
 					dialog.dismiss();
 				} catch (NullPointerException npe) {

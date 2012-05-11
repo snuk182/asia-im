@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 import ua.snuk182.asia.services.HistorySaver;
+import ua.snuk182.asia.services.api.AccountService;
 import ua.snuk182.asia.view.conversations.ConversationsView;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -129,7 +130,7 @@ public class Buddy implements Parcelable, Comparable<Buddy> {
 	/**
 	 * Buddy's group ID
 	 */
-	public int groupId;
+	public int groupId = AccountService.NO_GROUP_ID;
 	
 	/**
 	 * File sharing ability flag
