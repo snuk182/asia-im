@@ -81,6 +81,7 @@ public abstract class AccountService {
 	
 	public static final String ERR_HOST_NOT_FOUND = "host not found";
 	public static final int NOT_IN_LIST_GROUP_ID = -666;
+	public static final int NO_GROUP_ID = -777;
 	
 	public AccountService(Context context, IAccountServiceResponse serviceResponse, byte serviceId){
 		this.context = context;

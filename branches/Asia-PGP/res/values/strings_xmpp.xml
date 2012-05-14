@@ -8,5 +8,10 @@
 		<item>Service host</item>
 		<item>Service port</item>
 		<item>Ping timeout (seconds)</item>
+		<item>Proxy type</item>
+		<item>Proxy host</item>
+		<item>Proxy port</item>
+		<item>Proxy username</item>
+		<item>Proxy password</item>
 	</string-array>
 </resources>

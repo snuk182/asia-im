@@ -5,24 +5,105 @@ import java.util.Date;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+/**
+ * Online info entity. Carries buddy/account online info update.
+ * 
+ * @author Sergiy Plygun
+ *
+ */
 public class OnlineInfo implements Parcelable {
 	
+	/**
+	 * Status
+	 * 
+	 * @see Buddy#status
+	 */
 	public Byte userStatus = Buddy.ST_OFFLINE;
+	
+	/**
+	 * Extended status
+	 * 
+	 * @see Buddy#xstatus
+	 */
 	public byte xstatus = -1;
+	
+	/**
+	 * Extended status title.
+	 * 
+	 * @see Buddy#xstatusName
+	 */
 	public String xstatusName = null;
+	
+	/**
+	 * Extended status description
+	 * 
+	 * @see Buddy#xstatusDescription
+	 */
 	public String xstatusDescription = null;
+	
+	/**
+	 * Buddy's IP address
+	 * 
+	 * @see Buddy#externalIP
+	 */
 	public String extIP;
+	
+	/**
+	 * Buddy's online time in seconds
+	 */
 	public int onlineTime;
+	
+	/**
+	 * Buddy's signon date
+	 */
 	public Date signonTime;
+	
+	/**
+	 * Buddy's membership start date
+	 */
 	public Date memberSinceTime;
+	
+	/**
+	 * Visibility
+	 * 
+	 * @see Buddy#visibility
+	 */
 	public byte visibility;
+	
+	/**
+	 * Buddy's typing notification capability
+	 */
 	public boolean typingNotification = true;
 	//public List<String> capabilities;
+	
+	/**
+	 * Buddy's file sharing capability
+	 */
 	public boolean canFileShare = false;
+	
+	/**
+	 * Buddy's idle time
+	 */
 	public int idleTime;
+	
+	/**
+	 * Buddy's account create time
+	 */
 	public Date createTime;
+	
+	/**
+	 * Buddy's name/nick
+	 */
 	public String name;
+	
+	/**
+	 * Buddy's protocol UID
+	 */
 	public String protocolUid;
+	
+	/**
+	 * Buddy's userpic hash
+	 */
 	public String iconHash;
 	public byte secureOptions = Buddy.SECURE_NOSUPPORT;
 	

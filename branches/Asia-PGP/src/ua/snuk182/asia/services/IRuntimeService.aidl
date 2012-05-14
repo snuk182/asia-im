@@ -8,7 +8,6 @@ import ua.snuk182.asia.core.dataentity.ServiceMessage;
 import ua.snuk182.asia.core.dataentity.PersonalInfo;
 import ua.snuk182.asia.core.dataentity.TextMessage;
 import ua.snuk182.asia.core.dataentity.TabInfo;
-import ua.snuk182.asia.core.dataentity.ContactListViewGroup;
 import ua.snuk182.asia.services.IRuntimeServiceCallback;
 import ua.snuk182.asia.core.dataentity.MultiChatRoom;
 import ua.snuk182.asia.core.dataentity.MultiChatRoomOccupants;
@@ -23,8 +22,8 @@ interface IRuntimeService{
 	List<AccountView> getAccounts(boolean disabledToo);
 	Buddy getBuddy(byte serviceId, String buddyProtocolUid);
 	List<Buddy> getBuddies(byte serviceId, in List<String> buddyProtocolUid);
-	List<TabInfo> getSavedTabs();
-	void saveTabs(in List<TabInfo> tabInfos);
+	//List<TabInfo> getSavedTabs();
+	//void saveTabs(in List<TabInfo> tabInfos);
 	AccountView getAccountView(byte serviceId);
 	void connect(byte serviceId);
 	//void setAppVisible(boolean visible);

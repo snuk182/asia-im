@@ -14,6 +14,8 @@ import android.view.MenuItem;
 import android.widget.RelativeLayout;
 
 /**
+ * Splashscreen for tablet mode. Shown if no conversation tabs opened.
+ * 
  * @author Sergiy P
  *
  */
@@ -26,15 +28,12 @@ public class Splashscreen extends RelativeLayout implements ITabContent{
 		inflate.inflate(R.layout.splashscreen, this);
 		
 		setGravity(Gravity.CENTER);
+		
+		visualStyleUpdated();
 	}
 	
 	@Override 
 	public boolean onKeyDown(int i, KeyEvent event) {
-
-		  /*if (i == KeyEvent.KEYCODE_BACK) {
-		    Toast.makeText(getContext(), getResources().getString(R.string.label_sorry_back_button), Toast.LENGTH_LONG).show();
-		    return true; 
-		  }*/
 
 		  return false;
 	}
@@ -58,7 +57,7 @@ public class Splashscreen extends RelativeLayout implements ITabContent{
 	public TabWidgetLayout getTabWidgetLayout() {
 		TabWidgetLayout tabWidgetLayout = new TabWidgetLayout(getEntryPoint());
 		
-		tabWidgetLayout.setText(R.string.label_wait_starting);
+		tabWidgetLayout.setText(R.string.app_name);
 		return tabWidgetLayout;
 	}
 
@@ -71,7 +70,7 @@ public class Splashscreen extends RelativeLayout implements ITabContent{
 	public void visualStyleUpdated() {
 		if (EntryPoint.bgColor == EntryPoint.BGCOLOR_WALLPAPER){
 			setBackgroundColor(0x60000000);
-		}else {
+		} else {
 			try {
 				setBackgroundColor(0);
 			} catch (NumberFormatException e) {				

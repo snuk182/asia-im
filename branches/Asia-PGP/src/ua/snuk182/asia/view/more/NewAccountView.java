@@ -11,6 +11,7 @@ import ua.snuk182.asia.services.icq.ICQService;
 import ua.snuk182.asia.services.mrim.MrimService;
 import ua.snuk182.asia.services.xmpp.XMPPService;
 import ua.snuk182.asia.view.ITabContent;
+import ua.snuk182.asia.view.ViewUtils;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -32,92 +33,118 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class NewAccountView extends ScrollView implements ITabContent {
-	
+
 	private AccountView account;
 	private Spinner protocolChooser;
 	private LinearLayout customOptionsLayout;
-	
+
 	Bundle bu = null;
 	public String tag;
-	
-	public NewAccountView(EntryPoint entryPoint, final AccountView account){
+
+	public NewAccountView(EntryPoint entryPoint, final AccountView account) {
 		super(entryPoint);
 		LayoutInflater inflate = LayoutInflater.from(entryPoint);
 		inflate.inflate(R.layout.new_account_view, this);
-		
+
 		this.account = account;
-		
-		if (account != null){
-			tag = NewAccountView.class.getSimpleName()+" "+account.serviceId;
+
+		if (account != null) {
+			tag = NewAccountView.class.getSimpleName() + " " + account.serviceId;
 		} else {
 			try {
-				tag = NewAccountView.class.getSimpleName()+" "+new Random().nextInt();
-			} catch (NullPointerException npe) {	
+				tag = NewAccountView.class.getSimpleName() + " " + new Random().nextInt();
+			} catch (NullPointerException npe) {
 				ServiceUtils.log(npe);
-			} 
+			}
 		}
-		
-		protocolChooser = (Spinner) findViewById(R.id.newaccountprotocolchooser);
-		
-		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(), R.array.protocolnames, android.R.layout.simple_spinner_item);
-	    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-	    customOptionsLayout = (LinearLayout) findViewById(R.id.custom_options_layout);
-	    
+		protocolChooser = (Spinner) findViewById(R.id.newaccountprotocolchooser);
+
+		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(), R.array.protocolnames, android.R.layout.simple_spinner_item);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+		customOptionsLayout = (LinearLayout) findViewById(R.id.custom_options_layout);
+
 		protocolChooser.setAdapter(adapter);
-		
+
 		protocolChooser.setOnItemSelectedListener(new OnItemSelectedListener() {
 
 			@Override
-			public void onItemSelected(AdapterView<?> arg0, View arg1,
-					int arg2, long arg3) {
+			public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 				customOptionsLayout.removeAllViews();
-				
+
 				String[] options = null;
 				String[] optionNames = null;
 				String[] optionDefaults = null;
 				AccountService aps = null;
-				if (((String)protocolChooser.getSelectedItem()).equals(getContext().getResources().getString(R.string.icq_service_name))){
+				if (((String) protocolChooser.getSelectedItem()).equals(getContext().getResources().getString(R.string.icq_service_name))) {
 					aps = new ICQService(getContext());
 				}
-				if (((String)protocolChooser.getSelectedItem()).equals(getContext().getResources().getString(R.string.xmpp_service_name))){
+				if (((String) protocolChooser.getSelectedItem()).equals(getContext().getResources().getString(R.string.xmpp_service_name))) {
 					aps = new XMPPService(getContext());
 				}
-				if (((String)protocolChooser.getSelectedItem()).equals(getContext().getString(R.string.mrim_service_name))){
+				if (((String) protocolChooser.getSelectedItem()).equals(getContext().getString(R.string.mrim_service_name))) {
 					aps = new MrimService(getContext());
 				}
 				options = getResources().getStringArray(aps.getProtocolOptionNames());
 				optionNames = getResources().getStringArray(aps.getProtocolOptionStrings());
 				optionDefaults = getResources().getStringArray(aps.getProtocolOptionDefaults());
-				
-				if (options!=null){
-					for (int i=0; i<options.length; i++){
+
+				if (options != null) {
+					for (int i = 0; i < options.length; i++) {
 						String option = options[i];
-						
+
 						TextView tv = new TextView(getContext());
 						tv.setText(optionNames[i]);
 						tv.setTag("");
 						tv.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
 						tv.setTextSize(16);
-						
-						EditText et = new EditText(getContext());
-						et.setTag(option);
-						//et.setTag(R.string.description, optionNames[i]);
-						et.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
-						
-						et.setEnabled(account == null || !option.equals("uid"));
-						if (option.equals("password")){
-							et.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD );
-						}
-						
-						if (bu!=null){
-							et.setText(bu.getString(option));
-						}else {
-							et.setText(optionDefaults[i]);
-						}
-						
+
+						View v;
+						if (option.equals("proxytype")) {
+							String[] proxytypes = ViewUtils.getProxyTypes(aps, getContext());
+							
+							Spinner sp = new Spinner(getContext());
+							sp.setTag(option);
+							sp.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
+
+							ArrayAdapter<String> adapter = new ArrayAdapter<String>(getEntryPoint(), android.R.layout.simple_spinner_item, proxytypes);
+							adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+							
+							sp.setAdapter(adapter);
+							
+							if (bu != null) {
+								for (int ii=0; ii<proxytypes.length; ii++){
+									String optVal = bu.getString(option);
+									if (optVal != null && proxytypes[ii].equals(optVal)){
+										sp.setSelection(ii);
+										break;
+									}									
+								}
+							} 
+							
+							v = sp;
+						} else {
+							EditText et = new EditText(getContext());
+							et.setTag(option);
+							et.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
+
+							et.setEnabled(account == null || !option.equals("uid") || !option.equals("jid") || !option.equals("mrid"));
+							if (option.endsWith("password")) {
+								et.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+							}
+
+							if (bu != null) {
+								et.setText(bu.getString(option));
+							} else {
+								et.setText(optionDefaults[i]);
+							}
+							
+							v = et;
+						}						
+
 						customOptionsLayout.addView(tv);
-						customOptionsLayout.addView(et);
+						customOptionsLayout.addView(v);
 					}
 				}
 			}
@@ -127,115 +154,125 @@ public class NewAccountView extends ScrollView implements ITabContent {
 				customOptionsLayout.removeAllViews();
 			}
 		});
-		
-		if (account!=null){
-			for (int i=0; i<adapter.getCount(); i++){
-				if (adapter.getItem(i).equals(account.protocolName)){
+
+		if (account != null) {
+			for (int i = 0; i < adapter.getCount(); i++) {
+				if (adapter.getItem(i).equals(account.protocolName)) {
 					protocolChooser.setSelection(i);
 				}
-			}		
-			
+			}
+
 			try {
 				bu = entryPoint.runtimeService.getProtocolServiceOptions(account.serviceId);
 			} catch (RemoteException e) {
 				ServiceUtils.log(e);
 			}
 
-			
 		}
-		
+
 		Button createBtn = (Button) findViewById(R.id.newaccountokbutton);
-		if (account != null){
+		if (account != null) {
 			createBtn.setText(R.string.label_edit);
 		} else {
 			createBtn.setText(R.string.label_create);
 		}
-		createBtn.setOnClickListener(new OnClickListener(){
+		createBtn.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View arg0) {
 				createAccount();
 			}
 		});
-		
+
 		Button cancelBtn = (Button) findViewById(R.id.newaccountcancelbutton);
-		cancelBtn.setOnClickListener(new OnClickListener(){
+		cancelBtn.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
 				removeMe();
-			}});
+			}
+		});
 		visualStyleUpdated();
 	}
-	
-	private void removeMe(){
+
+	private void removeMe() {
 		getEntryPoint().mainScreen.removeTabByTag(tag);
 	}
-	
-	@Override 
+
+	@Override
 	public boolean onKeyDown(int i, KeyEvent event) {
 
-		  if (i == KeyEvent.KEYCODE_BACK) {
-		    //Toast.makeText(getEntryPoint(), getResources().getString(R.string.label_sorry_back_button), Toast.LENGTH_LONG).show();
-			  removeMe();
-		    return true; 
-		  }
+		if (i == KeyEvent.KEYCODE_BACK) {
+			// Toast.makeText(getEntryPoint(),
+			// getResources().getString(R.string.label_sorry_back_button),
+			// Toast.LENGTH_LONG).show();
+			removeMe();
+			return true;
+		}
 
-		  return false;
+		return false;
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-	    case R.id.menuitem_create:
-	    	createAccount();
-	    	return true;
-	    case R.id.menuitem_cancel:
-	    	removeMe();
-	    	return true;	    
-	    }
-	    return false;
+		case R.id.menuitem_create:
+			createAccount();
+			return true;
+		case R.id.menuitem_cancel:
+			removeMe();
+			return true;
+		}
+		return false;
 	}
-	
-	private void createAccount(){
+
+	private void createAccount() {
 		bu = new Bundle();
-		
+
 		AccountView localAccount = account;
-		
-		for (int i=0; i<customOptionsLayout.getChildCount(); i++){
-			if (!customOptionsLayout.getChildAt(i).getTag().equals("")){
-				EditText et = (EditText) customOptionsLayout.getChildAt(i);
-				bu.putString((String) et.getTag(), et.getText().toString());
+
+		for (int i = 0; i < customOptionsLayout.getChildCount(); i++) {
+			if (!customOptionsLayout.getChildAt(i).getTag().equals("")) {
+				View v = customOptionsLayout.getChildAt(i);
+				String value;
 				
-				if (localAccount == null){
-					if (et.getTag().equals("uid") || et.getTag().equals("jid") || et.getTag().equals("mrid")){
-						if (et.getText().toString().length()<1){
+				if (v instanceof Spinner){
+					value = (String) ((Spinner) v).getSelectedItem();
+				} else {
+					value = ((EditText)v).getText().toString();
+				}
+
+				bu.putString(v.getTag().toString(), value);
+				
+				if (localAccount == null) {
+					if (v.getTag().equals("uid") || v.getTag().equals("jid") || v.getTag().equals("mrid")) {
+						if (value.length() < 1) {
 							Toast.makeText(getEntryPoint(), R.string.label_you_must_enter_uid, Toast.LENGTH_SHORT).show();
 							return;
 						} else {
-							localAccount = new AccountView(et.getText().toString(), (String)protocolChooser.getSelectedItem());
+							localAccount = new AccountView(value, (String) protocolChooser.getSelectedItem());
 							try {
 								localAccount.serviceId = getEntryPoint().runtimeService.createAccount(localAccount);
 								account = localAccount;
-							} catch (NullPointerException npe) {	
+							} catch (NullPointerException npe) {
 								ServiceUtils.log(npe);
 							} catch (RemoteException e) {
 								Toast.makeText(getEntryPoint(), "Error creating account", 1000).show();
 							}
 						}
 					}
-				} 
+				}
 			}
 		}
-		
+
 		try {
 			getEntryPoint().runtimeService.saveProtocolServiceOptions(localAccount.serviceId, bu);
-		} catch (NullPointerException npe) {	
+		} catch (NullPointerException npe) {
 			ServiceUtils.log(npe);
 		} catch (RemoteException e) {
 			ServiceUtils.log(e);
 		}
-		if (account!=null){
+		if (account != null) {
 			removeMe();
 		}
 	}
@@ -248,60 +285,62 @@ public class NewAccountView extends ScrollView implements ITabContent {
 	@Override
 	public TabWidgetLayout getTabWidgetLayout() {
 		TabWidgetLayout tabWidgetLayout = new TabWidgetLayout(getEntryPoint());
-		
+
 		tabWidgetLayout.setText(R.string.label_new_account);
 		tabWidgetLayout.setImageResource(R.drawable.dark_asia_32);
-		//tabWidgetLayout.setScaleType(ScaleType.FIT_XY);
-		
+		// tabWidgetLayout.setScaleType(ScaleType.FIT_XY);
+
 		return tabWidgetLayout;
 	}
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		MenuItem createItem = menu.findItem(R.id.menuitem_create);
-		if (account != null){
+		if (account != null) {
 			createItem.setTitle(R.string.label_edit);
 		} else {
 			createItem.setTitle(R.string.label_create);
 		}
 		return false;
 	}
-	
+
 	@Override
 	public void visualStyleUpdated() {
-		if (EntryPoint.bgColor == EntryPoint.BGCOLOR_WALLPAPER){
+		if (EntryPoint.bgColor == EntryPoint.BGCOLOR_WALLPAPER) {
 			setBackgroundColor(0x60000000);
-			for (int i=0; i<customOptionsLayout.getChildCount(); i++){
-				if (customOptionsLayout.getChildAt(i).getTag().equals("")){
+			for (int i = 0; i < customOptionsLayout.getChildCount(); i++) {
+				if (customOptionsLayout.getChildAt(i).getTag().equals("")) {
 					TextView tv = (TextView) customOptionsLayout.getChildAt(i);
 					tv.setTextColor(ColorStateList.valueOf(0xff000000));
 				}
 			}
-			
-		}else {
+
+		} else {
 			try {
 				int color = EntryPoint.bgColor;
 				setBackgroundColor(0);
-				for (int i=0; i<customOptionsLayout.getChildCount(); i++){
-					if (customOptionsLayout.getChildAt(i).getTag().equals("")){
+				for (int i = 0; i < customOptionsLayout.getChildCount(); i++) {
+					if (customOptionsLayout.getChildAt(i).getTag().equals("")) {
 						TextView tv = (TextView) customOptionsLayout.getChildAt(i);
-						tv.setTextColor(ColorStateList.valueOf((color-0xff000000)>0x777777?0xff000000:0xffffffff));
+						tv.setTextColor(ColorStateList.valueOf((color - 0xff000000) > 0x777777 ? 0xff000000 : 0xffffffff));
 					}
 				}
-				
-			} catch (NumberFormatException e) {				
+
+			} catch (NumberFormatException e) {
 				ServiceUtils.log(e);
 			}
-		}				
+		}
 	}
-	
-	public EntryPoint getEntryPoint(){
+
+	public EntryPoint getEntryPoint() {
 		return (EntryPoint) getContext();
 	}
 
 	@Override
-	public void onStart() {}
+	public void onStart() {
+	}
 
 	@Override
-	public void configChanged() {}
+	public void configChanged() {
+	}
 }

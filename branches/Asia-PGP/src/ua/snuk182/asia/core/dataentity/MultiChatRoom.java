@@ -3,6 +3,12 @@ package ua.snuk182.asia.core.dataentity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+/**
+ * Multi-user chat room entity. Recognized as {@link Buddy}.
+ * 
+ * @author SergiyP
+ *
+ */
 public class MultiChatRoom extends Buddy{
 
 	public void readFromParcel(Parcel in){

@@ -25,7 +25,6 @@ import ua.snuk182.asia.view.cl.ContactList;
 import ua.snuk182.asia.view.conversations.ConversationsView;
 import ua.snuk182.asia.view.groupchats.GroupChatsView;
 import ua.snuk182.asia.view.more.AsiaCoreException;
-import ua.snuk182.asia.view.more.HistoryView;
 import ua.snuk182.asia.view.more.PreferencesView;
 import ua.snuk182.asia.view.more.SearchUsersView;
 import ua.snuk182.asia.view.more.TabWidgetLayout;
@@ -230,8 +229,13 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 
 	@Override
 	public void onStart() {
-		if (tabs.size() > 0 && getSelectedTab().content != null){
-			getSelectedTab().content.onStart();
+		try {
+			if (tabs.size() > 0 && getSelectedTab().content != null){
+				getSelectedTab().content.onStart();
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}		
 	}
 	
@@ -366,7 +370,7 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 			try {
 				Buddy budddy = getEntryPoint().runtimeService.getBuddy(message.serviceId, message.from);
 				budddy.unread++;
-				getEntryPoint().runtimeService.setUnread(budddy, message);
+				getEntryPoint().setUnread(budddy, message);
 			} catch (NullPointerException npe) {
 				ServiceUtils.log(npe);
 			} catch (RemoteException e) {
@@ -417,7 +421,7 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 
 	@Override
 	public void onDestroy() {
-		try {
+		/*try {
 			for (int i=tabs.size()-1; i>=0; i--){
 				if (tabs.get(i).tag.indexOf(ContactList.class.getSimpleName())<0 &&
 						tabs.get(i).tag.indexOf(ConversationsView.class.getSimpleName())<0 &&
@@ -431,7 +435,7 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 			ServiceUtils.log(npe);
 		} catch (RemoteException e){
 			getEntryPoint().onRemoteCallFailed(e);
-		}
+		}*/
 	}
 
 	@Override
@@ -459,7 +463,7 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 		try {
 			return tabs.get(getCurrentTab());
 		} catch (Exception e) {
-			//return tabs.get(0);
+			ServiceUtils.log(e);
 			return null;
 		}
 	}
