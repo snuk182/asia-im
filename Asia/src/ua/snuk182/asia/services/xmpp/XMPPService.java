@@ -1010,7 +1010,7 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 		String proxyPw = sharedPreferences.get(PROXY_PW);
 		String proxyType = sharedPreferences.get(PROXY_TYPE);
 		final ProxyInfo proxyInfo;
-		if (proxyHost != null && proxyPort != null && !proxyHost.isEmpty() && !proxyPort.isEmpty() && proxyType != null && !proxyType.equalsIgnoreCase("none")) {
+		if (proxyHost != null && proxyPort != null && proxyHost.length() > 0 && proxyPort.length() > 0 && proxyType != null && !proxyType.equalsIgnoreCase("none")) {
 			proxyInfo = new ProxyInfo(getProxyType(proxyType), proxyHost, Integer.parseInt(proxyPort.trim().replaceAll("\n", "")), proxyUser, proxyPw);
 		} else {
 			proxyInfo = null;
@@ -1431,8 +1431,6 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 
 		ServiceDiscoveryManager discoManager = ServiceDiscoveryManager.getInstanceFor(connection);
 
-		resetHeartbeat();
-
 		try {
 			DiscoverItems discoItems = discoManager.discoverItems(serviceName);
 			resetHeartbeat();
@@ -1504,7 +1502,9 @@ public class XMPPService extends AccountService implements ConnectionListener, M
 					} catch (ProtocolException e) {
 						ServiceUtils.log(e);
 					}
-				}  
+				} else {
+					presenceChanged(p);
+				}
 			}
 		}
 	};   
