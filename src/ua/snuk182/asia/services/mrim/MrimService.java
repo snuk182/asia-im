@@ -31,6 +31,7 @@ public class MrimService extends AccountService {
 	private static final String LOGIN_HOST = "loginhost";
 	private static final String PASSWORD = "password";
 	private static final String MRID = "mrid";
+	public static final int PROXY_TYPE_ID = 0;
 	
 	@Override
 	public Object request(short action, Object... args) throws ProtocolException {

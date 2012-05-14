@@ -5,12 +5,37 @@ import java.util.Date;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+/**
+ * Abstract message entity
+ * 
+ * @author SergiyP
+ *
+ */
 public class Message implements Parcelable {
 	
+	/**
+	 * Holder account's service id
+	 */
 	public byte serviceId;
+	
+	/**
+	 * Message text
+	 */
 	public String text;
+	
+	/**
+	 * Sender's protocol UID. 
+	 */
 	public String from;
+	
+	/**
+	 * The time message is sent/received
+	 */
 	public Date time;
+	
+	/**
+	 * Message ID
+	 */
 	public long messageId = 0;
 
 	public Message(Parcel arg0) {

@@ -15,7 +15,7 @@
   	<CheckBoxPreference android:persistent="false" android:title="@string/label_deny_messages_not_from_list" android:key="@string/key_deny_messages_not_from_list" android:defaultValue="false"/>
 </PreferenceCategory>
 <PreferenceCategory android:title="@string/xmpp_service_name">
-  	<!-- <CheckBoxPreference android:title="@string/label_secure_login" android:key="@string/key_secure_login" android:defaultValue="false"/> -->
+  	<CheckBoxPreference android:title="@string/label_secure_login" android:key="@string/key_secure_login" android:defaultValue="false"/>
   	<CheckBoxPreference android:title="@string/label_enable_pgp" android:key="@string/key_enable_pgp" android:defaultValue="false" />
   	<ua.snuk182.asia.view.more.widgets.FilePickerPreference
             android:key="@string/key_pgp_my"

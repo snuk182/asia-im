@@ -13,6 +13,7 @@ public final class ServiceConstants {
 	public static final String VIEWGROUP_OFFLINE = "AsiaOffline";
 	public static final String VIEWGROUP_UNREAD = "AsiaUnread";
 	public static final String VIEWGROUP_CHATS = "AsiaChats";
+	public static final String VIEWGROUP_NOGROUP = "AsiaNoGroup";
 	public static final String VIEWGROUP_NOT_IN_LIST = "AsiaNotInList";
 	
 	public static final byte NOTIFICATION_PLAIN = 0;

@@ -11,7 +11,6 @@ import ua.snuk182.asia.services.ServiceUtils;
 import ua.snuk182.asia.services.api.AccountService;
 import ua.snuk182.asia.view.IHasAccount;
 import ua.snuk182.asia.view.ITabContent;
-import android.app.ProgressDialog;
 import android.os.RemoteException;
 import android.text.InputFilter;
 import android.view.KeyEvent;
@@ -34,8 +33,6 @@ public class SearchUsersView extends LinearLayout implements ITabContent, IHasAc
 	Button searchBtn;
 	ListView searchResultsView;
 	List<PersonalInfo> infoList = new ArrayList<PersonalInfo>();
-
-	ProgressDialog progressDialog;
 
 	private SearchUsersAdapter searchAdapter;
 	
@@ -73,16 +70,12 @@ public class SearchUsersView extends LinearLayout implements ITabContent, IHasAc
 				}
 
 				try {
-					progressDialog = ProgressDialog.show(entryPoint, "", getResources().getString(R.string.label_wait), true);
-					progressDialog.setCancelable(true);
+					entryPoint.toggleWaitscreen(true);
 					entryPoint.runtimeService.searchUsersByUid(account.serviceId, uid);
 				} catch (NullPointerException npe) {
 					ServiceUtils.log(npe);
 				} catch (RemoteException e) {
-					if (progressDialog != null) {
-						progressDialog.dismiss();
-						progressDialog = null;
-					}
+					entryPoint.toggleWaitscreen(false);
 					getEntryPoint().onRemoteCallFailed(e);
 				}
 			}
@@ -98,11 +91,6 @@ public class SearchUsersView extends LinearLayout implements ITabContent, IHasAc
 	public boolean onKeyDown(int i, KeyEvent event) {
 
 		if (i == KeyEvent.KEYCODE_BACK) {
-			if (progressDialog != null) {
-				progressDialog.dismiss();
-				progressDialog = null;
-				return true;
-			}
 			entryPoint.mainScreen.removeTabByTag(SearchUsersView.class.getSimpleName()+ " " + account.serviceId);
 			return true;
 		}
@@ -111,10 +99,7 @@ public class SearchUsersView extends LinearLayout implements ITabContent, IHasAc
 	}
 
 	public void searchResult(List<PersonalInfo> infos) {
-		if (progressDialog != null) {
-			progressDialog.dismiss();
-			progressDialog = null;
-		}
+		getEntryPoint().toggleWaitscreen(false);
 		infoList.clear();
 		infoList.addAll(infos);
 		searchAdapter.notifyDataSetChanged();

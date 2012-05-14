@@ -9,9 +9,9 @@
 		android:title="@string/label_set_xstatus" />
 	--><item android:id="@+id/menuitem_showtabs" android:icon="@drawable/tabs"
 		android:title="@string/label_tabs_list" />
-	<!--<item android:id="@+id/menuitem_search" android:icon="@android:drawable/ic_menu_search"
-		android:title="@string/label_search_buddies" />
-	--><item android:id="@+id/menuitem_account" android:icon="@drawable/account_settings"
+	<item android:id="@+id/menuitem_add_buddy" android:icon="@android:drawable/ic_menu_add"
+		android:title="@string/label_add_buddy" />
+	<item android:id="@+id/menuitem_account" android:icon="@drawable/account_settings"
 		android:title="@string/label_account_settings" />
 	<item android:id="@+id/menuitem_prefs" android:icon="@drawable/preferences"
 		android:title="@string/label_preferences" />

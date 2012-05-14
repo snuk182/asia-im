@@ -45,6 +45,15 @@ public class HistoryView extends ListView implements ITabContent, IHasMessages {
 		}
 		
 	};
+	
+	private final Runnable refreshHistoryRunnable = new Runnable() {
+		public void run() {
+			messages.clear();
+			messages.addAll(buddy.getHistorySaver().getLastHistory(getEntryPoint(), true));
+			((HistoryViewAdapter) getAdapter()).notifyDataSetChanged();
+			setSelection(messages.size() - 1);			
+		}
+	};
 
 	public HistoryView(EntryPoint entryPoint, Buddy buddy, String tag) {
 		super(entryPoint);
@@ -57,12 +66,9 @@ public class HistoryView extends ListView implements ITabContent, IHasMessages {
 		
 		visualStyleUpdated();
 
-		messages.clear();
-		messages.addAll(buddy.getHistorySaver().getLastHistory(entryPoint, true));
-		((HistoryViewAdapter) getAdapter()).notifyDataSetChanged();
-		setSelection(messages.size() - 1);
+		entryPoint.threadMsgHandler.post(refreshHistoryRunnable);
 	}
-
+	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {

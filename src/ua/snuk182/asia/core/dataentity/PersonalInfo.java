@@ -4,10 +4,25 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+/**
+ * Personal info entity
+ * 
+ * @author Sergiy Plygun
+ *
+ */
 public class PersonalInfo implements Parcelable{
 	
+	/**
+	 * Info owner's protocol UID, either buddy or account
+	 */
 	public String protocolUid;
+	
+	/**
+	 * Info bundle.
+	 */
 	public Bundle properties;
+	
+	//A list of common info keys
 	public static final String INFO_CHAT_DESCRIPTION = "Description";
 	public static final String INFO_CHAT_OCCUPANTS = "Occupants";
 	public static final String INFO_CHAT_SUBJECT = "Subject";

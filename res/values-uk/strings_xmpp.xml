@@ -6,5 +6,10 @@
 		<item>Адреса сервісу</item>
 		<item>Порт сервісу</item>
 		<item>Таймаут пінга (секунди)</item>
+		<item>Тип проксі</item>
+		<item>Проксі сервер</item>
+		<item>Порт проксі серверу</item>
+		<item>Користувач проксі</item>
+		<item>Пароль користувача проксі</item>
 	</string-array>
 </resources>

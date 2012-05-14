@@ -126,7 +126,7 @@ public class ContactListGridItem extends RelativeLayout implements ContactListIt
 			return;
 		}
 		if (layout == null){
-			setLayoutParams(new LayoutParams(itemSize, itemSize));
+			setLayoutParams(new LinearLayout.LayoutParams(itemSize, itemSize));
 		}
 		
 		//setGravity(Gravity.CENTER);					
@@ -156,7 +156,7 @@ public class ContactListGridItem extends RelativeLayout implements ContactListIt
 		   unreadMsgIcon.setVisibility(View.VISIBLE);
 		} else {
 		   unreadMsgIcon.setVisibility(View.GONE);
-		}		
+		}
 		
 		switch(buddy.secureOptions){
 		case Buddy.SECURE_SUPPORTS:
@@ -229,7 +229,9 @@ public class ContactListGridItem extends RelativeLayout implements ContactListIt
 	public void requestIcon(final Buddy buddy){
 		if (showIcon){
 			mainStatusIcon.setVisibility(View.VISIBLE);
-			new Thread("CL grid item icon request"){
+			
+			getEntryPoint().threadMsgHandler.post(new Runnable() {
+				
 				@Override
 				public void run(){
 					finalizeBitmap();
@@ -239,9 +241,10 @@ public class ContactListGridItem extends RelativeLayout implements ContactListIt
 						ViewUtils.VMRUNTIME.allocBitmap(icon);
 					}
 					
-					getEntryPoint().threadMsgHandler.post(iconGot);
+					//getEntryPoint().threadMsgHandler.post(iconGot);
+					iconGot.run();
 				}
-			}.start();
+			});			
 		} else {
 			setNoBuddyImageMode(buddy);
 		}

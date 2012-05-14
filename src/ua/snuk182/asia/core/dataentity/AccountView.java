@@ -20,6 +20,12 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+/**
+ * Account view part, for using in views.
+ * 
+ * @author Sergiy Plygun
+ *
+ */
 public class AccountView implements Parcelable {
 	
 	public static final byte VIS_TO_PERMITTED = 3;
@@ -28,24 +34,89 @@ public class AccountView implements Parcelable {
 	public static final byte VIS_TO_ALL = 1;
 	public static final byte VIS_INVISIBLE = 2;
 	
+	/**
+	 * "Account enabled" flag
+	 */
 	public boolean isEnabled = true;
 	
+	/**
+	 * Service ID (0 to 255)
+	 */
 	public byte serviceId = -1;
-	//private String protocolId;
+	
+	/**
+	 * Protocol name (ICQ, XMPP etc)
+	 */
 	public String protocolName;
+	
+	/**
+	 * Protocol-specific identifier (444555666 for ICQ, user@server.com for XMPP and so on)
+	 */
 	public String protocolUid;
+	
+	/**
+	 * User name, human friendly
+	 */
 	public String ownName;
+	
+	/**
+	 * Account availability status.
+	 */
 	public byte status = Buddy.ST_ONLINE;
+	
+	/**
+	 * Account extended status.
+	 */
 	public byte xStatus = -1;
+	
+	/**
+	 * Account extended status name
+	 */
 	public String xStatusName = "";
+	
+	/**
+	 * Account extended status text.
+	 */
 	public String xStatusText = "";
+	
+	/**
+	 * Account visibility.
+	 */
 	public byte visibility = VIS_TO_BUDDIES;
+	
+	/**
+	 * Buddy list.
+	 */
 	private List<Buddy> buddyList = Collections.synchronizedList(new ArrayList<Buddy>());
+	
+	/**
+	 * Buddy group list.
+	 */
 	private List<BuddyGroup> buddyGroupList = Collections.synchronizedList(new ArrayList<BuddyGroup>());
+	
+	/**
+	 * Buddies with unread messages temporary storage. Buddy uid - number of unread messages. Non-serializable.
+	 */
 	private Map<String, Byte> unreadsMap = new HashMap<String, Byte>();
+	
+	/**
+	 * Undeletable buddies temporary storage. Non-serializable.
+	 */
 	private List<Buddy> undeletable;
+	
+	/**
+	 * Account options storage.
+	 */
 	public Bundle options = new Bundle();
+	
+	/**
+	 * Account connection state.
+	 */
 	private short connectionState = AccountService.STATE_DISCONNECTED;
+	
+	/**
+	 * Account last update time.
+	 */
 	public long lastUpdateTime = new Date().getTime();
 
 	@Override
@@ -119,6 +190,12 @@ public class AccountView implements Parcelable {
 		this.protocolName = protocolName.trim();
 	}	
 
+	/**
+	 * Find buddy by protocol uid in this account.
+	 * 
+	 * @param uid input uid
+	 * @return buddy or null
+	 */
 	public Buddy getBuddyByProtocolUid(String uid){
 		synchronized (buddyList) {
 			for (Buddy buddy : buddyList) {
@@ -130,6 +207,12 @@ public class AccountView implements Parcelable {
 		return null;
 	}
 	
+	/**
+	 * Find buddy group by protocol uid in this account.
+	 * 
+	 * @param id group id to find
+	 * @return group or null
+	 */
 	public BuddyGroup getBuddyGroupByGroupId(int id){
 		synchronized (buddyGroupList) {
 			for (BuddyGroup group : buddyGroupList) {
@@ -141,6 +224,11 @@ public class AccountView implements Parcelable {
 		return null;
 	}
 	
+	/**
+	 * Check if account has unread messages.
+	 * 
+	 * @return true if there are unread messages
+	 */
 	public boolean hasUnreadMessages(){
 		synchronized (buddyList) {
 			for (Buddy bu : buddyList) {
@@ -152,6 +240,13 @@ public class AccountView implements Parcelable {
 		return false;
 	}
 	
+	/**
+	 * Merge existing buddy with new values
+	 * 
+	 * @param newBuddy container with new values for buddy
+	 * @param updateStatus if true, buddy status will also be updated.
+	 * @return merged buddy
+	 */
 	public Buddy editBuddy(Buddy newBuddy, boolean updateStatus){
 		synchronized (buddyList) {
 			for (Buddy buddy : buddyList) {
@@ -186,13 +281,17 @@ public class AccountView implements Parcelable {
 	}
 	
 	/**
-	 * example "123456789 ICQ"
+	 * Returns account id, in form of "123456789 ICQ"
+	 * 
 	 * @return protocolUid+" "+protocolName
 	 */
 	public String getAccountId(){
 		return protocolUid+" "+protocolName;
 	}
 
+	/**
+	 * Tell account that it has been disconnected to perform appropriate actions (reset buddies' state etc...)
+	 */
 	public void disconnected() {
 		synchronized (buddyList) {
 			for (Buddy buddy : buddyList) {
@@ -203,10 +302,18 @@ public class AccountView implements Parcelable {
 		connectionState = AccountService.STATE_DISCONNECTED;
 	}
 	
+	/**
+	 * Refresh account's last update time.
+	 */
 	public void updateTime(){
 		this.lastUpdateTime = new Date().getTime();
 	}
 
+	/**
+	 * Remove all buddies from account
+	 * 
+	 * @param keepNotInList do not remove buddies that marked with {@link AccountService#NOT_IN_LIST_GROUP_ID}, as well as group chat records.
+	 */
 	public void removeAllBuddies(boolean keepNotInList) {
 		undeletable = new LinkedList<Buddy>();
 		synchronized (buddyList) {
@@ -224,6 +331,11 @@ public class AccountView implements Parcelable {
 		}
 	}
 
+	/**
+	 * Remove buddy from uid.
+	 * 
+	 * @param buddy
+	 */
 	public void removeBuddyByUid(Buddy buddy) {
 		synchronized (buddyList) {
 			for (int i = 0; i < buddyList.size(); i++) {
@@ -245,7 +357,12 @@ public class AccountView implements Parcelable {
 			}
 		}
 	}
-	
+	 /**
+	  * Find buddy by it's internal id.
+	  * 
+	  * @param id
+	  * @return buddy, if found, or null.
+	  */
 	public Buddy getBuddyByBuddyId(int id) {
 		for (Buddy buddy:buddyList){
 			if (buddy.id == id){
@@ -255,6 +372,11 @@ public class AccountView implements Parcelable {
 		return null;
 	}
 
+	/**
+	 * Add buddy to account's buddy list, according to group mark within buddy
+	 * 
+	 * @param buddy
+	 */
 	public void addBuddyToList(Buddy buddy) {
 		removeBuddyByUid(buddy);
 		buddyList.add(buddy);
@@ -268,6 +390,11 @@ public class AccountView implements Parcelable {
 		}
 	}
 
+	/**
+	 * Edit group.
+	 * 
+	 * @param newGroup a group's new data holder.
+	 */
 	public void editGroup(BuddyGroup newGroup) {
 		for (BuddyGroup group:buddyGroupList){
 			if (group.id == newGroup.id){
@@ -277,6 +404,12 @@ public class AccountView implements Parcelable {
 		}		
 	}
 
+	/**
+	 * Find buddies for particular group.
+	 * 
+	 * @param group
+	 * @return list of found buddies. May be empty.
+	 */
 	public List<Buddy> getBuddiesForGroup(BuddyGroup group) {
 		List<Buddy> res = new ArrayList<Buddy>(group.buddyList.size());
 		synchronized (buddyList) {
@@ -292,6 +425,11 @@ public class AccountView implements Parcelable {
 		return res;
 	}
 
+	/**
+	 * Remove buddy group.
+	 * 
+	 * @param group
+	 */
 	public void removeGroup(BuddyGroup group) {
 		for (int i=0; i<buddyGroupList.size(); i++){
 			if (buddyGroupList.get(i).id == group.id){
@@ -309,6 +447,11 @@ public class AccountView implements Parcelable {
 		this.connectionState = connectionState;
 	}
 	
+	/**
+	 * Merge account with a new data.
+	 * 
+	 * @param origin a new data holder for an account.
+	 */
 	public void merge(AccountView origin){
 		if (origin == null || origin == this){
 			return;
@@ -340,14 +483,30 @@ public class AccountView implements Parcelable {
 		
 	}
 
+	/**
+	 * Get preferences storage file name for an account.
+	 * 
+	 * @return filename
+	 */
 	public String getFilename() {
 		return getAccountId()+" "+protocolUid;
 	}
 	
+	/**
+	 * Get human-readable account nickname. If Nickname is empty, protocol UID is returned.
+	 * 
+	 * @return
+	 */
 	public String getSafeName(){
-		return ownName != null ? ownName : protocolUid;
+		return (ownName != null && ownName.length() > 0) ? ownName : protocolUid;
 	}
 	
+	/**
+	 * Obtain account's user icon from storage.
+	 * 
+	 * @param context
+	 * @return icon or null
+	 */
 	public Bitmap getIcon(Context context){
 		FileInputStream fis = null;
 		try {
@@ -366,6 +525,13 @@ public class AccountView implements Parcelable {
 		}
 	}
 
+	/**
+	 * Set new buddy list.
+	 * 
+	 * @param buddyList
+	 * @param runtimeService
+	 * @param getIcons obtain buddies' icons from server at once, if true
+	 */
 	public void setBuddyList(List<Buddy> buddyList, RuntimeService runtimeService, boolean getIcons) {
 		synchronized (buddyList) {
 			this.buddyList.addAll(buddyList);
@@ -392,12 +558,22 @@ public class AccountView implements Parcelable {
 		}
 	}
 
+	/**
+	 * Get buddy group list.
+	 * 
+	 * @return
+	 */
 	public List<BuddyGroup> getBuddyGroupList() {
 		synchronized (buddyGroupList) {
 			return buddyGroupList;
 		}
 	}
 	
+	/**
+	 * Set buddy group list.
+	 * 
+	 * @param buddyGroupList
+	 */
 	public void setBuddyGroupList(List<BuddyGroup> buddyGroupList) {
 		synchronized (buddyGroupList) {
 			List<BuddyGroup> old = new ArrayList<BuddyGroup>();

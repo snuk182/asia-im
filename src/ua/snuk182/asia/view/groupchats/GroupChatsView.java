@@ -48,6 +48,8 @@ public class GroupChatsView extends RelativeLayout implements ITabContent {
 				ServiceUtils.log(npe);
 			} catch (RemoteException e1) {
 				getEntryPoint().onRemoteCallFailed(e1);
+			} finally {
+				getEntryPoint().toggleWaitscreen(false);
 			}
 		}
 	};
@@ -58,7 +60,8 @@ public class GroupChatsView extends RelativeLayout implements ITabContent {
 		
 		LayoutInflater inflate = LayoutInflater.from(entryPoint);
 		inflate.inflate(R.layout.group_chats, this);
-		setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+		setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+		
 		layout = (LinearLayout) findViewById(R.id.chatslist);
 		searcher = (EditText) findViewById(R.id.searchtext);
 		searchBtn = (ImageButton) findViewById(R.id.searchbtn);
@@ -66,8 +69,6 @@ public class GroupChatsView extends RelativeLayout implements ITabContent {
 		tabWidgetLayout = new TabWidgetLayout(entryPoint);
 		setFocusable(false);
 		
-		int size = (int) (32*entryPoint.metrics.density);
-		tabWidgetLayout.setLayoutParams(new LinearLayout.LayoutParams(size, size));
 		tabWidgetLayout.setImageResource(R.drawable.logo_32px);
 		//tabWidgetLayout.setScaleType(ScaleType.CENTER_INSIDE);
 		tabWidgetLayout.setText(account.getSafeName());
@@ -81,7 +82,15 @@ public class GroupChatsView extends RelativeLayout implements ITabContent {
 		});
 		
 		visualStyleUpdated();
-		requestAvailableChatRooms();
+		
+		entryPoint.toggleWaitscreen(true);
+		new Thread(){
+			
+			@Override
+			public void run(){
+				requestAvailableChatRooms();
+			}
+		}.start();
 	}
 
 	protected void filterResult() {
@@ -146,9 +155,6 @@ public class GroupChatsView extends RelativeLayout implements ITabContent {
 	
 	protected void closeMe() {
 		getEntryPoint().mainScreen.removeTabByTag(GroupChatsView.class.getSimpleName()+" "+account.serviceId);
-		
-		//fix for a bug of loosing FILL_PARENT
-		((View)getEntryPoint().mainScreen).setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 	}
 
 	@Override
@@ -221,7 +227,8 @@ public class GroupChatsView extends RelativeLayout implements ITabContent {
 				}
 				
 			});
-		}		
+		}	
+		getEntryPoint().toggleWaitscreen(false);
 	}
 
 	private void addAvailableChat(final MultiChatRoom chat) {

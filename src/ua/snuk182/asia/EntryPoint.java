@@ -59,13 +59,24 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+/**
+ * The main and only activity for an application.
+ * 
+ * @author Sergiy Plygun
+ *
+ * TODO rewrite into Fragments instead of ActivityGroup
+ */
 public class EntryPoint extends ActivityGroup {
 	
+	//various parameter keys for saving state
 	private static final String SAVEDSTATE_SERVICE_INTENT = "serviceIntent";
 	private static final String SAVEDSTATE_SELECTED_CHAT = "selectedChat";
 	private static final String SAVEDSTATE_SELECTED_ACC = "selectedAcc";
-	private static final String SAVEDSTATE_TABS = "tabs";
+	private static final String SAVEDSTATE_TABS = "tabs";	
+	
+	//the background color for wallpaper mode. also acts as wallpaper mode marker.
 	public static final int BGCOLOR_WALLPAPER = 0xff7f7f80;
+	
 	public IRuntimeService runtimeService = null;
 	private Intent serviceIntent = null;
 	
@@ -76,7 +87,7 @@ public class EntryPoint extends ActivityGroup {
 	
 	public static String tabStyle = "slim";
 	
-	public static int bgColor = 0xff7f7f80;
+	public static int bgColor = BGCOLOR_WALLPAPER;
 	
 	public DisplayMetrics metrics = new DisplayMetrics();
 	
@@ -108,12 +119,6 @@ public class EntryPoint extends ActivityGroup {
 
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
-			/*runtimeService = null;    
-			serviceIntent = null;
-			if (serviceConnection != null){
-				getRuntimeService();
-			}*/
-			
 			finish();
 		}
 	};
@@ -126,6 +131,7 @@ public class EntryPoint extends ActivityGroup {
 			
 			String view;
 			
+			//detecting view type, smartphone or tablet
 			try {
 				view = ServiceStoredPreferences.getOption(EntryPoint.this, getString(R.string.key_view_type));
 			} catch (NullPointerException npe) {	
@@ -140,6 +146,7 @@ public class EntryPoint extends ActivityGroup {
 			
 			setContentView((View)mainScreen);
 			
+			//detecting if master password for start activity is required
 			String masterPw = ServiceStoredPreferences.getOption(getApplicationContext(), getResources().getString(R.string.key_master_password));
 			Boolean needPassword = masterPw != null && masterPw.length()>0;
 			if (needPassword){
@@ -148,8 +155,7 @@ public class EntryPoint extends ActivityGroup {
 			} else {
 				getRuntimeService();	
 			}			
-	    	//addTab(TabInfoFactory.createSplashscreenTab(this));          
-		}
+	    }
 	};
 	
 	private final Runnable visualStyleUpdatedRunnable = new Runnable(){
@@ -193,7 +199,6 @@ public class EntryPoint extends ActivityGroup {
 			@Override
 			public void run() {
 				mainScreen.configChanged();
-				//updateBackground();
 			}
         	
         });
@@ -237,7 +242,7 @@ public class EntryPoint extends ActivityGroup {
 		
 		tabStyle = ServiceStoredPreferences.getOption(getApplicationContext(), getResources().getString(R.string.key_tab_style));		
     	if (tabStyle == null) {	
-			tabStyle = "slim";
+			tabStyle = getString(R.string.value_tab_style_slim);
 		}
     	
     	getMetrics();    	
@@ -246,6 +251,7 @@ public class EntryPoint extends ActivityGroup {
     private void updateWallpaper() {
     	if (bgColor == BGCOLOR_WALLPAPER){
 			try {
+				//calculating correct wallpaper dimentions - the less wp side should be equal to bigger screen side
 				int heightPx = (int) (metrics.heightPixels * metrics.density);
 				int widthPx = (int) (metrics.widthPixels * metrics.density);
 				
@@ -269,18 +275,15 @@ public class EntryPoint extends ActivityGroup {
 		return appOptions;
 	}
 
-	/** Called when the activity is first created. */
-    @Override
+	@Override
     public void onCreate(Bundle savedInstanceState) {
     	
-    	//getSharedPreferences("AsiaTotalParams", 0).edit().clear().commit();    
+    	super.onCreate(savedInstanceState);  
     	
-    	super.onCreate(savedInstanceState);  		
+    	//do not load title bar on small screens. this looks like a hack, but no official api for detecting tablet mode is available
     	if (!ServiceUtils.isTablet(getApplicationContext())){
     		requestWindowFeature(Window.FEATURE_NO_TITLE);
     	}
-    	
-    	//Log.w("asia", Resources.getSystem().getConfiguration().toString());
     	
     	getNonVersionedMethods();
     	
@@ -293,17 +296,23 @@ public class EntryPoint extends ActivityGroup {
     	threadMsgHandler.post(startRunnable);	
     }
     
+	//request older api methods, if available
     private void getNonVersionedMethods() {
 		try {
 			invalidateOptionsMenuMethod = getClass().getMethod("invalidateOptionsMenu", new Class[] {});
 		} catch (NoSuchMethodException e) {}
 	}
 
+    /**
+     * Shows or hides waitscreen.
+     * 
+     * @param show true if screen needs to be shown, false - hidden.
+     */
 	public void toggleWaitscreen(final boolean show) {
     	
     	if (show){
     		try {
-				progressDialog = ProgressDialog.show(EntryPoint.this, "", getResources().getString(R.string.label_wait), true);
+				progressDialog = ProgressDialog.show(this, "", getResources().getString(R.string.label_wait), true);
 				progressDialog.setIndeterminateDrawable(getResources().getDrawable(R.drawable.logo_96px));
 				progressDialog.setCancelable(true);
 			} catch (Exception e) {
@@ -316,27 +325,6 @@ public class EntryPoint extends ActivityGroup {
     			progressDialog = null;
     		}
     	}
-    	
-    	/*if (progressDialog!=null){
-			if (show){
-				progressDialog.show();
-			} else {
-				progressDialog.hide();
-				
-				progressDialog = null;
-			}
-		} else {
-			if (show){
-				try {
-					progressDialog = ProgressDialog.show(EntryPoint.this, "", getResources().getString(R.string.label_wait), true);
-					progressDialog.setIndeterminateDrawable(getResources().getDrawable(R.drawable.logo_96px));
-					progressDialog.setCancelable(true);
-				} catch (Exception e) {
-					//TODO may be Window Leaked
-					ServiceUtils.log(e);
-				}
-			}
-		}*/
 	}
 
 	private void getRuntimeService() {
@@ -397,6 +385,10 @@ public class EntryPoint extends ActivityGroup {
     	}		    	
     }
     
+    /**
+     * Continue UI creation after the service has been connected.
+     * 
+     */
     private void continueCreating() {
     	try {
     		appOptions = runtimeService.getApplicationOptions();
@@ -406,22 +398,13 @@ public class EntryPoint extends ActivityGroup {
         	int selectedChatTab = 0;
         	if(savedState!=null){
         		savedTabs = savedState.getParcelableArrayList(SAVEDSTATE_TABS);        
-            	/*if (mainScreen instanceof TabletScreen){
-            		selectedAccTab = savedState.getInt(SAVEDSTATE_SELECTED_ACC);
-            		selectedChatTab = savedState.getInt(SAVEDSTATE_SELECTED_CHAT);
-            	} else {
-            		selectedChatTab = savedState.getInt(SAVEDSTATE_SELECTED_CHAT);
-            	}*/
-        		selectedAccTab = savedState.getInt(SAVEDSTATE_SELECTED_ACC);
+            	selectedAccTab = savedState.getInt(SAVEDSTATE_SELECTED_ACC);
         		selectedChatTab = savedState.getInt(SAVEDSTATE_SELECTED_CHAT);
             	serviceIntent = savedState.getParcelable(SAVEDSTATE_SERVICE_INTENT);
         	} else {
         		savedTabs = null;
         	}
     		
-    		if (savedTabs == null){
-    			savedTabs = (ArrayList<TabInfo>) runtimeService.getSavedTabs();
-    		}
     		if (savedTabs!=null){
     			for (TabInfo tab:savedTabs){    				
     				mainScreen.addTab(TabInfoFactory.recreateTabContent(this, tab), false);    	
@@ -444,6 +427,7 @@ public class EntryPoint extends ActivityGroup {
 			
 			serviceCallback.visualStyleUpdated();	
 			
+			//if master password was asked, remove its tab 
 			threadMsgHandler.post(new Runnable(){
 
 				@Override
@@ -479,6 +463,11 @@ public class EntryPoint extends ActivityGroup {
 		}		
 	}
     
+    /**
+     * Brings conversation tab to front for a buddy. If no such tab opened, opens it.
+     * 
+     * @param buddy
+     */
     public void getConversationTab(Buddy buddy){
     	String tag = buddy.getChatTag();
     	
@@ -499,7 +488,12 @@ public class EntryPoint extends ActivityGroup {
 		}    	
     }
     
-    public void addAccountActivityTab(AccountView account) {
+    /**
+     * Brings activity tab to front for an account. If no such tab opened, opens it.
+     * 
+     * @param account
+     */
+    public void getAccountActivityTab(AccountView account) {
     	String tag = AccountActivityView.class.getSimpleName()+" "+account.getAccountId();
     	
     	if (mainScreen.checkAndSetCurrentTabByTag(tag)){
@@ -514,7 +508,12 @@ public class EntryPoint extends ActivityGroup {
 		} 
     }
     
-    public void addHistoryTab(Buddy buddy){
+    /**
+     * Brings history tab to front for a buddy. If no such tab opened, opens it.
+     * 
+     * @param buddy
+     */
+    public void getHistoryTab(Buddy buddy){
     	String tag = HistoryView.class.getSimpleName()+" "+buddy.serviceId+" "+buddy.protocolUid;    	
     	
     	if (mainScreen.checkAndSetCurrentTabByTag(tag)){
@@ -525,7 +524,12 @@ public class EntryPoint extends ActivityGroup {
     	mainScreen.addTab(info, true);    	
     }
     
-    public void addSearchTab(AccountView account){
+    /**
+     * Brings buddy search tab to front for an account. If no such tab opened, opens it.
+     * 
+     * @param account
+     */
+    public void getSearchTab(AccountView account){
     	String tag = SearchUsersView.class.getSimpleName()+" "+account.serviceId;    	
     	   
     	if (mainScreen.checkAndSetCurrentTabByTag(tag)){
@@ -536,7 +540,12 @@ public class EntryPoint extends ActivityGroup {
     	mainScreen.addTab(tab, true);
     }
     
-    public void addMyGroupChatsTab(AccountView account){
+    /**
+     * Brings group chats tab to front for an account. If no such tab opened, opens it.
+     * 
+     * @param account
+     */
+    public void getMyGroupChatsTab(AccountView account){
     	String tag = GroupChatsView.class.getSimpleName()+" "+account.serviceId;    	
     	   
     	if (mainScreen.checkAndSetCurrentTabByTag(tag)){
@@ -547,11 +556,43 @@ public class EntryPoint extends ActivityGroup {
     	mainScreen.addTab(tab, true);
     }
     
-    public void removeAccount(AccountView account){
+    /**
+     * Brings account manager tab to front for an account. If no such tab opened, opens it.
+     */
+    public void addAccountsManagerTab() {		
+		String tag = AccountManagerView.class.getSimpleName();		
+		if (mainScreen.checkAndSetCurrentTabByTag(tag)){
+			return;
+		} 
+		
+		TabInfo tab = TabInfoFactory.createAccountManager(this);
+		mainScreen.addTab(tab, true);
+	}
+	
+    /**
+     * Brings preferences tab to front. If no such tab opened, opens it.
+     * 
+     * @param account if set, searches for account settings, otherwise application preferences will be the target.
+     */
+    public void addPreferencesTab(AccountView account){
+		String tag = account != null ? PreferencesView.class.getSimpleName()+" "+account.serviceId : PreferencesView.class.getSimpleName();
+		
+		if (mainScreen.checkAndSetCurrentTabByTag(tag)){
+			return;
+		} 
+		
+		TabInfo info = TabInfoFactory.createPreferencesTab(this, account);		
+		mainScreen.addTab(info, true);
+	}
+
+	public void removeAccount(AccountView account){
     	mainScreen.removeAccount(account);
     }
 
-	private final IRuntimeServiceCallback serviceCallback = new IRuntimeServiceCallback.Stub() {
+	/**
+	 * Service callback.
+	 */
+    private final IRuntimeServiceCallback serviceCallback = new IRuntimeServiceCallback.Stub() {
 		
 		private void accountStateChanged(AccountView account, boolean refreshContacts){
 			mainScreen.accountStateChanged(account, refreshContacts);
@@ -671,6 +712,7 @@ public class EntryPoint extends ActivityGroup {
 				@Override
 				public void run() {
 					Toast.makeText(getBaseContext(), getApplicationContext().getResources().getString(R.string.label_group) + group.name + getApplicationContext().getResources().getString(R.string.label_added), Toast.LENGTH_LONG).show();
+					mainScreen.visualStyleUpdated();
 				}
 				
 			});
@@ -683,8 +725,7 @@ public class EntryPoint extends ActivityGroup {
 				@Override
 				public void run() {
 					Toast.makeText(getBaseContext(), getApplicationContext().getResources().getString(R.string.label_buddy) + buddy.name + " (" + buddy.protocolUid + ")" + getApplicationContext().getResources().getString(R.string.label_added),
-							Toast.LENGTH_LONG).show();
-					
+							Toast.LENGTH_LONG).show();					
 					mainScreen.visualStyleUpdated();
 				}
 				
@@ -742,11 +783,10 @@ public class EntryPoint extends ActivityGroup {
 				public void run() {
 					Toast.makeText(getBaseContext(), getApplicationContext().getResources().getString(R.string.label_group) + group.name + getApplicationContext().getResources().getString(R.string.label_modified), Toast.LENGTH_LONG).show();
 					
-					mainScreen.visualStyleUpdated();
-				}
-				
+					//mainScreen.visualStyleUpdated();
+				}				
 			});
-			
+			mainScreen.accountUpdated(account, true);
 		}
 
 		@Override
@@ -780,16 +820,6 @@ public class EntryPoint extends ActivityGroup {
 			TabInfo tab = addAccountTab(account);		
 			tab.content.visualStyleUpdated();
 			tab.tabWidgetLayout.color();
-			/*threadMsgHandler.post(new Runnable(){
-
-				@Override
-				public void run() {
-					//int current = getTabHost().getCurrentTab();
-					
-					//removeTabAt(current);
-				}
-				
-			});		*/	
 		}
 
 		@Override
@@ -918,6 +948,8 @@ public class EntryPoint extends ActivityGroup {
 		@Override
 		public void run() {
 			finish();
+			
+			//just in case
 			System.gc();
 		}};
 
@@ -936,6 +968,8 @@ public class EntryPoint extends ActivityGroup {
 			return true;
 		} else {			
 			if (i == KeyEvent.KEYCODE_BACK){
+				
+				//if master password is required, then force destroying activity for password being asked during next activity start
 				String masterPw = ServiceStoredPreferences.getOption(getApplicationContext(), getResources().getString(R.string.key_master_password));
 				Boolean needPassword = masterPw != null && masterPw.length()>0;
 				
@@ -951,34 +985,21 @@ public class EntryPoint extends ActivityGroup {
 		}
 	}
 	
-	/*@Override
-	public void onStart(){
-		super.onStart();	
-		
-		try {
-			serviceCallback.visualStyleUpdated();
-		} catch (NullPointerException npe) {					
-		} catch (RemoteException e) {
-			ServiceUtils.log(e);
-		}
-		
-		if (mainScreen != null){
-			mainScreen.onStart();
-		}
-	}*/
-	
 	@Override
 	public void onRestart(){
 		super.onRestart();
 		updateWallpaper();
 		if (runtimeService!=null){
 			try {
+				
+				//tell the service that we're watching the activity now
 				runtimeService.setCurrentTabs(mainScreen.getCurrentTabs());
 			} catch (RemoteException e) {
 				ServiceUtils.log(e);
 				runtimeService = null;
 				serviceIntent = null;
 				
+				//mb service connection is dead? reconnect it
 				getRuntimeService();
 			}
 		} else {
@@ -992,10 +1013,13 @@ public class EntryPoint extends ActivityGroup {
 		try {
 			ArrayList<TabInfo> tabs = mainScreen.getTabs();
 			for (int i=tabs.size()-1; i>=0; i--){
-				if (tabs.get(i).tag.indexOf(ContactList.class.getSimpleName())<0 &&
-						tabs.get(i).tag.indexOf(ConversationsView.class.getSimpleName())<0 &&
-						tabs.get(i).tag.indexOf(HistoryView.class.getSimpleName())<0){
-					tabs.remove(i);
+				TabInfo tab = tabs.get(i);
+				
+				//do not save tabs other than contact list, chats and history tabs
+				if (tab.tag.indexOf(ContactList.class.getSimpleName())<0 &&
+						tab.tag.indexOf(ConversationsView.class.getSimpleName())<0 &&
+						tab.tag.indexOf(HistoryView.class.getSimpleName())<0){
+					mainScreen.removeTabByTag(tab.tag);
 				}
 			}
 			
@@ -1019,6 +1043,8 @@ public class EntryPoint extends ActivityGroup {
 		
 		if(runtimeService!=null){
 			try {
+				
+				//tell the service that we're moved off from Asia
 				runtimeService.setCurrentTabs(new ArrayList<String>());
 			} catch (NullPointerException npe) {
 				ServiceUtils.log(npe);
@@ -1039,7 +1065,8 @@ public class EntryPoint extends ActivityGroup {
 		new Thread(){
 			@Override
 			public void run(){
-				try {
+				try {					
+					//TODO fix the annoying WindowLeak
 					runtimeService.prepareExit();
 					unbindService(serviceConnection);
 					serviceConnection = null;
@@ -1055,36 +1082,10 @@ public class EntryPoint extends ActivityGroup {
 		finish();
 	}
 
-	public void addAccountsManagerTab() {		
-		String tag = AccountManagerView.class.getSimpleName();		
-		if (mainScreen.checkAndSetCurrentTabByTag(tag)){
-			return;
-		} 
-		
-		TabInfo tab = TabInfoFactory.createAccountManager(this);
-		mainScreen.addTab(tab, true);
-	}
-	
-	public void addPreferencesTab(AccountView account){
-		String tag = account != null ? PreferencesView.class.getSimpleName()+" "+account.serviceId : PreferencesView.class.getSimpleName();
-		
-		if (mainScreen.checkAndSetCurrentTabByTag(tag)){
-			return;
-		} 
-		
-		TabInfo info = TabInfoFactory.createPreferencesTab(this, account);		
-		mainScreen.addTab(info, true);
-	}
-
 	public void setXStatus(AccountView account) {
 		try {
 			runtimeService.setXStatus(account);
 			mainScreen.accountStateChanged(account, false);
-			/*for (TabInfo tab: tabs){
-				if ((tab.content instanceof IHasAccount) && ((IHasAccount)tab.content).getServiceId()==account.serviceId){
-					((IHasAccount)tab.content).stateChanged(account);
-				}
-			}*/
 			refreshMenu();
 		} catch (NullPointerException npe) {	
 			ServiceUtils.log(npe);
@@ -1104,21 +1105,9 @@ public class EntryPoint extends ActivityGroup {
 		}		
 	}
 	
-	/*public TabInfo getSelectedTab(){
-		return tabs.get(getTabHost().getCurrentTab());
-	}
-	
-	public TabInfo getTabByTag(String tag){
-		for (TabInfo tab:tabs){
-			if (tab.tag.equals(tag)){
-				return tab;
-			}
-		}
-		return null;
-	}*/
-	
 	public void onRemoteCallFailed(Throwable e){
 		ServiceUtils.log(e);
+		//destroy activity. TODO fix to more appropriate action
 		threadMsgHandler.post(endActivityRunnable );
 	}
 		
@@ -1134,6 +1123,9 @@ public class EntryPoint extends ActivityGroup {
 		startActivity(intent);
 	}
 	
+	/**
+	 * Android versions >= 3.0 needs menu to be refreshed.
+	 */
 	public void refreshMenu() {
 		if (Build.VERSION.SDK_INT > 10 && invalidateOptionsMenuMethod != null){
 			try {
@@ -1147,5 +1139,10 @@ public class EntryPoint extends ActivityGroup {
 	public void proceedLoading() {
 		toggleWaitscreen(true);
 		getRuntimeService();	
+	}
+
+	public void setUnread(Buddy buddy, TextMessage message) throws RemoteException {
+		runtimeService.setUnread(buddy, null);
+		mainScreen.buddyStateChanged(buddy);
 	}
 }

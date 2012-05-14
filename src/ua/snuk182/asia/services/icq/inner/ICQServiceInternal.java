@@ -550,7 +550,11 @@ public class ICQServiceInternal {
 			break;
 		case REQ_GETFULLBUDDYINFO:
 			if (getCurrentState() == STATE_CONNECTED && args.length>0){
-				getPersonalInfoEngine().getFullPersonalMetainfo((String) args[0]);
+				try {
+					getPersonalInfoEngine().getFullPersonalMetainfo((String) args[0]);
+				} catch (Exception e) {
+					serviceResponse.respond(ICQServiceResponse.RES_NOTIFICATION, "Error getting info");
+				}
 			}
 			break;
 		case REQ_ADDGROUP:
@@ -642,7 +646,7 @@ public class ICQServiceInternal {
 			}
 			
 			if (args[3] != null){
-				loginPort = Integer.parseInt((String) args[3]);
+				loginPort = Integer.parseInt(((String) args[3]).trim().replace("\n", ""));
 			}
 			
 			/*Set<String> nameSet = new HashSet<String>();
