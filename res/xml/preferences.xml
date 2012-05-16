@@ -135,7 +135,12 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/label_misc_prefs" >
-
+		<CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/key_toggle_menu_on_tab_longclick"
+            android:persistent="false"
+            android:title="@string/label_toggle_menu_on_tab_longclick" />
+		
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="@string/key_autoconnect"

@@ -224,7 +224,7 @@
 		participants: Warszawianka
 		(Tango project), nicubunu and others.
 		XMPP functionality by Smack (
-		http://igniterealtime.org )"</string>
+		http://igniterealtime.org )\nPGP functionality by Spongycastle Android lib"</string>
     <string name="label_connecting">connecting</string>
     <string name="label_completed">completed</string>
     <string name="label_too_many_accounts">Too many accounts</string>
@@ -255,5 +255,5 @@
     <string name="label_chat_menu">Chat menu</string>
     <string name="label_account_menu">Account menu</string>
     <string name="label_no_group">No group</string>
-
+	<string name="label_toggle_menu_on_tab_longclick">Toggle menu on tab long click</string>
 </resources>

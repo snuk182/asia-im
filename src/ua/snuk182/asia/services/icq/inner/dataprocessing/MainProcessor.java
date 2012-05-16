@@ -35,6 +35,10 @@ public class MainProcessor extends AbstractFlapProcessor {
 		service.getServiceResponse().respond(ICQServiceResponse.RES_CONNECTING, 9);
 		service.getRunnableService().sendMultipleToSocket(flaps);
 		service.getPersonalInfoEngine().getShortPersonalMetainfo(service.getUn());
+		if (service.getCurrentState() != ICQServiceInternal.STATE_CONNECTED){
+			service.setCurrentState(ICQServiceInternal.STATE_CONNECTED);
+			service.getServiceResponse().respond(ICQServiceResponse.RES_CONNECTED);
+		}
 	}
 
 	private Flap requestOfflineMessages() throws ICQException{
@@ -285,10 +289,6 @@ public class MainProcessor extends AbstractFlapProcessor {
 		case ICQConstants.SNAC_FAMILY_ICQEXTENSION:
 			switch(snac.subtypeId){
 			case ICQConstants.SNAC_ICQEXTENSION_METAINFORES:
-				if (service.getCurrentState() != ICQServiceInternal.STATE_CONNECTED){
-					service.setCurrentState(ICQServiceInternal.STATE_CONNECTED);
-					service.getServiceResponse().respond(ICQServiceResponse.RES_CONNECTED);
-				}
 				byte[] data = snac.plainData;
 				try {
 					TLV[] tlvs = service.getDataParser().parseTLV(data);

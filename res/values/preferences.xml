@@ -16,7 +16,7 @@
 	<string name="key_tab_style">PrefTabStyle</string>
 	    
 	<string name="key_view_type">PrefViewType</string>
-	
+	<string name="key_toggle_menu_on_tab_longclick">PrefMenuOnTabLongclick</string>
 	<string name="key_enable_pgp">PrefEnablePGP</string>
 	<string name="key_pgp_my">PrefMyPGPKey</string>
 	<string name="key_pgp_my_pw">PrefMyPGPKeyPassword</string>
