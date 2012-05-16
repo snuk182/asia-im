@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string-array name="xmpp_preference_strings">
+		<item>JID (имя@домен)</item>
+		<item>Пароль</item>
+		<item>Адрес сервиса</item>
+		<item>Порт сервиса</item>
+		<item>Таймаут пинга (секунды)</item>
+		<item>Тип прокси</item>
+		<item>Прокси сервер</item>
+		<item>Порт прокси сервера</item>
+		<item>Пользователь прокси</item>
+		<item>Пароль пользователя прокси</item>
+	</string-array>
+</resources>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="xmpp_service_name">XMPP</string>
+
+	<string-array name="xmpp_preference_strings">
+		<item>JID (name@domain)</item>
+		<item>Password</item>
+		<item>Service host</item>
+		<item>Service port</item>
+		<item>Ping timeout (seconds)</item>
+		<item>Proxy type</item>
+		<item>Proxy host</item>
+		<item>Proxy port</item>
+		<item>Proxy username</item>
+		<item>Proxy password</item>
+	</string-array>
+</resources>
