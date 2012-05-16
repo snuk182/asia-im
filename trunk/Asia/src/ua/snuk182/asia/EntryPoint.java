@@ -92,7 +92,8 @@ public class EntryPoint extends ActivityGroup {
 	public DisplayMetrics metrics = new DisplayMetrics();
 	
 	public boolean dontDrawSmileys = false;
-	
+	public boolean menuOnTabLongclick = false;
+
 	public BitmapDrawable wallpaper = null;
 	
 	private Method invalidateOptionsMenuMethod = null;
@@ -244,6 +245,8 @@ public class EntryPoint extends ActivityGroup {
     	if (tabStyle == null) {	
 			tabStyle = getString(R.string.value_tab_style_slim);
 		}
+    	
+    	menuOnTabLongclick = Boolean.parseBoolean(ServiceStoredPreferences.getOption(getApplicationContext(), getResources().getString(R.string.key_toggle_menu_on_tab_longclick)));		
     	
     	getMetrics();    	
 	}
@@ -1112,7 +1115,7 @@ public class EntryPoint extends ActivityGroup {
 	}
 		
 	public final Handler threadMsgHandler = new Handler();
-
+	
 	public void refreshAccounts() {
 		mainScreen.refreshAccounts();
 	}

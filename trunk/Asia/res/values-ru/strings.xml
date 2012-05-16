@@ -237,4 +237,5 @@
 
     <string name="label_security_preferences">Настойки безопасности</string>
     <string name="label_no_group">Без группы</string>
+    <string name="label_toggle_menu_on_tab_longclick">Меню по долгому тапу на вкладке</string>
 </resources>

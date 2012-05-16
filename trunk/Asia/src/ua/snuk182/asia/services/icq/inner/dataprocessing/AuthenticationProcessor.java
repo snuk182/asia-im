@@ -130,7 +130,15 @@ public class AuthenticationProcessor extends AbstractFlapProcessor {
 	private byte[] roastPw(String pws) throws ICQException{
 		byte[] pw = pws.getBytes();
 		byte[] pwhash = new byte[pw.length];
-		for (int i=0; i<pw.length; i++){
+		
+		//they don't support passwords longer than 8 symbols (facepalm)
+		int ln;
+		if (pw.length > 8){
+			ln = 8;
+		} else {
+			ln = pw.length;
+		}
+		for (int i=0; i<ln; i++){
 			if (i+1 <= pwRoastArray.length){
 				pwhash[i] = (byte) (pw[i]^pwRoastArray[i]);
 			} else {
