@@ -319,7 +319,9 @@ public class TabletScreen extends LinearLayout implements IMainScreen {
 			}
 		}	
 		
-		addLongClickListenerToTabWidget(info);
+		if (getEntryPoint().menuOnTabLongclick){
+			addLongClickListenerToTabWidget(info);
+		}
 	}
 
 	private static final boolean isChat(TabInfo info) {

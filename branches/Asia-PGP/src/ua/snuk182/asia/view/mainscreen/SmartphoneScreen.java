@@ -39,6 +39,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.TabHost;
@@ -224,6 +225,10 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 		
 		if (setAsCurrent){
 			setCurrentTabByTag(info.tag);
+		}
+		
+		if (getEntryPoint().menuOnTabLongclick){
+			addLongClickListenerToTabWidget(info);
 		}
 	}
 
@@ -640,4 +645,19 @@ public class SmartphoneScreen extends TabHost implements IMainScreen {
 		list.add(getCurrentTabTag());
 		return list;
 	}	
+	
+	private void addLongClickListenerToTabWidget(final TabInfo tab){
+		tab.tabWidgetLayout.setOnLongClickListener(new OnLongClickListener() {
+			
+			@Override
+			public boolean onLongClick(View v) {
+				if (tab.tag.equals(getCurrentTabTag())){
+					getEntryPoint().getWindow().openPanel(Window.FEATURE_OPTIONS_PANEL, new	KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MENU)); 
+					return true;
+				} else {
+					return false;
+				}
+			}
+		});
+	}
 }

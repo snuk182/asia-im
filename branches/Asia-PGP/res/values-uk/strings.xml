@@ -148,7 +148,7 @@
     <string name="label_show_icons">"Показувати іконки контактів"</string>
     <string name="label_send_my_location">"Послати моє місцезнаходження"</string>
     <string name="label_send_by_enter">"Відправляти Ентером"</string>
-    <string name="label_about_text">"\nАвтор: Сергій Плигун. \nMailto:snuk182@rambler.ru. \nСмайлики - автор шаблона Roland81 (http://www.openclipart.org/user-detail/roland81). Окрема подяка сайту OpenClipArt.org та його учасникам: Warszawianka (Tango project), nicubunu та іншим.\nФункціональність XMPP/Jabber за допомогою Smack (igniterealtime.org)"</string>
+    <string name="label_about_text">"\nАвтор: Сергій Плигун. \nMailto:snuk182@rambler.ru. \nСмайлики - автор шаблона Roland81 (http://www.openclipart.org/user-detail/roland81). Окрема подяка сайту OpenClipArt.org та його учасникам: Warszawianka (Tango project), nicubunu та іншим.\nФункціональність XMPP/Jabber за допомогою Smack (igniterealtime.org).\nФункциональность XMPP/Jabber с помощью библиотеки Smack (igniterealtime.org)\n Реализация PGP c помощью Spongycastle Android."</string>
     <string name="label_file_from">"Файл від "</string>
     <string name="label_files">" файлів"</string>
     <string name="error_fill_uid">Будь-ласка, вкажіть UID</string>
@@ -244,5 +244,5 @@
 	<string name="label_no_group">Без групи</string>
 	
     <string name="label_security_preferences">Налаштування безпеки</string>
-    
+    <string name="label_toggle_menu_on_tab_longclick">Меню за довгим тапом на вкладці</string>
 </resources>

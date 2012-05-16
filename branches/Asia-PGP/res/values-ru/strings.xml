@@ -151,7 +151,7 @@
     <string name="label_files">" файлов"</string>
     <string name="label_send_by_enter">"Отправлять Энтером"</string>
     <string name="label_send_my_location">"Отправить мое расположение"</string>
-    <string name="label_about_text">"\nАвтор: Сергей Плыгун. \nMailto:snuk182@rambler.ru. \nСмайлики - автор шаблона Roland81 (http://www.openclipart.org/user-detail/roland81). Отдельная благодарность сайту OpenClipArt.org и его участникам: Warszawianka (Tango project), nicubunu и другим.\nФункциональность XMPP/Jabber с помощью библиотеки Smack (igniterealtime.org)"</string>
+    <string name="label_about_text">"\nАвтор: Сергей Плыгун. \nMailto:snuk182@rambler.ru. \nСмайлики - автор шаблона Roland81 (http://www.openclipart.org/user-detail/roland81). Отдельная благодарность сайту OpenClipArt.org и его участникам: Warszawianka (Tango project), nicubunu и другим.\nФункциональность XMPP/Jabber с помощью библиотеки Smack (igniterealtime.org)\n Реализация PGP c помощью Spongycastle Android."</string>
     <string name="error_fill_uid">Пожалуйста, заполните поле UID</string>
     <string name="label_search_buddies">"Найти/Добавить..."</string>
     <string name="label_add_to_list">"Добавить"</string>
@@ -245,4 +245,5 @@
 
     <string name="label_security_preferences">Настойки безопасности</string>
     <string name="label_no_group">Без группы</string>
+    <string name="label_toggle_menu_on_tab_longclick">Меню по долгому тапу на вкладке</string>
 </resources>
