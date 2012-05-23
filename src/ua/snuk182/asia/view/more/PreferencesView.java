@@ -74,7 +74,8 @@ public class PreferencesView extends PreferenceActivity implements ITabContent {
 							
 							needRestart = pref.getKey().equals(getString(R.string.key_bg_type))
 									|| pref.getKey().equals(getString(R.string.key_view_type))
-									|| pref.getKey().equals(getString(R.string.key_tab_style));
+									|| pref.getKey().equals(getString(R.string.key_tab_style))
+									|| pref.getKey().equals(getString(R.string.key_toggle_menu_on_tab_longclick));
 						} catch (NullPointerException npe) {	
 							ServiceUtils.log(npe);
 						} catch (RemoteException e) {
