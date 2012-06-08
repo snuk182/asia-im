@@ -493,10 +493,17 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 			historyView.addView(getListItem(message));
 			if (tabActive){
 				scroller.post(scrollToEnd);	
+				buddy.unread = 0;				
 			} else {
 				//if (!getEntryPoint().getTabHost().getCurrentTabTag().equals(ContactList.class.getSimpleName()+" "+getServiceId())){
 					tabWidgetLayout.setImageResource(R.drawable.message_medium);
+					buddy.unread++;
 				//}
+			}
+			try {
+				getEntryPoint().setUnread(buddy, message);
+			} catch (RemoteException e) {
+				getEntryPoint().onRemoteCallFailed(e);
 			}
 		}
 	}
