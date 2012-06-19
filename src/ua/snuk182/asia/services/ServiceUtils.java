@@ -597,7 +597,57 @@ public final class ServiceUtils {
 	}
 
 	static final int DEFAULT_SKIP_AMOUNT = 1500;
+	
+	/**
+	 * Checks if the device is a tablet or a phone
+	 * 
+	 * @param activityContext
+	 *            The Activity Context.
+	 * @return Returns true if the device is a Tablet
+	 */
+//	public static boolean isTablet(Context activityContext) {
+//		if (Build.VERSION.SDK_INT < 11){
+//			return false;
+//		} else if (Build.VERSION.SDK_INT < 14) {
+//			return true;
+//		} else {
+//			// Verifies if the Generalized Size of the device is XLARGE to be
+//			// considered a Tablet
+//			boolean xlarge = ((activityContext.getResources().getConfiguration().screenLayout & 
+//	                        Configuration.SCREENLAYOUT_SIZE_MASK) == 
+//	                        Configuration.SCREENLAYOUT_SIZE_XLARGE);
+//
+//			// If XLarge, checks if the Generalized Density is at least MDPI
+//			// (160dpi)
+//	    	if (xlarge) {
+//	    		DisplayMetrics metrics = new DisplayMetrics();
+//	    		((WindowManager) activityContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getMetrics(metrics);
+//
+//	    		// MDPI=160, DEFAULT=160, DENSITY_HIGH=240, DENSITY_MEDIUM=160,
+//	    		// DENSITY_TV=213, DENSITY_XHIGH=320
+//	    		if (metrics.densityDpi == DisplayMetrics.DENSITY_DEFAULT
+//	                || metrics.densityDpi == DisplayMetrics.DENSITY_HIGH
+//	                || metrics.densityDpi == DisplayMetrics.DENSITY_MEDIUM
+//	                || metrics.densityDpi == DisplayMetrics.DENSITY_TV
+//	                || metrics.densityDpi == DisplayMetrics.DENSITY_XHIGH) {
+//
+//	    			// Yes, this is a tablet!
+//	    			return true;
+//	    		}
+//	    	}
+//
+//	    	// No, this is not a tablet!
+//	    	return false;
+//		}
+//	}
 
+	/**
+	 * Checks if the device is a tablet or a phone - another version
+	 * 
+	 * @param activityContext
+	 *            The Activity Context.
+	 * @return Returns true if the device is a Tablet
+	 */
 	public static boolean isTablet(Context context) {
 		if (Build.VERSION.SDK_INT < 11){
 			return false;
@@ -607,8 +657,8 @@ public final class ServiceUtils {
 			try {
 				// Compute screen size
 				DisplayMetrics dm = context.getResources().getDisplayMetrics();
-				float screenWidth = dm.widthPixels / dm.xdpi;
-				float screenHeight = dm.heightPixels / dm.ydpi;
+				float screenWidth = dm.widthPixels / dm.densityDpi;
+				float screenHeight = dm.heightPixels / dm.densityDpi;
 				double size = Math.sqrt(Math.pow(screenWidth, 2) + Math.pow(screenHeight, 2));
 				// Tablet devices should have a screen size greater than 6 inches
 				return size >= 6;
