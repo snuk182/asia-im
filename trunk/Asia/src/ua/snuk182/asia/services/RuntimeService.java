@@ -1170,7 +1170,7 @@ public class RuntimeService extends Service {
 			try {
 				accounts.add(new Account(getApplicationContext(), account, protocolResponse));
 			} catch (AsiaCoreException e) {
-				throw new RemoteException(e.getLocalizedMessage());
+				throw new RemoteException();
 			}
 			uiCallback.accountAdded(account);
 
