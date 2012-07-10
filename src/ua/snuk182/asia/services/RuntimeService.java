@@ -40,6 +40,7 @@ import ua.snuk182.asia.view.more.AsiaCoreException;
 import ua.snuk182.asia.view.more.musiccontrol.AbstractPlayerStateListener;
 import ua.snuk182.asia.view.more.musiccontrol.IPlayerStateListener;
 import ua.snuk182.asia.view.more.musiccontrol.androidmusic.AndroidMusicServiceStateListener;
+import ua.snuk182.asia.view.more.musiccontrol.apollo.ApolloStateListener;
 import ua.snuk182.asia.view.more.musiccontrol.poweramp.PowerAmpStateListener;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -219,6 +220,12 @@ public class RuntimeService extends Service {
 			if (Boolean.parseBoolean(playerStatus)) {
 				putPlayerStateListener(getPlayerStateListener(androidmusicPlayerStatusKey), a.accountView);
 			}
+			
+			String apolloStatusKey = getResources().getString(R.string.key_apollo_playing_to_status);
+			playerStatus = a.accountView.options.getString(apolloStatusKey);
+			if (Boolean.parseBoolean(playerStatus)) {
+				putPlayerStateListener(getPlayerStateListener(apolloStatusKey), a.accountView);
+			}
 		}
 	}
 
@@ -250,6 +257,10 @@ public class RuntimeService extends Service {
 
 			if (key.equals(getResources().getString(R.string.key_androidmusic_playing_to_status))) {
 				listener = new AndroidMusicServiceStateListener(this);
+			}
+			
+			if (key.equals(getResources().getString(R.string.key_apollo_playing_to_status))) {
+				listener = new ApolloStateListener(this);
 			}
 
 			playerStateListeners.put(key, listener);
@@ -1318,6 +1329,15 @@ public class RuntimeService extends Service {
 						putPlayerStateListener(getPlayerStateListener(musicKey), account);
 					} else {
 						removePlayerStateListener(getPlayerStateListener(musicKey), account);
+					}
+				}
+				
+				String apolloKey = getResources().getString(R.string.key_apollo_playing_to_status);
+				if (key.equals(apolloKey)) {
+					if (Boolean.parseBoolean(value)) {
+						putPlayerStateListener(getPlayerStateListener(apolloKey), account);
+					} else {
+						removePlayerStateListener(getPlayerStateListener(apolloKey), account);
 					}
 				}
 
