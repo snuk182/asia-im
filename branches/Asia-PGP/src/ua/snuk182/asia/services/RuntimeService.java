@@ -558,7 +558,7 @@ public class RuntimeService extends Service {
 							 * !oldBuddy.iconHash.equals(info.iconHash)))
 							 */) {
 					final String buddyUid = buddy.protocolUid;
-					ServiceUtils.log("icon request " + buddy.getFilename());
+					ServiceUtils.log("icon request " + buddy.getFullUid());
 					new Thread("Runtime icon request") {
 						@Override
 						public void run() {

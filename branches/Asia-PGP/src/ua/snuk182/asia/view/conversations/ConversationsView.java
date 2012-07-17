@@ -766,7 +766,7 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 		new Thread("Chat icon request"){
 			@Override
 			public void run(){
-				icon = Buddy.getIcon(getEntryPoint(), buddy.getFilename());
+				icon = Buddy.getIcon(getEntryPoint(), buddy.getFullUid(), true);
 				handler.post(bitmapGot);									
 			}
 		}.start();

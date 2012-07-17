@@ -199,9 +199,9 @@ public class DoubleContactListGroupItem extends LinearLayout implements OnClickL
 		setCollapsedInternal(true);						
 	}
 	
-	public ContactListListItem removeItem(String protocolUid){
+	public ContactListListItem removeItem(String uid){
 		for (ContactListListItem cli:buddyList){
-			if (cli.getTag().equals(protocolUid)){
+			if (cli.getTag().equals(uid)){
 				buddyList.remove(cli);
 				return cli;
 			}

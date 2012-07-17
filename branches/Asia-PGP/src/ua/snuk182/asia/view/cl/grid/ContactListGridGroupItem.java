@@ -41,7 +41,7 @@ public class ContactListGridGroupItem extends LinearLayout implements OnClickLis
 		
 		LayoutInflater inflate = LayoutInflater.from(entryPoint);
 		inflate.inflate(R.layout.contact_list_grid_panel_item, this);
-		setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
+		setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 		setOrientation(LinearLayout.HORIZONTAL);
 
 		setFocusable(true);
@@ -116,7 +116,7 @@ public class ContactListGridGroupItem extends LinearLayout implements OnClickLis
 
 				row.setFocusable(false);
 				
-				row.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+				row.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
 				row.setGravity(Gravity.CENTER_HORIZONTAL);
 			}
 			

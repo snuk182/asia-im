@@ -260,7 +260,7 @@ public class EntryPoint extends ActivityGroup {
 				
 				Bitmap original = ViewUtils.scaleBitmap(((BitmapDrawable)getWallpaper()).getBitmap(),   
 						(heightPx > widthPx) ? heightPx : widthPx, 
-								true);	
+								true, true);	
 				wallpaper = new BitmapDrawable(getResources(), original);
 				wallpaper.setGravity(Gravity.CENTER);
 				wallpaper.setFilterBitmap(false);

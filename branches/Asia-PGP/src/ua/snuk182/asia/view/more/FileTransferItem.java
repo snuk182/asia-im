@@ -80,8 +80,8 @@ public class FileTransferItem extends RelativeLayout {
 			ServiceUtils.log(e1);
 		}
 		
-		ContactListGridItem buddyItem = new ContactListGridItem(ftView.getEntryPoint(), buddy.protocolUid);
-		buddyItem.populate(buddy, showIcons);
+		ContactListGridItem buddyItem = new ContactListGridItem(ftView.getEntryPoint(), buddy.getFullUid(), ftView);
+		buddyItem.populate(buddy, showIcons, 0, Integer.MAX_VALUE);
 		
 		buddyItem.setOnClickListener(new OnClickListener() {
 

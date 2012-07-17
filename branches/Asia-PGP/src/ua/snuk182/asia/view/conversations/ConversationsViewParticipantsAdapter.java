@@ -79,7 +79,7 @@ public class ConversationsViewParticipantsAdapter extends BaseExpandableListAdap
 		
 		if (convertView == null){
 			tv = new TextView(entryPoint);
-			tv.setLayoutParams(new ListView.LayoutParams(ListView.LayoutParams.FILL_PARENT, ListView.LayoutParams.WRAP_CONTENT));
+			tv.setLayoutParams(new ListView.LayoutParams(ListView.LayoutParams.MATCH_PARENT, ListView.LayoutParams.WRAP_CONTENT));
 			tv.setGravity(Gravity.RIGHT);
 		} else {
 			//parent.removeView(convertView);
@@ -99,23 +99,21 @@ public class ConversationsViewParticipantsAdapter extends BaseExpandableListAdap
 		
 		if (showIcons){
 			if (convertView == null){
-				convertView = new ContactListGridItem(entryPoint, null);
+				convertView = new ContactListGridItem(entryPoint, buddy.getFullUid(), null);
 			} 
-			((ContactListGridItem)convertView).setTag(buddy.protocolUid);
-			((ContactListGridItem)convertView).populate(buddy, showIcons, new AbsListView.LayoutParams(ContactListGridItem.itemSize, ContactListGridItem.itemSize));
+			((ContactListGridItem)convertView).populate(buddy, showIcons, new AbsListView.LayoutParams(ContactListGridItem.itemSize, ContactListGridItem.itemSize), ((View)parent).getScrollY(), ((View)parent).getScrollY()+(((View)parent).getBottom()-((View)parent).getTop()));
 		} else {
 			if (convertView == null){
-				convertView = new ContactListListItem(entryPoint, null);
+				convertView = new ContactListListItem(entryPoint, buddy.getFullUid(), null);
 			} 
-			((ContactListListItem)convertView).setTag(buddy.protocolUid);
-			((ContactListListItem)convertView).populate(buddy, showIcons);
+			((ContactListListItem)convertView).populate(buddy, showIcons, ((View)parent).getScrollY(), ((View)parent).getScrollY()+(((View)parent).getBottom()-((View)parent).getTop()));
 	        
 		}	
 		
 		cli = (ContactListItem) convertView;
 		
 		cli.color();
- 		cli.requestIcon(buddy);
+ 		//cli.requestIcon(buddy, ((View)parent).getScrollY(), ((View)parent).getScrollY()+(((View)parent).getBottom()-((View)parent).getTop()));
  		
 		return (View) cli;
 	}

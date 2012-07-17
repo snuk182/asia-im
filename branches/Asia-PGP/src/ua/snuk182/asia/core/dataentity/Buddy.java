@@ -7,12 +7,14 @@ import java.util.List;
 
 import ua.snuk182.asia.services.HistorySaver;
 import ua.snuk182.asia.services.api.AccountService;
+import ua.snuk182.asia.view.ViewUtils;
 import ua.snuk182.asia.view.conversations.ConversationsView;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.View;
 
 /**
  * Buddy entity.
@@ -343,7 +345,7 @@ public class Buddy implements Parcelable, Comparable<Buddy> {
 	 * 
 	 * @return
 	 */
-	public String getFilename() {
+	public String getFullUid() {
 		return getOwnerAccountId()+" "+protocolUid;
 	}
 	
@@ -354,7 +356,13 @@ public class Buddy implements Parcelable, Comparable<Buddy> {
 	 * @param filename icon file name
 	 * @return icon bitmap as {@link Bitmap.Config.ARGB_8888}, if found, or null
 	 */
-	public static synchronized Bitmap getIcon(Context context, String filename){
+	public static synchronized Bitmap getIcon(Context context, String filename, boolean omitCache){
+		
+		Bitmap ret;
+		if (!omitCache){
+			ret = ViewUtils.BITMAP_CACHE.get(filename);
+			if (ret != null) return ret;
+		}
 		
 		FileInputStream fis = null;
 		try {
@@ -369,8 +377,12 @@ public class Buddy implements Parcelable, Comparable<Buddy> {
 		options.inScaled = false;
 		options.inPurgeable=true;
 		options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+		
+		ret = BitmapFactory.decodeStream(fis, null, options);
+		
+		ViewUtils.BITMAP_CACHE.put(filename, ret);
 
-		return BitmapFactory.decodeStream(fis, null, options);
+		return ret;
 	}
 
 	/**
