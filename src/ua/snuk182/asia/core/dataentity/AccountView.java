@@ -208,6 +208,23 @@ public class AccountView implements Parcelable {
 	}
 	
 	/**
+	 * Find buddy by full uid in this account.
+	 * 
+	 * @param uid input uid
+	 * @return buddy or null
+	 */
+	public Buddy getBuddyByFullUid(String uid) {
+		synchronized (buddyList) {
+			for (Buddy buddy : buddyList) {
+				if (uid.equals(buddy.getFullUid())) {
+					return buddy;
+				}
+			}
+		}
+		return null;
+	}
+	
+	/**
 	 * Find buddy group by protocol uid in this account.
 	 * 
 	 * @param id group id to find

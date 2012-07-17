@@ -86,7 +86,7 @@ public class Notificator {
 		if (updateAppIcon) {
 			notificator.notify(appIconId, notification);
 		} else {
-			notificator.notify(buddy.getFilename().hashCode(), notification);
+			notificator.notify(buddy.getFullUid().hashCode(), notification);
 		}
 	}
 
@@ -95,7 +95,7 @@ public class Notificator {
 	}
 
 	public void cancel(Buddy buddy) {
-		cancel(buddy.getFilename().hashCode());
+		cancel(buddy.getFullUid().hashCode());
 	}
 
 	private void cancel(int id) {
@@ -118,7 +118,7 @@ public class Notificator {
 		notificationIntent.setData((Uri.parse("asia://" + notificatorId)));
 		PendingIntent contentIntent = PendingIntent.getActivity(context, buddy.id, notificationIntent, 0);
 		notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
-		notificator.notify(buddy.getFilename().hashCode(), notification);
+		notificator.notify(buddy.getFullUid().hashCode(), notification);
 	}
 
 	public void notifyAccountChanged(AccountView account, String text) {
