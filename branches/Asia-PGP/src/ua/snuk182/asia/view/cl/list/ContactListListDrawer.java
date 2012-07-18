@@ -200,7 +200,7 @@ public class ContactListListDrawer extends EventableScrollView implements IConta
 				}
 			}*/
 			
-			onScrollStoppedListener.onScrollStopped(getScrollY(), getScrollY()+(getBottom()-getTop()));
+			//onScrollStoppedListener.onScrollStopped(getScrollY(), getScrollY()+(getBottom()-getTop()));
 		}
 	};
 
@@ -393,7 +393,7 @@ public class ContactListListDrawer extends EventableScrollView implements IConta
 			groItem.refresh();
 		}
 
-		item.populate(buddy, getScrollY(), getScrollY()+(getBottom()-getTop()));
+		item.populate(buddy);
 	}
 
 	@Override
@@ -464,7 +464,7 @@ public class ContactListListDrawer extends EventableScrollView implements IConta
 		item.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, height));
 
 		item.removeFromParent();
-		item.populate(buddy, showIcons, getScrollY(), getScrollY()+(getBottom()-getTop()));
+		item.populate(buddy, showIcons);
 		//item.requestIcon(buddy);
 
 		return item;
@@ -474,7 +474,7 @@ public class ContactListListDrawer extends EventableScrollView implements IConta
 	public void bitmap(String uid) {
 		ContactListListItem item = findExistingItem(uid);
 		if (item != null) {
-			item.requestIcon(parent.account.getBuddyByProtocolUid(uid), getScrollY(), getScrollY()+(getBottom()-getTop()));
+			item.requestIcon(parent.account.getBuddyByProtocolUid(uid));
 		}
 	}
 

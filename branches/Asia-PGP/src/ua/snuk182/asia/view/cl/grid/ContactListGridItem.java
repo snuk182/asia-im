@@ -97,8 +97,8 @@ public class ContactListGridItem extends RelativeLayout implements ContactListIt
 	}	
 	
 	@Override
-	public void populate(Buddy buddy, int parentTop, int parentBottom){
-		populate(buddy, showIcon, parentTop, parentBottom);
+	public void populate(Buddy buddy){
+		populate(buddy, showIcon);
 	}
 	
 	public static void resize(int itemSize, EntryPoint entryPoint){
@@ -125,11 +125,11 @@ public class ContactListGridItem extends RelativeLayout implements ContactListIt
 		}
 	}
 	
-	public void populate(Buddy buddy, boolean showIcons, int parentTop, int parentBottom){
-		populate(buddy, showIcons, null, parentTop, parentBottom);
+	public void populate(Buddy buddy, boolean showIcons){
+		populate(buddy, showIcons, null);
 	}
 	
-	public void populate(Buddy buddy, boolean showIcons, ViewGroup.LayoutParams layout, int parentTop, int parentBottom){
+	public void populate(Buddy buddy, boolean showIcons, ViewGroup.LayoutParams layout){
 		if (!buddy.getFullUid().equals(getTag())){
 			return;
 		}
@@ -201,16 +201,12 @@ public class ContactListGridItem extends RelativeLayout implements ContactListIt
 		if (showIcons){
 			if (!this.showIcon){
 				this.showIcon = showIcons;
-				visibility2IconAction(parentTop, parentBottom);
-			} else {
-				this.showIcon = showIcons;
-			}
-			mainStatusIcon.setVisibility(View.VISIBLE);
+				visibility2IconAction(scroller.getScrollY(), scroller.getScrollY() + (scroller.getBottom()-scroller.getTop()));
+			} 			
 		} else {
-			setNoBuddyImageMode(buddy);
 			this.showIcon = showIcons;
-		}
-		
+			setNoBuddyImageMode(buddy);			
+		}		
 	}
 
 	public void removeFromParent(){
@@ -234,10 +230,10 @@ public class ContactListGridItem extends RelativeLayout implements ContactListIt
 	}
 	
 	@Override
-	public void requestIcon(Buddy buddy, int parentTop, int parentBottom){
-		icon = null;
+	public void requestIcon(Buddy buddy){
+		icon = new WeakReference<Bitmap>(null);
 		if (showIcon){
-			visibility2IconAction(parentTop, parentBottom);
+			visibility2IconAction(scroller.getScrollY(), scroller.getScrollY() + (scroller.getBottom()-scroller.getTop()));
 		} else {
 			setNoBuddyImageMode(buddy);
 		}
@@ -250,7 +246,13 @@ public class ContactListGridItem extends RelativeLayout implements ContactListIt
 			
 			@Override
 			public void run(){
-				icon = new WeakReference<Bitmap>(Buddy.getIcon(getEntryPoint(), filename, icon == null));
+				if (icon != null && icon.get() != null){
+					buddyImage.setBuddyImage(null);
+					icon.get().recycle();
+					icon.clear();
+				}
+				
+				icon = new WeakReference<Bitmap>(Buddy.getIcon(getEntryPoint(), filename, (icon != null && icon.get() == null)));
 				
 				//getEntryPoint().threadMsgHandler.post(iconGot);
 				iconGot.run();
@@ -285,7 +287,9 @@ public class ContactListGridItem extends RelativeLayout implements ContactListIt
 
 	@Override
 	public void onDrawerScrolled(int parentTop, int parentBottom) {
-		visibility2IconAction(parentTop, parentBottom);
+		if (showIcon){
+			visibility2IconAction(parentTop, parentBottom);
+		}
 	}
 
 	private void visibility2IconAction(int parentTop, int parentBottom) {
@@ -322,7 +326,7 @@ public class ContactListGridItem extends RelativeLayout implements ContactListIt
 	protected void onLayout(boolean changed, int left, int top, int right, int bottom){
 		super.onLayout(changed, left, top, right, bottom);
 		
-		if (changed && scroller != null){
+		if (showIcon && changed && scroller != null){
 			visibility2IconAction(scroller.getScrollY(), scroller.getScrollY() + (scroller.getBottom()-scroller.getTop()));
 		}
 	}

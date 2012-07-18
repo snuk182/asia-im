@@ -73,6 +73,7 @@ public class EntryPoint extends ActivityGroup {
 	private static final String SAVEDSTATE_SELECTED_CHAT = "selectedChat";
 	private static final String SAVEDSTATE_SELECTED_ACC = "selectedAcc";
 	private static final String SAVEDSTATE_TABS = "tabs";	
+	private static final String SAVEDSTATE_WALLPAPER_HASH = "wpHash";	
 	
 	//the background color for wallpaper mode. also acts as wallpaper mode marker.
 	public static final int BGCOLOR_WALLPAPER = 0xff7f7f80;
@@ -95,6 +96,7 @@ public class EntryPoint extends ActivityGroup {
 	public boolean menuOnTabLongclick = false;
 
 	public BitmapDrawable wallpaper = null;
+	private int wallpaperHash = 0;
 	
 	private Method invalidateOptionsMenuMethod = null;
 	
@@ -254,13 +256,21 @@ public class EntryPoint extends ActivityGroup {
     private void updateWallpaper() {
     	if (bgColor == BGCOLOR_WALLPAPER){
 			try {
+				Bitmap wp = ((BitmapDrawable)getWallpaper()).getBitmap();
+				int wph = wp.hashCode();
+				if (wph == wallpaperHash){
+					return;
+				}
+				
+				wallpaperHash = wph;
+				
 				//calculating correct wallpaper dimentions - the less wp side should be equal to bigger screen side
 				int heightPx = (int) (metrics.heightPixels * metrics.density);
 				int widthPx = (int) (metrics.widthPixels * metrics.density);
 				
-				Bitmap original = ViewUtils.scaleBitmap(((BitmapDrawable)getWallpaper()).getBitmap(),   
+				Bitmap original = ViewUtils.scaleBitmap(wp,   
 						(heightPx > widthPx) ? heightPx : widthPx, 
-								true, true);	
+								true, false);	
 				wallpaper = new BitmapDrawable(getResources(), original);
 				wallpaper.setGravity(Gravity.CENTER);
 				wallpaper.setFilterBitmap(false);
@@ -293,6 +303,9 @@ public class EntryPoint extends ActivityGroup {
     	setContentView(R.layout.dummy);
     	
     	savedState = savedInstanceState;
+    	if (savedInstanceState != null){
+    		wallpaperHash = savedInstanceState.getInt(SAVEDSTATE_WALLPAPER_HASH);
+    	}
     	
     	toggleWaitscreen(true);
         
@@ -1030,6 +1043,7 @@ public class EntryPoint extends ActivityGroup {
 			bundle.putInt(SAVEDSTATE_SELECTED_ACC, mainScreen.getCurrentAccountsTab());
 			bundle.putInt(SAVEDSTATE_SELECTED_CHAT, mainScreen.getCurrentChatsTab());
 			bundle.putParcelable(SAVEDSTATE_SERVICE_INTENT, serviceIntent);
+			bundle.putInt(SAVEDSTATE_WALLPAPER_HASH, wallpaperHash);
 		} catch (Exception e) {
 			ServiceUtils.log(e);
 		}
@@ -1062,6 +1076,7 @@ public class EntryPoint extends ActivityGroup {
 		super.onDestroy();
 		ServiceUtils.log("entry point destroyed");
 		mainScreen.onDestroy();
+		System.gc();
 	}
 	
 	public void exit() {

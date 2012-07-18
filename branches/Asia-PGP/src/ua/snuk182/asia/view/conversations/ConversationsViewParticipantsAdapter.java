@@ -101,12 +101,12 @@ public class ConversationsViewParticipantsAdapter extends BaseExpandableListAdap
 			if (convertView == null){
 				convertView = new ContactListGridItem(entryPoint, buddy.getFullUid(), null);
 			} 
-			((ContactListGridItem)convertView).populate(buddy, showIcons, new AbsListView.LayoutParams(ContactListGridItem.itemSize, ContactListGridItem.itemSize), ((View)parent).getScrollY(), ((View)parent).getScrollY()+(((View)parent).getBottom()-((View)parent).getTop()));
+			((ContactListGridItem)convertView).populate(buddy, showIcons, new AbsListView.LayoutParams(ContactListGridItem.itemSize, ContactListGridItem.itemSize));
 		} else {
 			if (convertView == null){
 				convertView = new ContactListListItem(entryPoint, buddy.getFullUid(), null);
 			} 
-			((ContactListListItem)convertView).populate(buddy, showIcons, ((View)parent).getScrollY(), ((View)parent).getScrollY()+(((View)parent).getBottom()-((View)parent).getTop()));
+			((ContactListListItem)convertView).populate(buddy, showIcons);
 	        
 		}	
 		
