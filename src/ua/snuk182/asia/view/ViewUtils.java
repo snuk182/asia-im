@@ -69,6 +69,11 @@ public final class ViewUtils {
 		protected int sizeOf(String key, Bitmap value) {
 	        return value.getRowBytes() * value.getHeight();
 	    }
+		
+		@Override
+		protected void entryRemoved(boolean evicted, String key, Bitmap oldValue, Bitmap newValue) {
+			oldValue.recycle();
+		}
 	};	
 	
 	private static final Map<String, IconMenuAdapter> iconMenuAdapters = new HashMap<String, IconMenuAdapter>();

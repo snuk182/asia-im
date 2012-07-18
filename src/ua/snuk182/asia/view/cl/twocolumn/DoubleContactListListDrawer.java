@@ -208,7 +208,7 @@ public class DoubleContactListListDrawer extends EventableScrollView implements 
 				}
 			}*/
 			
-			onScrollStoppedListener.onScrollStopped(getScrollY(), getScrollY()+(getBottom()-getTop()));
+			//onScrollStoppedListener.onScrollStopped(getScrollY(), getScrollY()+(getBottom()-getTop()));
 		}
 	};
 	
@@ -409,7 +409,7 @@ public class DoubleContactListListDrawer extends EventableScrollView implements 
 			groItem.refresh(false);
 		}
 
-		item.populate(buddy, getScrollY(), getScrollY()+(getBottom()-getTop()));
+		item.populate(buddy);
 	}
 
 	@Override
@@ -477,7 +477,7 @@ public class DoubleContactListListDrawer extends EventableScrollView implements 
 		item.setLayoutParams(new LinearLayout.LayoutParams(DoubleContactListGroupItem.itemSize, (int) (ContactListListItem.itemHeight*getEntryPoint().metrics.density), 1f));
 		
 		item.removeFromParent();
-		item.populate(buddy, showIcons, getScrollY(), getScrollY()+(getBottom()-getTop()));
+		item.populate(buddy, showIcons);
 		//item.requestIcon(buddy);
 		
 		return item;
@@ -491,7 +491,7 @@ public class DoubleContactListListDrawer extends EventableScrollView implements 
 	public void bitmap(String uid) {
 		ContactListListItem item = findExistingItem(uid);
 		if (item != null){
-			item.requestIcon(parent.account.getBuddyByProtocolUid(uid), getScrollY(), getScrollY()+(getBottom()-getTop()));
+			item.requestIcon(parent.account.getBuddyByProtocolUid(uid));
 		}
 	}
 	

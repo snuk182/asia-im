@@ -164,7 +164,7 @@ public class ContactListGridDrawer extends EventableScrollView implements IConta
 					}
 				}
 				
-				item.requestIcon(buddy, getScrollY(), getScrollY()+(getBottom()-getTop()));
+				//item.requestIcon(buddy);
 			}
 
 			if (unreadGroup.getBuddyList().size() > 0) {
@@ -208,7 +208,7 @@ public class ContactListGridDrawer extends EventableScrollView implements IConta
 				}
 			}*/
 			
-			onScrollStoppedListener.onScrollStopped(getScrollY(), getScrollY()+(getBottom()-getTop()));
+			//onScrollStoppedListener.onScrollStopped(getScrollY(), getScrollY()+(getBottom()-getTop()));
 		}
 	};
 	
@@ -406,7 +406,7 @@ public class ContactListGridDrawer extends EventableScrollView implements IConta
 			groItem.refresh();
 		}
 		
-		item.populate(buddy, getScrollY(), getScrollY()+(getBottom()-getTop()));		
+		item.populate(buddy);		
 	}
 
 	@Override
@@ -481,7 +481,7 @@ public class ContactListGridDrawer extends EventableScrollView implements IConta
 		}
 
 		item.removeFromParent();
-		item.populate(buddy, showIcons, getScrollY(), getScrollY()+(getBottom()-getTop()));
+		item.populate(buddy, showIcons);
 		//item.requestIcon(buddy);
 		
 		return item;
@@ -497,7 +497,7 @@ public class ContactListGridDrawer extends EventableScrollView implements IConta
 			Buddy buddy = getEntryPoint().runtimeService.getBuddy(parent.account.serviceId, uid);
 			ContactListGridItem item = findExistingItem(buddy.getFullUid());
 			if (item != null) {
-				item.requestIcon(buddy, getScrollY(), getScrollY()+(getBottom()-getTop()));				
+				item.requestIcon(buddy);				
 			}			
 		} catch (NullPointerException npe) {
 			ServiceUtils.log(npe);

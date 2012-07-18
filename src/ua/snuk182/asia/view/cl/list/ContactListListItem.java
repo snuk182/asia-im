@@ -102,7 +102,7 @@ public class ContactListListItem extends RelativeLayout implements ContactListIt
 		setOnFocusChangeListener(this);
 	}
 	
-	public void populate(Buddy buddy, boolean showIcons, int parentTop, int parentBottom){
+	public void populate(Buddy buddy, boolean showIcons){
 		if (!buddy.getFullUid().equals(getTag())){
 			return;
 		}
@@ -242,7 +242,7 @@ public class ContactListListItem extends RelativeLayout implements ContactListIt
 		
 		if (showIcons && !this.showIcons){
 			this.showIcons = showIcons;			
-			visibility2IconAction(parentTop, parentBottom);
+			visibility2IconAction(scroller.getScrollY(), scroller.getScrollY() + (scroller.getBottom()-scroller.getTop()));
 		} else {
 			this.showIcons = showIcons;
 		}
@@ -286,10 +286,10 @@ public class ContactListListItem extends RelativeLayout implements ContactListIt
 	}
 	
 	@Override
-	public void requestIcon(Buddy buddy, int parentTop, int parentBottom){
+	public void requestIcon(Buddy buddy){
 		icon = null;
 		if (showIcons){
-			visibility2IconAction(parentTop, parentBottom);
+			visibility2IconAction(scroller.getScrollY(), scroller.getScrollY() + (scroller.getBottom()-scroller.getTop()));
 		} else {
 			picLayout.setBuddyImage(R.drawable.dummy_48);
 		}
@@ -323,8 +323,8 @@ public class ContactListListItem extends RelativeLayout implements ContactListIt
 	}
 
 	@Override
-	public void populate(Buddy buddy, int parentTop, int parentBottom) {
-		populate(buddy, showIcons, parentTop, parentBottom);
+	public void populate(Buddy buddy) {
+		populate(buddy, showIcons);
 	}
 	
 	@Override
