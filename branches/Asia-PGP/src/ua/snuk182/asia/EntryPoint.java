@@ -41,7 +41,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -73,7 +72,6 @@ public class EntryPoint extends ActivityGroup {
 	private static final String SAVEDSTATE_SELECTED_CHAT = "selectedChat";
 	private static final String SAVEDSTATE_SELECTED_ACC = "selectedAcc";
 	private static final String SAVEDSTATE_TABS = "tabs";	
-	private static final String SAVEDSTATE_WALLPAPER_HASH = "wpHash";	
 	
 	//the background color for wallpaper mode. also acts as wallpaper mode marker.
 	public static final int BGCOLOR_WALLPAPER = 0xff7f7f80;
@@ -96,7 +94,6 @@ public class EntryPoint extends ActivityGroup {
 	public boolean menuOnTabLongclick = false;
 
 	public BitmapDrawable wallpaper = null;
-	private int wallpaperHash = 0;
 	
 	private Method invalidateOptionsMenuMethod = null;
 	
@@ -194,19 +191,29 @@ public class EntryPoint extends ActivityGroup {
 	};
 	
 	@Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigurationChanged(final Configuration newConfig) {
         super.onConfigurationChanged(newConfig); 
         getMetrics();
+        
         threadMsgHandler.post(new Runnable(){
 
 			@Override
 			public void run() {
+				checkWallpaperOrientation(newConfig.orientation);				
 				mainScreen.configChanged();
 			}
         	
         });
     }
 	
+	private void checkWallpaperOrientation(int orientation) {
+		if (orientation == Configuration.ORIENTATION_PORTRAIT){
+			wallpaper.setGravity(wallpaper.getBitmap().getHeight() < wallpaper.getBitmap().getWidth() ? Gravity.CLIP_VERTICAL : Gravity.CLIP_HORIZONTAL);
+		} else {
+			wallpaper.setGravity(wallpaper.getBitmap().getHeight() < wallpaper.getBitmap().getWidth() ? Gravity.CLIP_HORIZONTAL : Gravity.CLIP_VERTICAL);
+		}
+	}
+
 	private void addMasterPasswordRequestTab() {
 		String tag = MasterPasswordView.class.getSimpleName();
 		
@@ -256,25 +263,20 @@ public class EntryPoint extends ActivityGroup {
     private void updateWallpaper() {
     	if (bgColor == BGCOLOR_WALLPAPER){
 			try {
-				Bitmap wp = ((BitmapDrawable)getWallpaper()).getBitmap();
-				int wph = wp.hashCode();
-				if (wph == wallpaperHash){
-					return;
-				}
-				
-				wallpaperHash = wph;
-				
 				//calculating correct wallpaper dimentions - the less wp side should be equal to bigger screen side
-				int heightPx = (int) (metrics.heightPixels * metrics.density);
+				/*int heightPx = (int) (metrics.heightPixels * metrics.density);
 				int widthPx = (int) (metrics.widthPixels * metrics.density);
 				
-				Bitmap original = ViewUtils.scaleBitmap(wp,   
+				Bitmap original = ViewUtils.scaleBitmap(((BitmapDrawable)getWallpaper()).getBitmap(),   
 						(heightPx > widthPx) ? heightPx : widthPx, 
-								true, false);	
-				wallpaper = new BitmapDrawable(getResources(), original);
-				wallpaper.setGravity(Gravity.CENTER);
+								true);	
+				wallpaper = new BitmapDrawable(original);*/
+				
+				wallpaper = (BitmapDrawable)getWallpaper();
+				
 				wallpaper.setFilterBitmap(false);
 				wallpaper.setDither(false);
+				checkWallpaperOrientation(getResources().getConfiguration().orientation);
 				mainScreen.setBackgroundDrawable(wallpaper);
 			} catch (Exception e) {
 				mainScreen.setBackgroundColor(bgColor);		
@@ -303,9 +305,6 @@ public class EntryPoint extends ActivityGroup {
     	setContentView(R.layout.dummy);
     	
     	savedState = savedInstanceState;
-    	if (savedInstanceState != null){
-    		wallpaperHash = savedInstanceState.getInt(SAVEDSTATE_WALLPAPER_HASH);
-    	}
     	
     	toggleWaitscreen(true);
         
@@ -1043,7 +1042,6 @@ public class EntryPoint extends ActivityGroup {
 			bundle.putInt(SAVEDSTATE_SELECTED_ACC, mainScreen.getCurrentAccountsTab());
 			bundle.putInt(SAVEDSTATE_SELECTED_CHAT, mainScreen.getCurrentChatsTab());
 			bundle.putParcelable(SAVEDSTATE_SERVICE_INTENT, serviceIntent);
-			bundle.putInt(SAVEDSTATE_WALLPAPER_HASH, wallpaperHash);
 		} catch (Exception e) {
 			ServiceUtils.log(e);
 		}
@@ -1076,7 +1074,6 @@ public class EntryPoint extends ActivityGroup {
 		super.onDestroy();
 		ServiceUtils.log("entry point destroyed");
 		mainScreen.onDestroy();
-		System.gc();
 	}
 	
 	public void exit() {
@@ -1162,5 +1159,10 @@ public class EntryPoint extends ActivityGroup {
 	public void setUnread(Buddy buddy, TextMessage message) throws RemoteException {
 		runtimeService.setUnread(buddy, null);
 		mainScreen.buddyStateChanged(buddy);
+	}
+	
+	@Override
+	public void onLowMemory(){
+		System.gc();
 	}
 }
