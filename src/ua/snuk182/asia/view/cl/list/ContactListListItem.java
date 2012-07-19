@@ -1,7 +1,5 @@
 package ua.snuk182.asia.view.cl.list;
 
-import java.lang.ref.WeakReference;
-
 import ua.snuk182.asia.EntryPoint;
 import ua.snuk182.asia.R;
 import ua.snuk182.asia.core.dataentity.Buddy;
@@ -12,7 +10,6 @@ import ua.snuk182.asia.view.more.BuddyImage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
-import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -21,7 +18,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 public class ContactListListItem extends RelativeLayout implements ContactListItem, Comparable<ContactListListItem> {
@@ -43,20 +39,18 @@ public class ContactListListItem extends RelativeLayout implements ContactListIt
 	private static float nameTextSize = 14;
 	private static float statusTextSize = 10;
 	
-	private WeakReference<Bitmap> icon;
-	private final ScrollView scroller;
-	private BitmapDrawable bd;
+	private Bitmap icon;
 	
 	private final Runnable iconGot = new Runnable(){
 
 		@Override
 		public void run() {
-			if (icon != null && icon.get() != null){
+			if (icon != null){
 				int picSize = itemHeight;
 				if (EntryPoint.bgColor == EntryPoint.BGCOLOR_WALLPAPER){
-					picSize -= 4;
+					picSize -= 3;
 				}
-				bd = new BitmapDrawable(ViewUtils.scaleBitmap(icon.get(), (int) ((picSize) * getEntryPoint().metrics.density), false, false));
+				BitmapDrawable bd = new BitmapDrawable(ViewUtils.scaleBitmap(icon, (int) ((picSize) * getEntryPoint().metrics.density), false));
 				bd.setFilterBitmap(false);
 				bd.setDither(false);
 				bd.setGravity(Gravity.CENTER);
@@ -71,7 +65,7 @@ public class ContactListListItem extends RelativeLayout implements ContactListIt
 	
 	public String iconId = "";
 
-	public ContactListListItem(Context context, String tag, ScrollView scroller) {
+	public ContactListListItem(Context context, String tag) {
 		super(context, null);
 		setClickable(true);
 		
@@ -85,8 +79,6 @@ public class ContactListListItem extends RelativeLayout implements ContactListIt
 		authIcon = (ImageView) findViewById(R.id.authimage);
 		xStatusText = (TextView) findViewById(R.id.xstatuslabel);  
 		picLayout.setBuddyImage(R.drawable.dummy_48);
-		
-		this.scroller = scroller;
 		
 		int size = (int) (itemHeight * getEntryPoint().metrics.density);
 		RelativeLayout.LayoutParams layout = new RelativeLayout.LayoutParams(size, size);
@@ -103,7 +95,7 @@ public class ContactListListItem extends RelativeLayout implements ContactListIt
 	}
 	
 	public void populate(Buddy buddy, boolean showIcons){
-		if (!buddy.getFullUid().equals(getTag())){
+		if (!buddy.protocolUid.equals(getTag())){
 			return;
 		}
 		
@@ -111,6 +103,8 @@ public class ContactListListItem extends RelativeLayout implements ContactListIt
 		name.setTextSize(nameTextSize);
 		xStatusText.setTextSize(statusTextSize);
 	       
+		setTag(buddy.protocolUid);
+		        
 		setFocusable(true);
 		//setFocusableInTouchMode(true);
 		
@@ -242,7 +236,7 @@ public class ContactListListItem extends RelativeLayout implements ContactListIt
 		
 		if (showIcons && !this.showIcons){
 			this.showIcons = showIcons;			
-			visibility2IconAction(scroller.getScrollY(), scroller.getScrollY() + (scroller.getBottom()-scroller.getTop()));
+			requestIcon(buddy);
 		} else {
 			this.showIcons = showIcons;
 		}
@@ -286,10 +280,22 @@ public class ContactListListItem extends RelativeLayout implements ContactListIt
 	}
 	
 	@Override
-	public void requestIcon(Buddy buddy){
-		icon = null;
+	public void requestIcon(final Buddy buddy){
 		if (showIcons){
-			visibility2IconAction(scroller.getScrollY(), scroller.getScrollY() + (scroller.getBottom()-scroller.getTop()));
+			getEntryPoint().threadMsgHandler.post(new Runnable() {
+				
+				@Override
+				public void run(){
+					finalizeBitmap();
+					
+					icon = Buddy.getIcon(getEntryPoint(), buddy.getFilename());
+					if (icon != null){
+						ViewUtils.VMRUNTIME.allocBitmap(icon);
+					}
+					//getEntryPoint().threadMsgHandler.post(iconGot);
+					iconGot.run();
+				}
+			});
 		} else {
 			picLayout.setBuddyImage(R.drawable.dummy_48);
 		}
@@ -334,61 +340,23 @@ public class ContactListListItem extends RelativeLayout implements ContactListIt
 	}
 
 	@Override
-	public void onDrawerScrolled(int parentTop, int parentBottom) {
-		visibility2IconAction(parentTop, parentBottom);
-	}
-
-	private void visibility2IconAction(int parentTop, int parentBottom) {
-		if (checkMeVisible(parentTop, parentBottom)){
-			requestIconInternal(getTag().toString());
-		} else {
-			picLayout.setBuddyImage(null);
-		}
-	}
-	
-	private void requestIconInternal(final String filename) {
-		mainStatusIcon.setVisibility(View.VISIBLE);
-		
-		getEntryPoint().threadMsgHandler.post(new Runnable() {
-			
-			@Override
-			public void run(){
-				icon = new WeakReference<Bitmap>(Buddy.getIcon(getEntryPoint(), filename, icon == null));
-				
-				//getEntryPoint().threadMsgHandler.post(iconGot);
-				iconGot.run();
-			}
-		});
-	}
-
-	private boolean checkMeVisible(int parentTop, int parentBottom) {
-		View parent = (View) getParent();		
-		if (parent == null){
-			//we're not drawn yet
-			return false;
-		}
-		
-		Rect rect = new Rect();		
-		if (parent instanceof LinearLayout && (((LinearLayout)parent).getOrientation() == LinearLayout.VERTICAL)){
-			getHitRect(rect);
-		} else {
-			parent.getHitRect(rect);
-		}
-		
-		return (rect.top > parentTop-50) && (rect.bottom < parentBottom+50);
-	}
-
-	@Override
 	public void setTag(String tag) {
 		super.setTag(tag);
 	}
 	
 	@Override
-	protected void onLayout(boolean changed, int left, int top, int right, int bottom){
-		super.onLayout(changed, left, top, right, bottom);
-		
-		if (changed && scroller != null){
-			visibility2IconAction(scroller.getScrollY(), scroller.getScrollY() + (scroller.getBottom()-scroller.getTop()));
+	protected void finalize() throws Throwable{
+		try {
+			finalizeBitmap();
+		} finally {
+			super.finalize();
+		}		
+	}
+
+	private void finalizeBitmap() {
+		if (icon != null){
+			ViewUtils.VMRUNTIME.freeBitmap(icon);
+			ServiceUtils.log("Bitmap for "+getTag()+" finalized");
 		}
 	}
 }

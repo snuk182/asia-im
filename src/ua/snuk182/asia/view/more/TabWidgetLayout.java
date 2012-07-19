@@ -153,7 +153,7 @@ public class TabWidgetLayout extends LinearLayout {
 			return;
 		}
 		
-		setImageBitmap(ViewUtils.scaleBitmap(bmp, (int) (32 * getEntryPoint().metrics.density), true, true));
+		setImageBitmap(ViewUtils.scaleBitmap(bmp, (int) (32 * getEntryPoint().metrics.density), true));
 	}
 
 	private EntryPoint getEntryPoint() {

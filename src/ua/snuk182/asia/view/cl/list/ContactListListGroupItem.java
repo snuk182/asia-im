@@ -39,7 +39,7 @@ public class ContactListListGroupItem extends LinearLayout implements OnClickLis
 		LayoutInflater inflate = LayoutInflater.from(entryPoint);
 		inflate.inflate(R.layout.contact_list_grid_panel_item, this); 
 		setLayoutParams(new ListView.LayoutParams(
-		        ListView.LayoutParams.MATCH_PARENT,
+		        ListView.LayoutParams.FILL_PARENT,
 		        ListView.LayoutParams.WRAP_CONTENT));
 		setOrientation(LinearLayout.HORIZONTAL);
 		
@@ -111,9 +111,9 @@ public class ContactListListGroupItem extends LinearLayout implements OnClickLis
 		setCollapsedInternal(true);					
 	}
 	
-	public ContactListListItem removeItem(String fullUid){
+	public ContactListListItem removeItem(String protocolUid){
 		for (ContactListListItem cli:buddyList){
-			if (cli.getTag().equals(fullUid)){
+			if (cli.getTag().equals(protocolUid)){
 				buddyList.remove(cli);
 				return cli;
 			}

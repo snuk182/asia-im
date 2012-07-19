@@ -13,7 +13,6 @@ import ua.snuk182.asia.core.dataentity.TextMessage;
 import ua.snuk182.asia.services.ServiceConstants;
 import ua.snuk182.asia.services.ServiceUtils;
 import ua.snuk182.asia.services.api.AccountService;
-import ua.snuk182.asia.view.EventableScrollView;
 import ua.snuk182.asia.view.ViewUtils;
 import ua.snuk182.asia.view.cl.ContactList;
 import ua.snuk182.asia.view.cl.IContactListDrawer;
@@ -21,8 +20,9 @@ import android.os.RemoteException;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 
-public class ContactListListDrawer extends EventableScrollView implements IContactListDrawer {
+public class ContactListListDrawer extends ScrollView implements IContactListDrawer {
 
 	private List<ContactListListGroupItem> groups = new ArrayList<ContactListListGroupItem>();
 	private ContactListListGroupItem unreadGroup;
@@ -194,13 +194,11 @@ public class ContactListListDrawer extends EventableScrollView implements IConta
 
 			tmpItems.clear();
 			
-			/*for (ContactListListGroupItem group : groups){
+			for (ContactListListGroupItem group : groups){
 				for (ContactListListItem item: group.getBuddyList()){
-					item.requestIcon(parent.account.getBuddyByFullUid(item.getTag().toString()), getScrollY(), getScrollY()+(getBottom()-getTop()));
+					item.requestIcon(parent.account.getBuddyByProtocolUid(item.getTag().toString()));
 				}
-			}*/
-			
-			//onScrollStoppedListener.onScrollStopped(getScrollY(), getScrollY()+(getBottom()-getTop()));
+			}
 		}
 	};
 
@@ -244,20 +242,8 @@ public class ContactListListDrawer extends EventableScrollView implements IConta
 			}
 		});
 		
-		setOnScrollStoppedListener(new OnScrollStoppedListener() {
-			
-			@Override
-			public void onScrollStopped(int frameTop, int frameBottom) {
-				for (ContactListListGroupItem group : groups){
-					for (ContactListListItem item : group.getBuddyList()){
-						item.onDrawerScrolled(frameTop, frameBottom);
-					}
-				}
-			}
-		});
-		
 		setFocusable(false);
-		LinearLayout.LayoutParams layout = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+		LinearLayout.LayoutParams layout = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT);
 		layout.weight = 0.1f;
 		setLayoutParams(layout);
 	}
@@ -302,7 +288,7 @@ public class ContactListListDrawer extends EventableScrollView implements IConta
 		ContactListListItem buddy = null;
 		for (int i = 0; i < groups.size(); i++) {
 			ContactListListGroupItem groupItem = groups.get(i);
-			ContactListListItem bu = groupItem.removeItem(parent.account.getAccountId()+" "+message.from);
+			ContactListListItem bu = groupItem.removeItem(message.from);
 			if (bu != null) {
 				buddy = bu;
 
@@ -325,6 +311,19 @@ public class ContactListListDrawer extends EventableScrollView implements IConta
 		for (ContactListListGroupItem item : groups) {
 			item.refresh();
 		}
+
+		/*String tag = ConversationsView.class.getSimpleName()+" "+message.serviceId+" "+message.from;
+		if (getEntryPoint().mainScreen.getCurrentChatsTabTag().equals(tag)) {
+			try {
+				Buddy budddy = getEntryPoint().runtimeService.getBuddy(parent.account.serviceId, message.from);
+				budddy.unread++;
+				getEntryPoint().runtimeService.setUnread(budddy, message);
+			} catch (NullPointerException npe) {
+				ServiceUtils.log(npe);
+			} catch (RemoteException e) {
+				getEntryPoint().onRemoteCallFailed(e);
+			}
+		}*/
 	}
 
 	@Override
@@ -333,7 +332,7 @@ public class ContactListListDrawer extends EventableScrollView implements IConta
 		for (int i = 0; i < groups.size(); i++) {
 			ContactListListGroupItem groupItem = groups.get(i);
 
-			item = groupItem.removeItem(buddy.getFullUid());
+			item = groupItem.removeItem(buddy.protocolUid);
 			if (item != null) {
 				groupItem.setRefreshContents(true);
 				break;
@@ -344,10 +343,12 @@ public class ContactListListDrawer extends EventableScrollView implements IConta
 			if (!showOffline && buddy.status != Buddy.ST_OFFLINE){
 				item = getItem(buddy, showIcons);
 			} else {
-				ServiceUtils.log("no item found - "+buddy.getFullUid());
+				ServiceUtils.log("no item found - "+buddy.protocolUid);
 				return;
 			}
 		}
+
+		item.populate(buddy);
 
 		ContactListListGroupItem groupItem = null;
 		String tag = null;
@@ -393,7 +394,6 @@ public class ContactListListDrawer extends EventableScrollView implements IConta
 			groItem.refresh();
 		}
 
-		item.populate(buddy);
 	}
 
 	@Override
@@ -418,8 +418,8 @@ public class ContactListListDrawer extends EventableScrollView implements IConta
 	private ContactListListItem getItem(final Buddy buddy, boolean showIcons) {
 		ContactListListItem item;
 		int height = (int) (ContactListListItem.itemHeight * getEntryPoint().metrics.density);
-		if ((item = findExistingItem(buddy.getFullUid())) == null) {
-			final ContactListListItem cli = new ContactListListItem(getEntryPoint(), buddy.getFullUid(), this);
+		if ((item = findExistingItem(buddy.protocolUid)) == null) {
+			final ContactListListItem cli = new ContactListListItem(getEntryPoint(), buddy.protocolUid);
 			cli.setOnClickListener(new OnClickListener() {
 
 				@Override
@@ -461,7 +461,7 @@ public class ContactListListDrawer extends EventableScrollView implements IConta
 
 			item = cli;
 		}
-		item.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, height));
+		item.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, height));
 
 		item.removeFromParent();
 		item.populate(buddy, showIcons);
@@ -473,9 +473,16 @@ public class ContactListListDrawer extends EventableScrollView implements IConta
 	@Override
 	public void bitmap(String uid) {
 		ContactListListItem item = findExistingItem(uid);
-		if (item != null) {
-			item.requestIcon(parent.account.getBuddyByProtocolUid(uid));
+		try {
+			if (item != null) {
+				item.requestIcon(getEntryPoint().runtimeService.getBuddy(parent.account.serviceId, uid));
+			}
+		} catch (NullPointerException npe) {
+			ServiceUtils.log(npe);
+		} catch (RemoteException e) {
+			getEntryPoint().onRemoteCallFailed(e);
 		}
+
 	}
 
 	@Override

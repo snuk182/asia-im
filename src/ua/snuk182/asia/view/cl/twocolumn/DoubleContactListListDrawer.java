@@ -13,7 +13,6 @@ import ua.snuk182.asia.core.dataentity.TextMessage;
 import ua.snuk182.asia.services.ServiceConstants;
 import ua.snuk182.asia.services.ServiceUtils;
 import ua.snuk182.asia.services.api.AccountService;
-import ua.snuk182.asia.view.EventableScrollView;
 import ua.snuk182.asia.view.ViewUtils;
 import ua.snuk182.asia.view.cl.ContactList;
 import ua.snuk182.asia.view.cl.IContactListDrawer;
@@ -22,8 +21,9 @@ import android.os.RemoteException;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 
-public class DoubleContactListListDrawer extends EventableScrollView implements IContactListDrawer {
+public class DoubleContactListListDrawer extends ScrollView implements IContactListDrawer {
 
 	private LinearLayout contactList;
 
@@ -202,13 +202,11 @@ public class DoubleContactListListDrawer extends EventableScrollView implements 
 			
 			tmpItems.clear();
 			
-			/*for (DoubleContactListGroupItem group : groups){
+			for (DoubleContactListGroupItem group : groups){
 				for (ContactListListItem item: group.getBuddyList()){
-					item.requestIcon(parent.account.getBuddyByProtocolUid(item.getTag().toString()), getScrollY(), getScrollY()+(getBottom()-getTop()));
+					item.requestIcon(parent.account.getBuddyByProtocolUid(item.getTag().toString()));
 				}
-			}*/
-			
-			//onScrollStoppedListener.onScrollStopped(getScrollY(), getScrollY()+(getBottom()-getTop()));
+			}
 		}
 	};
 	
@@ -252,19 +250,7 @@ public class DoubleContactListListDrawer extends EventableScrollView implements 
 			}
 		});
 		
-		setOnScrollStoppedListener(new OnScrollStoppedListener() {
-			
-			@Override
-			public void onScrollStopped(int frameTop, int frameBottom) {
-				for (DoubleContactListGroupItem group : groups){
-					for (ContactListListItem item : group.getBuddyList()){
-						item.onDrawerScrolled(frameTop, frameBottom);
-					}
-				}
-			}
-		});
-		
-		LinearLayout.LayoutParams layout = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+		LinearLayout.LayoutParams layout = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT);
 		layout.weight = 0.1f;
 		setLayoutParams(layout);
 		setFocusable(false);
@@ -316,7 +302,7 @@ public class DoubleContactListListDrawer extends EventableScrollView implements 
 		ContactListListItem buddy = null;
 		for (int i = 0; i < groups.size(); i++) {
 			DoubleContactListGroupItem groupItem = groups.get(i);
-			ContactListListItem bu = groupItem.removeItem(parent.account.getAccountId()+" "+message.from);
+			ContactListListItem bu = groupItem.removeItem(message.from);
 			if (bu != null) {
 				//if (buddy == null) {
 					buddy = bu;
@@ -341,6 +327,19 @@ public class DoubleContactListListDrawer extends EventableScrollView implements 
 		for (DoubleContactListGroupItem item : groups) {
 			item.refresh(false);
 		}
+
+		/*String tag = ConversationsView.class.getSimpleName()+" "+message.serviceId+" "+message.from;
+		if (getEntryPoint().mainScreen.getCurrentChatsTabTag().equals(tag)) {
+			try {
+				Buddy budddy = getEntryPoint().runtimeService.getBuddy(parent.account.serviceId, message.from);
+				budddy.unread++;
+				getEntryPoint().runtimeService.setUnread(budddy, message);
+			} catch (NullPointerException npe) {
+				ServiceUtils.log(npe);
+			} catch (RemoteException e) {
+				getEntryPoint().onRemoteCallFailed(e);
+			}
+		}*/
 	}
 
 	@Override
@@ -349,7 +348,7 @@ public class DoubleContactListListDrawer extends EventableScrollView implements 
 		for (int i = 0; i < groups.size(); i++) {
 			DoubleContactListGroupItem groupItem = groups.get(i);
 
-			item = groupItem.removeItem(buddy.getFullUid());
+			item = groupItem.removeItem(buddy.protocolUid);
 			if (item != null) {
 				groupItem.setRefreshContents(true);
 				break;
@@ -360,11 +359,13 @@ public class DoubleContactListListDrawer extends EventableScrollView implements 
 			if (!showOffline && buddy.status != Buddy.ST_OFFLINE){
 				item = getItem(buddy, showIcons);
 			} else {
-				ServiceUtils.log("no item found - "+buddy.getFullUid());
+				ServiceUtils.log("no item found - "+buddy.protocolUid);
 				return;
 			}
 		}
 
+		item.populate(buddy);
+		
 		DoubleContactListGroupItem groupItem = null;
 		String tag = null;
 		if (buddy.unread < 1){
@@ -409,7 +410,6 @@ public class DoubleContactListListDrawer extends EventableScrollView implements 
 			groItem.refresh(false);
 		}
 
-		item.populate(buddy);
 	}
 
 	@Override
@@ -429,8 +429,8 @@ public class DoubleContactListListDrawer extends EventableScrollView implements 
 
 	private ContactListListItem getItem(final Buddy buddy, boolean showIcons) {
 		ContactListListItem item;
-		if ((item = findExistingItem(buddy.getFullUid())) == null){			
-			final ContactListListItem cli = new ContactListListItem(getEntryPoint(), buddy.getFullUid(), this);
+		if ((item = findExistingItem(buddy.protocolUid)) == null){			
+			final ContactListListItem cli = new ContactListListItem(getEntryPoint(), buddy.protocolUid);
 			cli.setOnClickListener(new OnClickListener() {
 
 				@Override
@@ -491,7 +491,13 @@ public class DoubleContactListListDrawer extends EventableScrollView implements 
 	public void bitmap(String uid) {
 		ContactListListItem item = findExistingItem(uid);
 		if (item != null){
-			item.requestIcon(parent.account.getBuddyByProtocolUid(uid));
+			try {
+				item.requestIcon(getEntryPoint().runtimeService.getBuddy(parent.account.serviceId, uid));
+			} catch (NullPointerException npe) {	
+				ServiceUtils.log(npe);
+			} catch (RemoteException e) {
+				getEntryPoint().onRemoteCallFailed(e);
+			}
 		}
 	}
 	
