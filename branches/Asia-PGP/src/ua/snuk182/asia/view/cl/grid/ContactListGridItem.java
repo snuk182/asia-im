@@ -46,7 +46,7 @@ public class ContactListGridItem extends RelativeLayout implements ContactListIt
 		public void run() {
 			if (icon != null){
 				int picSize = itemSize;
-				if (EntryPoint.bgColor == EntryPoint.BGCOLOR_WALLPAPER){
+				if (EntryPoint.isSlimTransparentInterface()){
 					picSize -= 15;
 				}
 				BitmapDrawable bd = new BitmapDrawable(ViewUtils.scaleBitmap(icon, (int) ((picSize) * getEntryPoint().metrics.density), false));
@@ -266,7 +266,7 @@ public class ContactListGridItem extends RelativeLayout implements ContactListIt
 		buddyImage.onFocusChange(null, false);
 		int pad2;
 		
-		if (EntryPoint.bgColor != 0xff7f7f80){
+		if (!EntryPoint.isSlimTransparentInterface()){
 			pad2 = (int) (7*getEntryPoint().metrics.density);				
 		} else {
 			pad2 = 0;					

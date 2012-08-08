@@ -45,7 +45,7 @@ public class BuddyImage extends ImageView implements OnFocusChangeListener{
 
 	@Override
 	public void onFocusChange(View v, boolean hasFocus) {
-		if (EntryPoint.bgColor == 0xff7f7f80){
+		if (EntryPoint.isSlimTransparentInterface()){
 			if (hasFocus){
 				setTopImage(R.drawable.contact_sel_64px);			
 			} else {

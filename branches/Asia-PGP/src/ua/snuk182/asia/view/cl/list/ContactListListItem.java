@@ -47,7 +47,7 @@ public class ContactListListItem extends RelativeLayout implements ContactListIt
 		public void run() {
 			if (icon != null){
 				int picSize = itemHeight;
-				if (EntryPoint.bgColor == EntryPoint.BGCOLOR_WALLPAPER){
+				if (EntryPoint.isSlimTransparentInterface()){
 					picSize -= 3;
 				}
 				BitmapDrawable bd = new BitmapDrawable(ViewUtils.scaleBitmap(icon, (int) ((picSize) * getEntryPoint().metrics.density), false));

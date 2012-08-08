@@ -69,7 +69,7 @@ public class TabWidgetLayout extends LinearLayout {
 		}
 		
 		LinearLayout.LayoutParams layout = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, parent.getLayoutParams().height);
-		if (EntryPoint.bgColor == EntryPoint.BGCOLOR_WALLPAPER || Build.VERSION.SDK_INT < 11){
+		if (EntryPoint.isSlimTransparentInterface() || Build.VERSION.SDK_INT < 11){
 			//layout.setMargins((int) (-3 * getEntryPoint().metrics.density), 0, (int) (-3 * getEntryPoint().metrics.density), 0);
 			
 			int iconPadding = (int) (15*getEntryPoint().metrics.density);
