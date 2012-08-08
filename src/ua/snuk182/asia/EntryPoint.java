@@ -1165,4 +1165,8 @@ public class EntryPoint extends ActivityGroup {
 	public void onLowMemory(){
 		System.gc();
 	}
+	
+	public static final boolean isSlimTransparentInterface(){
+		return bgColor == BGCOLOR_WALLPAPER && tabStyle.equals("slim");
+	}	
 }
