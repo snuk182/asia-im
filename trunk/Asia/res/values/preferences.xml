@@ -51,7 +51,8 @@
 	<string name="key_secure_login">PrefSecureLogin</string>
 	<string name="key_poweramp_playing_to_status">PrefPowerampToStatus</string>
 	<string name="key_androidmusic_playing_to_status">PrefAndroidMusicToStatus</string>
-
+	<string name="key_apollo_playing_to_status">PrefAndroidMusicToStatus</string>
+	
 	<string name="value_sound_type_all_on">allOn</string>
 	<string name="value_sound_type_vibra">vibra</string>
 	<string name="value_sound_type_off">allOff</string>

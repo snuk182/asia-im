@@ -3,6 +3,7 @@
 
     <style name="LightTheme" parent="android:Theme.Holo.Light" />
     <style name="DarkTheme" parent="android:Theme.Holo" />
-    <style name="TransparentTheme" parent="android:Theme.Translucent" />
+    <style name="TransparentTheme" parent="android:Theme.Holo" />
+    <style name="AsiaTransparentTheme" parent="android:Theme.Translucent" />
     
 </resources>

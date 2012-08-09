@@ -7,6 +7,7 @@ import java.util.List;
 
 import ua.snuk182.asia.services.HistorySaver;
 import ua.snuk182.asia.services.api.AccountService;
+import ua.snuk182.asia.view.ViewUtils;
 import ua.snuk182.asia.view.conversations.ConversationsView;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -343,8 +344,7 @@ public class Buddy implements Parcelable, Comparable<Buddy> {
 	 * @param filename icon file name
 	 * @return icon bitmap as {@link Bitmap.Config.ARGB_8888}, if found, or null
 	 */
-	public static synchronized Bitmap getIcon(Context context, String filename){
-		
+	public static Bitmap getIcon(Context context, String filename){
 		FileInputStream fis = null;
 		try {
 			fis = context.openFileInput(filename+BUDDYICON_FILEEXT);
@@ -354,11 +354,23 @@ public class Buddy implements Parcelable, Comparable<Buddy> {
 		if (fis == null) return null;
 		
 		BitmapFactory.Options options = new BitmapFactory.Options();
-		options.inDither = false;
+		
+		options.inJustDecodeBounds = true;		
+		BitmapFactory.decodeStream(fis, null, options);
+		
+		if (!ViewUtils.checkAvailableRamForBitmap(options.outHeight, options.outWidth)) return null;
+		
+		try {
+			fis = context.openFileInput(filename+BUDDYICON_FILEEXT);
+		} catch (Exception e) {
+		}
+		
+		options.inJustDecodeBounds = false;
+		options.inDither = true;
 		options.inScaled = false;
 		options.inPurgeable=true;
-		options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-
+		options.inPreferredConfig = Bitmap.Config.RGB_565;
+		
 		return BitmapFactory.decodeStream(fis, null, options);
 	}
 

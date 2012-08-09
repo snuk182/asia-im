@@ -175,15 +175,18 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 					kbManager.hideSoftInputFromWindow(textEditor.getWindowToken(), 0);
 				}
 			} else {
-				buddy.unread = 0;
 				try {
+					Buddy original = getEntryPoint().runtimeService.getBuddy(getServiceId(), buddy.protocolUid);
+					buddy.merge(original);
+					
+					buddy.unread = 0;
 					getEntryPoint().setUnread(buddy, null);					
 				} catch (NullPointerException npe) {	
 					ServiceUtils.log(npe);
 				} catch (RemoteException e) {
 					getEntryPoint().onRemoteCallFailed(e);
 				}
-				tabWidgetLayout.setScaledBitmap(icon);		
+				tabWidgetLayout.setScaledBitmap(icon, buddy.getFilename());		
 				updateBuddyState(buddy);
 				scroller.post(scrollToEnd);	
 			}
@@ -225,7 +228,7 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 
 		@Override
 		public void run() {
-			tabWidgetLayout.setScaledBitmap(icon);						
+			tabWidgetLayout.setScaledBitmap(icon, buddy.getFilename());						
 		}
 		
 	};

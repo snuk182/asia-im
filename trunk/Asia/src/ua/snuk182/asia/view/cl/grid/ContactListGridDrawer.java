@@ -200,7 +200,6 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 			for (ContactListGridGroupItem group : groups) {
 				group.resize(size);
 				group.color();
-				//System.out.println(group.getTag()+" "+group.getBuddyList().size());
 				group.refresh(COLUMN_COUNT);
 			}
 			
@@ -288,25 +287,6 @@ public class ContactListGridDrawer extends ScrollView implements IContactListDra
 					}
 				}
 			});
-			
-			/*new Thread() {
-				
-				@Override
-				public void start() {
-					oldWidth = width;
-					if (clInited && COLUMN_COUNT > 0){
-						int newColumnCount = width / ContactListGridItem.itemSize;
-						//if (COLUMN_COUNT != newColumnCount){
-							COLUMN_COUNT = newColumnCount;
-							for (ContactListGridGroupItem group : groups) {
-								group.refresh(COLUMN_COUNT);
-							}
-						//} 
-					} else {
-						updateView();
-					}
-				}
-			};*/
 		}		
 	}
 

@@ -28,7 +28,11 @@ public abstract class AbstractPlayerStateListener {
 		listeners.remove(serviceId);
 		
 		if (listeners.size() < 1){
-			unregister();
+			try{
+				unregister();
+			} catch (IllegalArgumentException e){
+				ServiceUtils.log(e);
+			}
 		}
 	}
 	

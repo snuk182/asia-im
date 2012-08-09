@@ -28,6 +28,7 @@
     <string name="label_secure_login">Безпечний вхід</string>
     <string name="label_poweramp_playing_to_status">"Зараз грає" із PowerAMP</string>
     <string name="label_androidmusic_playing_to_status">"Зараз грає" з Музичного програвача</string>
+    <string name="label_apollo_playing_to_status">"Зараз грає" з Apollo</string>
     <string name="label_dont_draw_smileys">Не малювати смайли</string>
     <string name="label_account_activity_log">Журнал активності</string>
     <string name="label_size_big">Великий</string>
