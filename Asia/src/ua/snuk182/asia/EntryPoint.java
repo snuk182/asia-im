@@ -41,7 +41,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -192,19 +191,29 @@ public class EntryPoint extends ActivityGroup {
 	};
 	
 	@Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigurationChanged(final Configuration newConfig) {
         super.onConfigurationChanged(newConfig); 
         getMetrics();
+        
         threadMsgHandler.post(new Runnable(){
 
 			@Override
 			public void run() {
+				checkWallpaperOrientation(newConfig.orientation);				
 				mainScreen.configChanged();
 			}
         	
         });
     }
 	
+	private void checkWallpaperOrientation(int orientation) {
+		if (orientation == Configuration.ORIENTATION_PORTRAIT){
+			wallpaper.setGravity(wallpaper.getBitmap().getHeight() < wallpaper.getBitmap().getWidth() ? Gravity.CLIP_VERTICAL : Gravity.CLIP_HORIZONTAL);
+		} else {
+			wallpaper.setGravity(wallpaper.getBitmap().getHeight() < wallpaper.getBitmap().getWidth() ? Gravity.CLIP_HORIZONTAL : Gravity.CLIP_VERTICAL);
+		}
+	}
+
 	private void addMasterPasswordRequestTab() {
 		String tag = MasterPasswordView.class.getSimpleName();
 		
@@ -229,7 +238,12 @@ public class EntryPoint extends ActivityGroup {
 			}
 		}
 		
-		if (bgColor < BGCOLOR_WALLPAPER){
+		tabStyle = ServiceStoredPreferences.getOption(getApplicationContext(), getResources().getString(R.string.key_tab_style));		
+    	if (tabStyle == null) {	
+			tabStyle = getString(R.string.value_tab_style_slim);
+		}
+    	
+    	if (bgColor < BGCOLOR_WALLPAPER){
 			setTheme(R.style.DarkTheme);	  				
 		}
 		
@@ -238,15 +252,14 @@ public class EntryPoint extends ActivityGroup {
 		}
 		
 		if (bgColor == BGCOLOR_WALLPAPER){
-			setTheme(R.style.TransparentTheme);	    	
+			if (tabStyle.equals("slim")){
+				setTheme(R.style.AsiaTransparentTheme);	
+			} else {
+				setTheme(R.style.TransparentTheme);	
+			} 	
 		}
 		
-		tabStyle = ServiceStoredPreferences.getOption(getApplicationContext(), getResources().getString(R.string.key_tab_style));		
-    	if (tabStyle == null) {	
-			tabStyle = getString(R.string.value_tab_style_slim);
-		}
-    	
-    	menuOnTabLongclick = Boolean.parseBoolean(ServiceStoredPreferences.getOption(getApplicationContext(), getResources().getString(R.string.key_toggle_menu_on_tab_longclick)));		
+		menuOnTabLongclick = Boolean.parseBoolean(ServiceStoredPreferences.getOption(getApplicationContext(), getResources().getString(R.string.key_toggle_menu_on_tab_longclick)));		
     	
     	getMetrics();    	
 	}
@@ -255,16 +268,19 @@ public class EntryPoint extends ActivityGroup {
     	if (bgColor == BGCOLOR_WALLPAPER){
 			try {
 				//calculating correct wallpaper dimentions - the less wp side should be equal to bigger screen side
-				int heightPx = (int) (metrics.heightPixels * metrics.density);
+				/*int heightPx = (int) (metrics.heightPixels * metrics.density);
 				int widthPx = (int) (metrics.widthPixels * metrics.density);
 				
 				Bitmap original = ViewUtils.scaleBitmap(((BitmapDrawable)getWallpaper()).getBitmap(),   
 						(heightPx > widthPx) ? heightPx : widthPx, 
 								true);	
-				wallpaper = new BitmapDrawable(getResources(), original);
-				wallpaper.setGravity(Gravity.CENTER);
+				wallpaper = new BitmapDrawable(original);*/
+				
+				wallpaper = (BitmapDrawable)getWallpaper();
+				
 				wallpaper.setFilterBitmap(false);
 				wallpaper.setDither(false);
+				checkWallpaperOrientation(getResources().getConfiguration().orientation);
 				mainScreen.setBackgroundDrawable(wallpaper);
 			} catch (Exception e) {
 				mainScreen.setBackgroundColor(bgColor);		
@@ -1115,7 +1131,7 @@ public class EntryPoint extends ActivityGroup {
 	}
 		
 	public final Handler threadMsgHandler = new Handler();
-	
+
 	public void refreshAccounts() {
 		mainScreen.refreshAccounts();
 	}
@@ -1148,4 +1164,13 @@ public class EntryPoint extends ActivityGroup {
 		runtimeService.setUnread(buddy, null);
 		mainScreen.buddyStateChanged(buddy);
 	}
+	
+	@Override
+	public void onLowMemory(){
+		System.gc();
+	}
+	
+	public static final boolean isSlimTransparentInterface(){
+		return bgColor == BGCOLOR_WALLPAPER && tabStyle.equals("slim");
+	}	
 }
