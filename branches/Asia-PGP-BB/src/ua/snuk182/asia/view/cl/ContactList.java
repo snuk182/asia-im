@@ -438,7 +438,7 @@ public class ContactList extends LinearLayout implements ITabContent, IHasMessag
 			return;
 		}
 		
-		ownIcon.setImageBitmap(ViewUtils.scaleBitmap(icon, (int) (32*getEntryPoint().metrics.density), true));
+		ownIcon.setImageBitmap(ViewUtils.scaleBitmap(icon, (int) (32*getEntryPoint().metrics.density), true, account.getFilename()));
 		ownIcon.setVisibility(View.VISIBLE);
 	}
 	
