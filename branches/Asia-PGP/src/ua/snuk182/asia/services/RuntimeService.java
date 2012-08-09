@@ -457,13 +457,14 @@ public class RuntimeService extends Service {
 				// Bitmap bitmap = BitmapFactory.decodeByteArray(iconData, 0,
 				// iconData.length);
 
-				String filename = account.getAccountId() + " " + args[1];
+				final String filename = account.getAccountId() + " " + args[1];
 				log("icon for " + filename);
 				storage.saveIcon(filename, iconData, new Runnable() {
 
 					@Override
 					public void run() {
 						try {
+							cleanupBitmapCache(filename);
 							uiCallback.icon(serviceId, (String) args[1]);
 						} catch (NullPointerException npe) {
 							openedTabs.clear();
@@ -902,7 +903,13 @@ public class RuntimeService extends Service {
 			}
 
 			return null;
-		}
+		}		
+	}
+	
+	//Ashamingly LruCache does not have any kind of key enumerators, 
+	//so we have to reinvent wheels to find out if the modifications of our bitmap exist in a cache.
+	private void cleanupBitmapCache(String filename) {
+		//ViewUtils.BITMAP_CACHE.put(filename, Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8));		
 	}
 
 	public ProtocolServiceResponse getProtocolResponse() {

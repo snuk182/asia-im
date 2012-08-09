@@ -4,5 +4,5 @@
     <style name="LightTheme" parent="android:Theme.DeviceDefault.Light" />
     <style name="DarkTheme" parent="android:Theme.DeviceDefault" />
     <style name="TransparentTheme" parent="android:Theme.DeviceDefault" />
-    
+    <style name="AsiaTransparentTheme" parent="android:Theme.Translucent" />
 </resources>

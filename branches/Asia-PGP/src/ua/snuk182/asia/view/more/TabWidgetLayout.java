@@ -143,7 +143,7 @@ public class TabWidgetLayout extends LinearLayout {
 		}
 	}
 	
-	public void setScaledBitmap(Bitmap bmp){
+	public void setScaledBitmap(Bitmap bmp, String bitmapName){
 		if (bmp == null){			
 			iconCache = getContext().getResources().getDrawable(R.drawable.dummy_32);
 			if (tabIcon != null){
@@ -153,7 +153,7 @@ public class TabWidgetLayout extends LinearLayout {
 			return;
 		}
 		
-		setImageBitmap(ViewUtils.scaleBitmap(bmp, (int) (32 * getEntryPoint().metrics.density), true));
+		setImageBitmap(ViewUtils.scaleBitmap(bmp, (int) (32 * getEntryPoint().metrics.density), true, bitmapName));
 	}
 
 	private EntryPoint getEntryPoint() {

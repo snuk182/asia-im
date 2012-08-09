@@ -238,7 +238,12 @@ public class EntryPoint extends ActivityGroup {
 			}
 		}
 		
-		if (bgColor < BGCOLOR_WALLPAPER){
+		tabStyle = ServiceStoredPreferences.getOption(getApplicationContext(), getResources().getString(R.string.key_tab_style));		
+    	if (tabStyle == null) {	
+			tabStyle = getString(R.string.value_tab_style_slim);
+		}
+    	
+    	if (bgColor < BGCOLOR_WALLPAPER){
 			setTheme(R.style.DarkTheme);	  				
 		}
 		
@@ -247,15 +252,14 @@ public class EntryPoint extends ActivityGroup {
 		}
 		
 		if (bgColor == BGCOLOR_WALLPAPER){
-			setTheme(R.style.TransparentTheme);	    	
+			if (tabStyle.equals("slim")){
+				setTheme(R.style.AsiaTransparentTheme);	
+			} else {
+				setTheme(R.style.TransparentTheme);	
+			} 	
 		}
 		
-		tabStyle = ServiceStoredPreferences.getOption(getApplicationContext(), getResources().getString(R.string.key_tab_style));		
-    	if (tabStyle == null) {	
-			tabStyle = getString(R.string.value_tab_style_slim);
-		}
-    	
-    	menuOnTabLongclick = Boolean.parseBoolean(ServiceStoredPreferences.getOption(getApplicationContext(), getResources().getString(R.string.key_toggle_menu_on_tab_longclick)));		
+		menuOnTabLongclick = Boolean.parseBoolean(ServiceStoredPreferences.getOption(getApplicationContext(), getResources().getString(R.string.key_toggle_menu_on_tab_longclick)));		
     	
     	getMetrics();    	
 	}
