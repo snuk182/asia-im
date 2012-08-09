@@ -186,7 +186,7 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 				} catch (RemoteException e) {
 					getEntryPoint().onRemoteCallFailed(e);
 				}
-				tabWidgetLayout.setScaledBitmap(icon);		
+				tabWidgetLayout.setScaledBitmap(icon, buddy.getFilename());		
 				updateBuddyState(buddy);
 				scroller.post(scrollToEnd);	
 			}
@@ -228,7 +228,7 @@ public class ConversationsView extends RelativeLayout implements ITabContent, IH
 
 		@Override
 		public void run() {
-			tabWidgetLayout.setScaledBitmap(icon);						
+			tabWidgetLayout.setScaledBitmap(icon, buddy.getFilename());						
 		}
 		
 	};

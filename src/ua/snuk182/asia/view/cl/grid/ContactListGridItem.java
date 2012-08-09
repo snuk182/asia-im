@@ -44,16 +44,18 @@ public class ContactListGridItem extends RelativeLayout implements ContactListIt
 
 		@Override
 		public void run() {
-			if (icon != null){
+			if (icon != null && !icon.isRecycled()){
 				int picSize = itemSize;
 				if (EntryPoint.isSlimTransparentInterface()){
 					picSize -= 15;
 				}
-				BitmapDrawable bd = new BitmapDrawable(ViewUtils.scaleBitmap(icon, (int) ((picSize) * getEntryPoint().metrics.density), false));
+				BitmapDrawable bd = new BitmapDrawable(ViewUtils.scaleBitmap(icon, (int) ((picSize) * getEntryPoint().metrics.density), false, getTag().toString()));
 				bd.setFilterBitmap(false);
 				bd.setDither(false);
 				bd.setGravity(Gravity.CENTER);
 				buddyImage.setBuddyImage(bd);
+				
+				finalizeBitmap();				
 			} else {
 				buddyImage.setBuddyImage(R.drawable.dummy_48);
 			}
@@ -234,8 +236,6 @@ public class ContactListGridItem extends RelativeLayout implements ContactListIt
 				
 				@Override
 				public void run(){
-					finalizeBitmap();
-					
 					icon = Buddy.getIcon(getEntryPoint(), buddy.getFilename());
 					if (icon != null){
 						ViewUtils.VMRUNTIME.allocBitmap(icon);
@@ -291,8 +291,11 @@ public class ContactListGridItem extends RelativeLayout implements ContactListIt
 
 	private void finalizeBitmap() {
 		if (icon != null){
-			ViewUtils.VMRUNTIME.freeBitmap(icon);
-			ServiceUtils.log("Bitmap for "+getTag()+" finalized");
+			if (!icon.isRecycled()){
+				ViewUtils.VMRUNTIME.freeBitmap(icon);
+				ServiceUtils.log("Bitmap for "+getTag()+" finalized");
+			} 
+			icon = null;
 		}
 	}
 }

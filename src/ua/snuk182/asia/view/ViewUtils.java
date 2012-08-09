@@ -71,6 +71,19 @@ public final class ViewUtils {
 	private static final Map<String, IconMenuAdapter> iconMenuAdapters = new HashMap<String, IconMenuAdapter>();
 
 	private static TabsAdapter tabsAdapter = null;
+	
+	/*public static LruCache<String, Bitmap> BITMAP_CACHE = new LruCache<String, Bitmap>((int) (Runtime.getRuntime().totalMemory() * 0.6)){
+		
+		@Override 
+		protected int sizeOf(String key, Bitmap value){
+			return value.getRowBytes() * value.getHeight();
+		}
+		
+		@Override 
+		protected void entryRemoved(boolean evicted, String key, Bitmap oldValue, Bitmap newValue){
+			oldValue.recycle();
+		}
+	};*/
 
 	private static TabsAdapter getTabsAdapter(EntryPoint entryPoint) {
 		if (tabsAdapter == null || tabsAdapter.getEntryPoint() != entryPoint) {
@@ -996,28 +1009,61 @@ public final class ViewUtils {
 		builder.create().show();
 	}
 
-	public static final Bitmap scaleBitmap(Bitmap bmp, int size, boolean fitHeightOnly) {
+	public static final Bitmap scaleBitmap(Bitmap bmp, int size, boolean fitHeightOnly, String originalBitmapName) {
 		if (bmp == null) {
 			return null;
 		}
 		
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB){
-			if ((size * size * 4) > (Debug.getNativeHeapFreeSize() * 0.8)) {
-				return null;
-			}
-		} else {
-			if ((size * size * 4) > (Runtime.getRuntime().freeMemory() * 0.8)) {
-				return null;
-			}
-		}
-
+		Bitmap bmpp;
+		
+		/*if (originalBitmapName != null){
+			bmpp = BITMAP_CACHE.get(originalBitmapName);
+			if (bmpp != null) {
+				
+				//this is the sign the bitmaps for this sources are obsolete
+				BITMAP_CACHE.remove(originalBitmapName);
+			} else {
+				String bmpName = originalBitmapName+" "+size;
+				bmpp = BITMAP_CACHE.get(bmpName);
+				if (bmpp != null) return bmpp;
+			}			
+		}*/
+		
 		if (fitHeightOnly || bmp.getWidth() < bmp.getHeight()) {
 			int itemWidth = (size * bmp.getWidth()) / bmp.getHeight();
-			return Bitmap.createScaledBitmap(bmp, itemWidth, size, true);
+			
+			if (!checkAvailableRamForBitmap(size, itemWidth)) return null;
+			
+			bmpp = Bitmap.createScaledBitmap(bmp, itemWidth, size, true);
 		} else {
 			int itemHeight = (size * bmp.getHeight()) / bmp.getWidth();
-			return Bitmap.createScaledBitmap(bmp, size, itemHeight, true);
+			
+			if (!checkAvailableRamForBitmap(itemHeight, size)) return null;
+			
+			bmpp =  Bitmap.createScaledBitmap(bmp, size, itemHeight, true);
 		}
+		
+		/*if (originalBitmapName != null){
+			BITMAP_CACHE.put(originalBitmapName+" "+size, bmpp);
+		}*/
+		
+		return bmpp;
+	}
+	
+	public static synchronized final boolean checkAvailableRamForBitmap(int h, int w){
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB){
+			if ((h * w * 2) > (Debug.getNativeHeapFreeSize() * 0.75)) {
+				ServiceUtils.log("LOW MEMORY "+Runtime.getRuntime().freeMemory());
+				return false;
+			}
+		} else {
+			if ((h * w * 2) > (Runtime.getRuntime().freeMemory() * 0.75)) {
+				ServiceUtils.log("LOW MEMORY "+Runtime.getRuntime().freeMemory());
+				return false;
+			}
+		}
+		
+		return true;
 	}
 
 	public static final void newGroupChatDialog(final EntryPoint entryPoint, final AccountView account) {
@@ -1409,7 +1455,6 @@ public final class ViewUtils {
 				freeBitmap(bmp);
 		}
 
-		// may be turned to changeable
 		private final boolean useHack = Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB;
 
 		private Set<Bitmap> allocatedBitmaps = new HashSet<Bitmap>();

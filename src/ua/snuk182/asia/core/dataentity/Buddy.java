@@ -7,12 +7,11 @@ import java.util.List;
 
 import ua.snuk182.asia.services.HistorySaver;
 import ua.snuk182.asia.services.api.AccountService;
+import ua.snuk182.asia.view.ViewUtils;
 import ua.snuk182.asia.view.conversations.ConversationsView;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Build;
-import android.os.Debug;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -370,17 +369,7 @@ public class Buddy implements Parcelable, Comparable<Buddy> {
 		options.inJustDecodeBounds = true;		
 		BitmapFactory.decodeStream(fis, null, options);
 		
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB){
-			if ((options.outWidth * options.outHeight * 4) > (Debug.getNativeHeapFreeSize() * 0.8)) {
-				System.gc();
-				return null;
-			}
-		} else {
-			if ((options.outWidth * options.outHeight * 4) > (Runtime.getRuntime().freeMemory() * 0.8)) {
-				System.gc();
-				return null;
-			}
-		}
+		if (!ViewUtils.checkAvailableRamForBitmap(options.outHeight, options.outWidth)) return null;
 		
 		try {
 			fis = context.openFileInput(filename+BUDDYICON_FILEEXT);
@@ -388,10 +377,10 @@ public class Buddy implements Parcelable, Comparable<Buddy> {
 		}
 		
 		options.inJustDecodeBounds = false;
-		options.inDither = false;
+		options.inDither = true;
 		options.inScaled = false;
 		options.inPurgeable=true;
-		options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+		options.inPreferredConfig = Bitmap.Config.RGB_565;
 		
 		return BitmapFactory.decodeStream(fis, null, options);
 	}
