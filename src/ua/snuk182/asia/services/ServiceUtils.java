@@ -607,8 +607,8 @@ public final class ServiceUtils {
 			try {
 				// Compute screen size
 				DisplayMetrics dm = context.getResources().getDisplayMetrics();
-				float screenWidth = dm.widthPixels / dm.xdpi;
-				float screenHeight = dm.heightPixels / dm.ydpi;
+				float screenWidth = dm.widthPixels / dm.densityDpi;
+				float screenHeight = dm.heightPixels / dm.densityDpi;
 				double size = Math.sqrt(Math.pow(screenWidth, 2) + Math.pow(screenHeight, 2));
 				// Tablet devices should have a screen size greater than 6 inches
 				return size >= 6;

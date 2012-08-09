@@ -40,6 +40,7 @@ import ua.snuk182.asia.view.more.AsiaCoreException;
 import ua.snuk182.asia.view.more.musiccontrol.AbstractPlayerStateListener;
 import ua.snuk182.asia.view.more.musiccontrol.IPlayerStateListener;
 import ua.snuk182.asia.view.more.musiccontrol.androidmusic.AndroidMusicServiceStateListener;
+import ua.snuk182.asia.view.more.musiccontrol.apollo.ApolloStateListener;
 import ua.snuk182.asia.view.more.musiccontrol.poweramp.PowerAmpStateListener;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -219,6 +220,12 @@ public class RuntimeService extends Service {
 			if (Boolean.parseBoolean(playerStatus)) {
 				putPlayerStateListener(getPlayerStateListener(androidmusicPlayerStatusKey), a.accountView);
 			}
+			
+			String apolloStatusKey = getResources().getString(R.string.key_apollo_playing_to_status);
+			playerStatus = a.accountView.options.getString(apolloStatusKey);
+			if (Boolean.parseBoolean(playerStatus)) {
+				putPlayerStateListener(getPlayerStateListener(apolloStatusKey), a.accountView);
+			}
 		}
 	}
 
@@ -250,6 +257,10 @@ public class RuntimeService extends Service {
 
 			if (key.equals(getResources().getString(R.string.key_androidmusic_playing_to_status))) {
 				listener = new AndroidMusicServiceStateListener(this);
+			}
+			
+			if (key.equals(getResources().getString(R.string.key_apollo_playing_to_status))) {
+				listener = new ApolloStateListener(this);
 			}
 
 			playerStateListeners.put(key, listener);
@@ -446,13 +457,14 @@ public class RuntimeService extends Service {
 				// Bitmap bitmap = BitmapFactory.decodeByteArray(iconData, 0,
 				// iconData.length);
 
-				String filename = account.getAccountId() + " " + args[1];
+				final String filename = account.getAccountId() + " " + args[1];
 				log("icon for " + filename);
 				storage.saveIcon(filename, iconData, new Runnable() {
 
 					@Override
 					public void run() {
 						try {
+							cleanupBitmapCache(filename);
 							uiCallback.icon(serviceId, (String) args[1]);
 						} catch (NullPointerException npe) {
 							openedTabs.clear();
@@ -891,7 +903,13 @@ public class RuntimeService extends Service {
 			}
 
 			return null;
-		}
+		}		
+	}
+	
+	//Ashamingly LruCache does not have any kind of key enumerators, 
+	//so we have to reinvent wheels to find out if the modifications of our bitmap exist in a cache.
+	private void cleanupBitmapCache(String filename) {
+		//ViewUtils.BITMAP_CACHE.put(filename, Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8));		
 	}
 
 	public ProtocolServiceResponse getProtocolResponse() {
@@ -1318,6 +1336,15 @@ public class RuntimeService extends Service {
 						putPlayerStateListener(getPlayerStateListener(musicKey), account);
 					} else {
 						removePlayerStateListener(getPlayerStateListener(musicKey), account);
+					}
+				}
+				
+				String apolloKey = getResources().getString(R.string.key_apollo_playing_to_status);
+				if (key.equals(apolloKey)) {
+					if (Boolean.parseBoolean(value)) {
+						putPlayerStateListener(getPlayerStateListener(apolloKey), account);
+					} else {
+						removePlayerStateListener(getPlayerStateListener(apolloKey), account);
 					}
 				}
 

@@ -69,7 +69,7 @@ public class TabWidgetLayout extends LinearLayout {
 		}
 		
 		LinearLayout.LayoutParams layout = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, parent.getLayoutParams().height);
-		if (EntryPoint.bgColor == EntryPoint.BGCOLOR_WALLPAPER || Build.VERSION.SDK_INT < 11){
+		if (EntryPoint.isSlimTransparentInterface() || Build.VERSION.SDK_INT < 11){
 			//layout.setMargins((int) (-3 * getEntryPoint().metrics.density), 0, (int) (-3 * getEntryPoint().metrics.density), 0);
 			
 			int iconPadding = (int) (15*getEntryPoint().metrics.density);
@@ -143,7 +143,7 @@ public class TabWidgetLayout extends LinearLayout {
 		}
 	}
 	
-	public void setScaledBitmap(Bitmap bmp){
+	public void setScaledBitmap(Bitmap bmp, String bitmapName){
 		if (bmp == null){			
 			iconCache = getContext().getResources().getDrawable(R.drawable.dummy_32);
 			if (tabIcon != null){
@@ -153,7 +153,7 @@ public class TabWidgetLayout extends LinearLayout {
 			return;
 		}
 		
-		setImageBitmap(ViewUtils.scaleBitmap(bmp, (int) (32 * getEntryPoint().metrics.density), true));
+		setImageBitmap(ViewUtils.scaleBitmap(bmp, (int) (32 * getEntryPoint().metrics.density), true, bitmapName));
 	}
 
 	private EntryPoint getEntryPoint() {

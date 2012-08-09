@@ -45,16 +45,18 @@ public class ContactListListItem extends RelativeLayout implements ContactListIt
 
 		@Override
 		public void run() {
-			if (icon != null){
+			if (icon != null && !icon.isRecycled()){
 				int picSize = itemHeight;
-				if (EntryPoint.bgColor == EntryPoint.BGCOLOR_WALLPAPER){
-					picSize -= 10;
+				if (EntryPoint.isSlimTransparentInterface()){
+					picSize -= 3;
 				}
-				BitmapDrawable bd = new BitmapDrawable(ViewUtils.scaleBitmap(icon, (int) ((picSize) * getEntryPoint().metrics.density), false));
+				BitmapDrawable bd = new BitmapDrawable(ViewUtils.scaleBitmap(icon, (int) ((picSize) * getEntryPoint().metrics.density), false, getTag().toString()));
 				bd.setFilterBitmap(false);
 				bd.setDither(false);
 				bd.setGravity(Gravity.CENTER);
 				picLayout.setBuddyImage(bd);
+
+				finalizeBitmap();
 			} else {
 				picLayout.setBuddyImage(R.drawable.dummy_48);
 			}
@@ -355,8 +357,11 @@ public class ContactListListItem extends RelativeLayout implements ContactListIt
 
 	private void finalizeBitmap() {
 		if (icon != null){
-			ViewUtils.VMRUNTIME.freeBitmap(icon);
-			ServiceUtils.log("Bitmap for "+getTag()+" finalized");
+			if (!icon.isRecycled()){
+				ViewUtils.VMRUNTIME.freeBitmap(icon);
+				ServiceUtils.log("Bitmap for "+getTag()+" finalized");
+			} 
+			icon = null;
 		}
 	}
 }

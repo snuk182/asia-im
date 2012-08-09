@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="version">0.8.3.7</string>
+    <string name="version">0.8.3.8</string>
     
     <string name="label_ok">Ok</string>
     <string name="label_pw_cannot_be_empty">Password cannot be empty</string>
@@ -45,6 +45,7 @@
     <string name="label_secure_login">Secure login</string>
     <string name="label_poweramp_playing_to_status">Send "Now playing" from PowerAMP</string>
     <string name="label_androidmusic_playing_to_status">Send "Now playing" from Android Music</string>
+    <string name="label_apollo_playing_to_status">Send "Now playing" from Android Music</string>
     <string name="label_send_typing">Send typing notifications</string>
     <string name="label_fullscreen_landscape_kb">Fullscreen landscape keyboard</string>
     <string name="label_deny_messages_not_from_list">"Deny all messages from 'not in list' buddies"</string>
