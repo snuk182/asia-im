@@ -207,10 +207,12 @@ public class EntryPoint extends ActivityGroup {
     }
 	
 	private void checkWallpaperOrientation(int orientation) {
-		if (orientation == Configuration.ORIENTATION_PORTRAIT){
-			wallpaper.setGravity(wallpaper.getBitmap().getHeight() < wallpaper.getBitmap().getWidth() ? Gravity.CLIP_VERTICAL : Gravity.CLIP_HORIZONTAL);
-		} else {
-			wallpaper.setGravity(wallpaper.getBitmap().getHeight() < wallpaper.getBitmap().getWidth() ? Gravity.CLIP_HORIZONTAL : Gravity.CLIP_VERTICAL);
+		if (wallpaper != null){
+			if (orientation == Configuration.ORIENTATION_PORTRAIT){
+				wallpaper.setGravity(wallpaper.getBitmap().getHeight() < wallpaper.getBitmap().getWidth() ? Gravity.CLIP_VERTICAL : Gravity.CLIP_HORIZONTAL);
+			} else {
+				wallpaper.setGravity(wallpaper.getBitmap().getHeight() < wallpaper.getBitmap().getWidth() ? Gravity.CLIP_HORIZONTAL : Gravity.CLIP_VERTICAL);
+			}
 		}
 	}
 
@@ -286,6 +288,7 @@ public class EntryPoint extends ActivityGroup {
 				mainScreen.setBackgroundColor(bgColor);		
 			}
 		} else {
+			wallpaper = null;
 			mainScreen.setBackgroundColor(bgColor);					
 		}
 	}
