@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="version">0.8.3.8</string>
+    <string name="version">0.8.3.9</string>
     
     <string name="label_ok">Ok</string>
     <string name="label_pw_cannot_be_empty">Password cannot be empty</string>
