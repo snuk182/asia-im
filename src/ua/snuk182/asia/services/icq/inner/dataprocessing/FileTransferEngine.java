@@ -323,7 +323,11 @@ public class FileTransferEngine {
 			}
 			if (target == TARGET_PROXY) {				
 				sendHandshake();
-			} /*else {
+			} else if (files != null && files.size()>0 && message.connectFTPeer) {
+                connectionState = CONNSTATE_FILE_HEADER;
+                fireTransfer();
+            } 
+			/*else {
 				if (files != null) {
 					sendFileInfo(files.get(0));
 				} 
@@ -335,12 +339,14 @@ public class FileTransferEngine {
 		private void sendFileInfo(File file) {
 			byte[] infoBlob;
 			
-			byte[] filenameBytes;
+			byte[] filenameBytes = file.getName().getBytes();
+			String encoding = null;/*"UTF-16BE";
 			try {
-				filenameBytes = file.getName().getBytes("UTF-16BE");
+				filenameBytes = file.getName().getBytes(encoding);				
 			} catch (UnsupportedEncodingException e) {
 				filenameBytes = file.getName().getBytes();
-			}
+				encoding = "UTF-8";
+			}*/
 			
 			if (filenameBytes.length + 194 > 256){
 				infoBlob = new byte[filenameBytes.length + 194];
@@ -418,7 +424,11 @@ public class FileTransferEngine {
 			
 			pos+=16; //mac file info?
 			
-			System.arraycopy(new byte[]{0,2}, 0, infoBlob, pos, 2); //encoding
+			//if (encoding.equals("UTF-16BE")) {
+			//	System.arraycopy(new byte[]{0,2}, 0, infoBlob, pos, 2); //encoding
+			//} else {
+				System.arraycopy(new byte[]{0,0}, 0, infoBlob, pos, 2); //encoding
+			//}
 			pos+=2;
 			System.arraycopy(new byte[]{0,0}, 0, infoBlob, pos, 2); //encoding subcode
 			pos+=2;
