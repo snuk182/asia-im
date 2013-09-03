@@ -11,39 +11,7 @@ import ua.snuk182.asia.core.dataentity.MultiChatRoom;
 import ua.snuk182.asia.core.dataentity.MultiChatRoomOccupants;
 
 interface IRuntimeServiceCallback{
-	/*
-	public static final short RES_NOP = 0;
-	public static final short RES_SAVEPARAMS = 1;
-	public static final short RES_CONNECTED = 2;
-	public static final short RES_DISCONNECTED = 3;
-	public static final short RES_STATUSSET = 4;
-	public static final short RES_EXTENDEDSTATUSSET = 5;
-	public static final short RES_MESSAGE = 6;
-	public static final short RES_FILEMESSAGE = 7;
-	public static final short RES_USERINFO = 8;
-	public static final short RES_OWNINFO = 9;
-	public static final short RES_OWNINFOSET = 10;
-	public static final short RES_BUDDYADDED = 11;
-	public static final short RES_BUDDYDELETED = 12;
-	public static final short RES_CLUPDATED = 13;
-	*/
 	
-	/*void accountAdded(in AccountView account);
-	void accountInfoUpdated(in AccountView account);
-	void accountRemoved(in AccountView account);
-	void accountStateChanged(in AccountView account);
-	void textMessage(in TextMessage message);
-	void buddyStateChanged(in Buddy buddy);
-	void buddyGroupAdded(in BuddyGroup group);
-	void buddyGroupRemoved(in BuddyGroup group);
-	void serviceNotification(byte serviceId, String text, byte type);
-	void serviceMessage(in ServiceMessage msg);
-	void buddySearchResult(byte serviceId, in List<PersonalInfo> infos);
-	void visualStyleUpdated();
-	void connectionState(byte serviceId, int state);
-	void bitmap(byte serviceId, String uid);*/
-	
-
 	void accountConnected(in AccountView account);
 	void icon(byte serviceId, String uid);
 	void contactListUpdated(in AccountView account);

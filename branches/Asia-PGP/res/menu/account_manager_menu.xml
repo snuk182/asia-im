@@ -3,6 +3,8 @@
   xmlns:android="http://schemas.android.com/apk/res/android">
   <item android:id="@+id/menuitem_add" 
 		android:title="@string/label_add_new_account" />
+	<item android:id="@+id/menuitem_export" 
+		android:title="@string/label_export" />
 	<item android:id="@+id/menuitem_close" 
 		android:title="@string/label_close" />
 </menu>

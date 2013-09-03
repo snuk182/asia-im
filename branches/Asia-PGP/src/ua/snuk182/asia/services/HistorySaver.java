@@ -27,14 +27,14 @@ import android.os.Environment;
 public final class HistorySaver {
 	
 	//in-file history markers for incoming and outgoing messages
-	private static final String MARK_IN = ">->";
-	private static final String MARK_OUT = "<-<";
+	static final String MARK_IN = ">->";
+	static final String MARK_OUT = "<-<";
 	
 	//history file suffix
-	private static final String SUFFIX = ".history";
+	static final String SUFFIX = ".history";
 	
 	//messages divider
-	private static final String RECORD_DIVIDER = "--------------------------------------";
+	static final String RECORD_DIVIDER = "--------------------------------------";
 	
 	//owner buddy
 	private Buddy buddy;
