@@ -66,7 +66,7 @@ import android.widget.Toast;
 public class RuntimeService extends Service {
 
 	//Accounts list
-	private final List<Account> accounts = new ArrayList<Account>();
+	final List<Account> accounts = new ArrayList<Account>();
 
 	//Protocol service response entity
 	private ProtocolServiceResponse protocolResponse;
@@ -78,7 +78,7 @@ public class RuntimeService extends Service {
 	private ServiceStoredPreferences storage;
 	
 	//private List<TabInfo> tabInfos = null;
-	private Notificator notificator = null;
+	Notificator notificator = null;
 	//private boolean isAppVisible = true;
 	private Handler handler = new Handler();
 	private Bundle appOptions;
@@ -1961,6 +1961,11 @@ public class RuntimeService extends Service {
 			if (bu != null){
 				bu.merge(buddy);
 			}
+		}
+
+		@Override
+		public void requestExport(String password) throws RemoteException {
+			new Exporter(RuntimeService.this).export(password);
 		}
 	};
 

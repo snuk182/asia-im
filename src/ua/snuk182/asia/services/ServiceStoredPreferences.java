@@ -57,8 +57,8 @@ public final class ServiceStoredPreferences {
 	private static final String ATTR_PROTOCOL_NAME = "protocol_name";
 	private static final String TAG_ACCOUNT = "account";
 	private static final String XML_ENCODING = "UTF-16LE";
-	private static final String XMLPARAMS_TOTAL = "XmlTotalParams";
-	private static final String PREFERENCES_FILEEXT = ".preferences";
+	static final String XMLPARAMS_TOTAL = "XmlTotalParams";
+	static final String PREFERENCES_FILEEXT = ".preferences";
 
 	private static final String XML_NAMESPACE = "ua.snuk182.asia";
 
@@ -421,7 +421,7 @@ public final class ServiceStoredPreferences {
 		return account;
 	}
 	
-	private static final int getAccessMode(){
+	static final int getAccessMode(){
 		int mode = Context.MODE_PRIVATE;
 		if (Build.VERSION.SDK_INT > 10){
 			mode = Context.MODE_MULTI_PROCESS;

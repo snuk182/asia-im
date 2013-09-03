@@ -8,12 +8,18 @@ import ua.snuk182.asia.R;
 import ua.snuk182.asia.core.dataentity.AccountView;
 import ua.snuk182.asia.services.ServiceUtils;
 import ua.snuk182.asia.view.ITabContent;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.res.Resources.NotFoundException;
 import android.os.RemoteException;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.inputmethod.EditorInfo;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class AccountManagerView extends ListView implements ITabContent {
@@ -52,13 +58,48 @@ public class AccountManagerView extends ListView implements ITabContent {
 					getEntryPoint().mainScreen.removeTabByTag(AccountManagerView.class.getSimpleName());
 					getEntryPoint().addAccountEditorTab(null);					
 				} else {
-					Toast.makeText(getEntryPoint(), R.string.label_too_many_accounts, Toast.LENGTH_LONG);
+					Toast.makeText(getEntryPoint(), R.string.label_too_many_accounts, Toast.LENGTH_LONG).show();
 				}
 			} catch (RemoteException e) {
 				getEntryPoint().onRemoteCallFailed(e);
 			} catch (NotFoundException e) {
 				getEntryPoint().onRemoteCallFailed(e);
 			}
+			break;
+		case R.id.menuitem_export:
+			AlertDialog.Builder builder = new AlertDialog.Builder(getEntryPoint());
+			
+			LinearLayout ll = new LinearLayout(getEntryPoint());
+			ll.setOrientation(LinearLayout.VERTICAL);
+			
+			TextView label = new TextView(getEntryPoint());
+			label.setText(R.string.label_password);
+			ll.addView(label, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+			
+			final EditText et = new EditText(getEntryPoint());
+			et.setImeOptions(EditorInfo.TYPE_TEXT_VARIATION_PASSWORD);
+			ll.addView(et, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+			
+			builder.setView(ll);
+			builder.setCancelable(true);
+			
+			builder.setPositiveButton(R.string.label_ok, new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					try {
+						getEntryPoint().runtimeService.requestExport(et.getText().toString());
+					}  catch (RemoteException e) {
+						getEntryPoint().onRemoteCallFailed(e);
+					} catch (NotFoundException e) {
+						getEntryPoint().onRemoteCallFailed(e);
+					}
+					
+					dialog.dismiss();
+				}
+			});
+			
+			builder.create().show();
 			break;
 		}
 		return false;

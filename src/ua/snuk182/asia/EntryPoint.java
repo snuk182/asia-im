@@ -208,11 +208,13 @@ public class EntryPoint extends ActivityGroup {
 	
 	private void checkWallpaperOrientation(int orientation) {
 		if (wallpaper != null){
-			if (orientation == Configuration.ORIENTATION_PORTRAIT){
-				wallpaper.setGravity(wallpaper.getBitmap().getHeight() < wallpaper.getBitmap().getWidth() ? Gravity.CLIP_VERTICAL : Gravity.CLIP_HORIZONTAL);
+			if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
+				wallpaper.setGravity(wallpaper.getBitmap().getHeight() <= wallpaper.getBitmap().getWidth() ? Gravity.CENTER_HORIZONTAL|Gravity.FILL_VERTICAL : Gravity.CENTER_VERTICAL|Gravity.FILL_HORIZONTAL);
 			} else {
-				wallpaper.setGravity(wallpaper.getBitmap().getHeight() < wallpaper.getBitmap().getWidth() ? Gravity.CLIP_HORIZONTAL : Gravity.CLIP_VERTICAL);
+				wallpaper.setGravity(wallpaper.getBitmap().getHeight() <= wallpaper.getBitmap().getWidth() ? Gravity.CENTER_VERTICAL|Gravity.FILL_HORIZONTAL : Gravity.CENTER_HORIZONTAL|Gravity.FILL_VERTICAL);
 			}
+			
+			//wallpaper.setGravity(wallpaper.getBitmap().getHeight() < wallpaper.getBitmap().getWidth() ? Gravity.CENTER_HORIZONTAL|Gravity.FILL_VERTICAL :  Gravity.CENTER_VERTICAL|Gravity.FILL_HORIZONTAL);
 		}
 	}
 

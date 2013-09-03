@@ -82,4 +82,6 @@ interface IRuntimeService{
 	MultiChatRoomOccupants getChatRoomOccupants(byte serviceId, String chatId);
 	PersonalInfo getChatInfo(byte serviceId, String chatId);
 	void setCurrentTabs(in List<String> tabs);
+	
+	void requestExport(String password);
 }
