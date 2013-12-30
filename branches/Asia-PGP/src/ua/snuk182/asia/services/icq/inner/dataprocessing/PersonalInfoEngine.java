@@ -817,7 +817,7 @@ public class PersonalInfoEngine {
 		try {
 			numUin = Integer.parseInt(uin);
 		} catch (NumberFormatException e) {
-			service.getServiceResponse().respond(ICQServiceResponse.RES_NOTIFICATION, "UIN cannot be parsed");
+			//service.getServiceResponse().respond(ICQServiceResponse.RES_NOTIFICATION, "UIN cannot be parsed");
 			service.getServiceResponse().respond(ICQServiceResponse.RES_SEARCHRESULT, new ArrayList<ICQPersonalInfo>(0));
 			return;
 		}

@@ -51,7 +51,7 @@ public final class Exporter {
 	private static final String RECORD_DIVIDER = "{}";
 	private static final byte[] NEW_LINE_BYTES;
 	
-	private static final String XML_NAMESPACE = "org.aceim";
+	private static final String XML_NAMESPACE = "aceim.app";
 	private static final String TAG_ACCOUNTS = "accounts";
 	private static final String ATTR_COLLAPSED = "is_collapsed";
 	private static final String TAG_GROUP = "group";
@@ -143,7 +143,7 @@ public final class Exporter {
 				
 				for (Buddy b : a.accountView.getBuddyList()) {
 					File bicon = new File(service.getApplicationContext().getFilesDir().getAbsolutePath() + File.separator + b.getFilename() + Buddy.BUDDYICON_FILEEXT);
-					File bhistory = new File(service.getApplicationContext().getFilesDir().getAbsolutePath() + File.separator + a.accountView.getFilename() + HistorySaver.SUFFIX);
+					File bhistory = new File(service.getApplicationContext().getFilesDir().getAbsolutePath() + File.separator + b.getOwnerAccountId()+" "+b.protocolUid + HistorySaver.SUFFIX);
 					
 					files.add(bicon);
 					files.add(bhistory);
@@ -172,6 +172,8 @@ public final class Exporter {
 				}
 				zos.closeEntry();
 				in.close();
+				
+				tmpFile.delete();
 			}
 			
 			zos.close();
@@ -354,7 +356,9 @@ public final class Exporter {
 				 if (strLine.startsWith(HistorySaver.RECORD_DIVIDER)) {
 					 
 					 if (tm != null) {
-						 saveMessage(tm, os);
+						 tm.text = sb.toString();
+						 sb = new StringBuilder();
+						 saveMessage(split[2], tm, os);
 					 }
 					 
 					 if (strLine.equals(HistorySaver.RECORD_DIVIDER + HistorySaver.MARK_IN)) {
@@ -377,25 +381,23 @@ public final class Exporter {
 								tm.time = Calendar.getInstance().getTime();
 							}
 							 
-							 tm.text = strLine.substring(dateEnd + 2);
+							 sb.append(strLine.substring(dateEnd + 2));
 							 tm.writerUid = strLine.substring(0, dateStart);
 						 } else {
-							 tm.text = strLine;
+							 sb.append(strLine);
 						 }
 					 }
 				 }
-				 sb.append(strLine);
-				 sb.append("\n");
 			 }
 		} catch (IOException e) {	
-			e.printStackTrace();
+			ServiceUtils.log(e);
 		}
 	}
 
-	private void saveMessage(TextMessage message, BufferedOutputStream stream) {
+	private void saveMessage(String from, TextMessage message, BufferedOutputStream stream) {
 		JSONObject o;
 		try {
-			o = HistoryObject.fromMessage(message);
+			o = HistoryObject.fromMessage(message, from);
 		} catch (JSONException e) {
 			ServiceUtils.log(e);
 			o = new JSONObject();
@@ -410,14 +412,7 @@ public final class Exporter {
 			stream.write(NEW_LINE_BYTES);					
 		} catch (IOException e) {
 			ServiceUtils.log(e);
-		} finally {
-			try {
-				stream.flush();
-				stream.close();
-			} catch (IOException e) {
-				ServiceUtils.log(e);
-			}
-		}
+		} 
 	}
 
 	private static final byte[] getBytes(String string) {
@@ -440,15 +435,15 @@ public final class Exporter {
 		}
 		
 		//writerUid == from -> incoming
-		static HistoryObject fromMessage(TextMessage message) throws JSONException{
+		static HistoryObject fromMessage(TextMessage message, String from) throws JSONException{
 			HistoryObject o = new HistoryObject();
 			
 			o.put("type", "TEXT");
 			o.put("contact-name", message.writerUid != null ? message.writerUid : message.from);
-			o.put("incoming", message.writerUid.equals(message.from));
+			o.put("incoming", from.equals(message.from));
 			o.put("text", message.text);
 			o.put("message-id", message.hashCode());
-			o.put("time", message.time);
+			o.put("time", message.time.getTime());
 			
 			return o;
 		}
